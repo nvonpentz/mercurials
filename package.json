@@ -6,7 +6,8 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint"
+    "lint": "next lint",
+    "watch": "cd contracts && node ../scripts/watch.js" 
   },
   "dependencies": {
     "@rainbow-me/rainbowkit": "^0.8.1",

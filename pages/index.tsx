@@ -2,8 +2,12 @@ import { ConnectButton } from '@rainbow-me/rainbowkit';
 import type { NextPage } from 'next';
 import Head from 'next/head';
 import styles from '../styles/Home.module.css';
+import { address } from '../contracts/deploys/fossil.31337.address.json';
+import { abi } from '../contracts/deploys/fossil.31337.compilerOutput.json';
 
 const Home: NextPage = () => {
+  console.log('address', address)
+  console.log('abi', abi)
   return (
     <div className={styles.container}>
       <Head>

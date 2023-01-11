@@ -65,6 +65,7 @@ contract Fossil is ERC721 {
 
     function generateFrequency(uint tokenId) public view returns (string memory) {
         uint random = generateRandom(1, 50, tokenId);
+
         string memory frequency;
         if (random < 100) {
             frequency = string.concat('0', Strings.toString(random));
