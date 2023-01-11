@@ -2,8 +2,14 @@ import { ConnectButton } from '@rainbow-me/rainbowkit';
 import type { NextPage } from 'next';
 import Head from 'next/head';
 import styles from '../styles/Home.module.css';
+import { useBlockNumber } from 'wagmi'
 
 const Home: NextPage = () => {
+  const { data, isError, isLoading } = useBlockNumber({
+    watch: true,
+  })
+  console.log('data', data, 'isError', isError, 'isLoading', isLoading)
+
   return (
     <div className={styles.container}>
       <Head>
