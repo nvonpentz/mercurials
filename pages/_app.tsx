@@ -33,8 +33,6 @@ const { connectors } = getDefaultWallets({
   chains,
 });
 
-console.log('chains', chains);
-
 const wagmiClient = createClient({
   autoConnect: true,
   connectors,

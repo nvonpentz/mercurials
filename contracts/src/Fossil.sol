@@ -5,6 +5,7 @@ import {ERC721} from "openzeppelin-contracts/contracts/token/ERC721/ERC721.sol";
 import {Base64} from "openzeppelin-contracts/contracts/utils/Base64.sol";
 import {Strings} from "openzeppelin-contracts/contracts/utils/Strings.sol";
 import {Counters} from "openzeppelin-contracts/contracts/utils/Counters.sol";
+import {console} from "forge-std/console.sol";
 
 contract Fossil is ERC721 {
     using Counters for Counters.Counter;
@@ -54,6 +55,16 @@ contract Fossil is ERC721 {
 
     } 
 
+    function constructImageURI(uint seed) public view returns (string memory) {
+        string memory svg = render(seed);
+        console.log(svg);
+        string memory image = Base64.encode(bytes(svg));
+        string memory output = string(
+            abi.encodePacked("data:image/svg+xml;base64,", image)
+        );
+        return output;
+    }
+
     function tokenURI(uint256 tokenId) public view override returns (string memory) {
         require(_exists(tokenId), "Nonexistent token");
         return constructTokenURI(_seeds[tokenId]);
@@ -96,7 +107,7 @@ contract Fossil is ERC721 {
     }
 
     function generateBackgroundColor(uint tokenId) public view returns (string memory) {
-        return 'gray';
+        return 'blue';
     }
 
     function generateLightingColor(uint tokenId) public view returns (string memory) {
@@ -104,7 +115,7 @@ contract Fossil is ERC721 {
     }
 
     function generateColor(uint tokenId) internal view returns (string memory) {
-        return 'gray';
+        return 'green';
     }
 
     function generateStyles(uint tokenId) public view returns (string memory) {
@@ -119,12 +130,13 @@ contract Fossil is ERC721 {
     }
 
     function generateFilters(uint tokenId) public view returns (string memory) {
-        return // prettier-ignore
+        return
+            // prettier-ignore
             string.concat(
                 '<filter id="cracked-lava">',
                   '<feGaussianBlur result="result0" in="SourceGraphic" stdDeviation="0.5" id="feGaussianBlur2336"/>',
                   '<feTurbulence baseFrequency="0.', generateFrequency(tokenId),
-                  '" type="',generateTurbulenceType(tokenId),'"', '" seed="488" numOctaves="', generateOctaves(tokenId),'" result="result1" id="feTurbulence2338"/>',
+                  '" type="turbulence" ', 'seed="488" numOctaves="', generateOctaves(tokenId),'" result="result1" id="feTurbulence2338"/>',
                   '<feDisplacementMap result="result5" xChannelSelector="R" scale="', generateScale(tokenId), '" in2="result1" in="result1" yChannelSelector="G" id="feDisplacementMap2340"/>',
                   '<feComposite result="result2" operator="in" in2="result5" in="result0" id="feComposite2342"/>',
                   '<feSpecularLighting lighting-color="4d4d4dff" surfaceScale="2" result="result4" specularConstant="2" specularExponent="65" in="result2" id="feSpecularLighting2346">',

@@ -2,6 +2,7 @@
 pragma solidity ^0.8.13;
 
 import "forge-std/Script.sol";
+import "forge-std/console.sol";
 import "../src/Fossil.sol";
 import {Strings} from "openzeppelin-contracts/contracts/utils/Strings.sol";
 
@@ -17,6 +18,7 @@ contract Deploy is Script {
 
         // Deploy Fossil contract
         fossil = new Fossil();
+        console.log('address', address(fossil));
 
         // Fetch ABI output from /out, and write to /deploys folder
         string memory compilerOutput = vm.readFile("out/Fossil.sol/Fossil.json");
