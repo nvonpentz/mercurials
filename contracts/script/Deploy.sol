@@ -37,5 +37,6 @@ contract Deploy is Script {
 
         // Finish deployment
         vm.stopBroadcast();
+        console.log('Deploy done...');
     }
 }

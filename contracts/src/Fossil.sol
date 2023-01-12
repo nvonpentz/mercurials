@@ -7,115 +7,70 @@ import {Strings} from "openzeppelin-contracts/contracts/utils/Strings.sol";
 import {Counters} from "openzeppelin-contracts/contracts/utils/Counters.sol";
 import {console} from "forge-std/console.sol";
 
-contract Fossil is ERC721 {
-    using Counters for Counters.Counter;
+contract Fossil {
+    using Strings for uint256;
 
-    Counters.Counter public _tokenIds;
-    mapping(uint256 => uint256) private _seeds;
-
-    constructor() ERC721("Fossil", "FOSSIL") {}
-
-    function getSeed(uint tokenId) internal view returns (uint256) {
-        return uint256(
-            keccak256(abi.encodePacked(blockhash((block.number - 1) / 5), tokenId))
-        );
-    }
-
-    function nextToken() external view returns (string memory) {
-        return 'false';
-        return constructTokenURI(getSeed(_tokenIds.current()));
-    }
-
-    function mint(address to) external {
-        _tokenIds.increment();
-        uint256 newTokenId = _tokenIds.current();
-        _seeds[newTokenId] = getSeed(newTokenId);
-        _mint(to, newTokenId); // _safeMint?
-    }
-
-    function constructTokenURI(uint256 seed) public view returns (string memory) {
-        string memory svg = render(seed);
-        string memory json = Base64.encode(
-            bytes(
-                string(
-                    // prettier-ignore
-                    string.concat(
-                        '{"name": "Fossil #', '",',
-                          '"description": "Generative art',
-                          '"image": "data:image/svg+xml;base64,', Base64.encode(bytes(svg)),
-                       '"}'
-                    )
-                )
-            )
-        );
-        string memory output = string(
-            abi.encodePacked("data:application/json;base64,", json)
-        );
-        return output;
-
-    } 
-
-    function constructImageURI(uint seed) public view returns (string memory) {
-        string memory svg = render(seed);
-        console.log(svg);
-        string memory image = Base64.encode(bytes(svg));
-        string memory output = string(
-            abi.encodePacked("data:image/svg+xml;base64,", image)
-        );
-        return output;
-    }
-
-    function tokenURI(uint256 tokenId) public view override returns (string memory) {
-        require(_exists(tokenId), "Nonexistent token");
-        return constructTokenURI(_seeds[tokenId]);
+    bytes16 internal constant ALPHABET = '0123456789abcdef';
+    function toHexStringNoPrefix(uint256 value, uint256 length) internal pure returns (string memory) {
+        bytes memory buffer = new bytes(2 * length);
+        for (uint256 i = buffer.length; i > 0; i--) {
+            buffer[i - 1] = ALPHABET[value & 0xf];
+            value >>= 4;
+        }
+        return string(buffer);
     }
 
     function generateRandom(uint min, uint max, uint seed) internal view returns (uint) {
       return min + uint(keccak256(abi.encodePacked(seed, min, max))) % (max - min + 1);
     }
 
+    function generateRandomColor(uint seed) internal view returns (string memory) {
+        return string.concat('#', toHexStringNoPrefix(generateRandom(0, 16777215, seed), uint(3)));
+    }
+
     function generateFrequency(uint tokenId) public view returns (string memory) {
         uint random = generateRandom(1, 50, tokenId);
-
         string memory frequency;
         if (random < 100) {
-            frequency = string.concat('0', Strings.toString(random));
+            frequency = string.concat('0', random.toString());
         } else if (random < 10) {
-            frequency = string.concat('00', Strings.toString(random));
+            frequency = string.concat('00', random.toString());
         } else {
-            frequency = Strings.toString(random);
+            frequency = random.toString();
         }
 
         return frequency;
     }
 
     function generateTurbulenceType(uint tokenId) public view returns (string memory) {
-        // if (tokenId % 2 == 0) {
-        //     return 'fractalNoise';
-        // }
-        return 'turbulence';
-        // return 'fractalNoise';
+        return '"turbulence"';
     }
 
     function generateOctaves(uint tokenId) public view returns (string memory) {
         uint random = generateRandom(1, 5, tokenId);
-        return Strings.toString(random);
+        return random.toString();
     }
 
     function generateScale(uint tokenId) public view returns (string memory) {
-        return Strings.toString(generateRandom(0, 80, tokenId));
+        return generateRandom(0, 80, tokenId).toString();
     }
 
     function generateBackgroundColor(uint tokenId) public view returns (string memory) {
-        return 'blue';
+        uint seed = uint(keccak256(abi.encodePacked(tokenId, uint(0))));
+        return generateRandomColor(seed);
     }
 
     function generateLightingColor(uint tokenId) public view returns (string memory) {
-        return 'black';
+        uint seed = uint(keccak256(abi.encodePacked(tokenId, uint(1))));
+        return generateRandomColor(seed);
+        // return 'black';
     }
 
     function generateColor(uint tokenId) internal view returns (string memory) {
-        return 'green';
+        uint seed = uint(keccak256(abi.encodePacked(tokenId, uint(2))));
+        return generateRandomColor(seed);
+
+        // return 'darkblue';
     }
 
     function generateStyles(uint tokenId) public view returns (string memory) {
@@ -130,16 +85,14 @@ contract Fossil is ERC721 {
     }
 
     function generateFilters(uint tokenId) public view returns (string memory) {
-        return
-            // prettier-ignore
+        return // prettier-ignore
             string.concat(
                 '<filter id="cracked-lava">',
                   '<feGaussianBlur result="result0" in="SourceGraphic" stdDeviation="0.5" id="feGaussianBlur2336"/>',
-                  '<feTurbulence baseFrequency="0.', generateFrequency(tokenId),
-                  '" type="turbulence" ', 'seed="488" numOctaves="', generateOctaves(tokenId),'" result="result1" id="feTurbulence2338"/>',
+                  '<feTurbulence baseFrequency="0.', generateFrequency(tokenId), '" type=',generateTurbulenceType(tokenId), ' seed="488" numOctaves="', generateOctaves(tokenId),'" result="result1" id="feTurbulence2338"/>',
                   '<feDisplacementMap result="result5" xChannelSelector="R" scale="', generateScale(tokenId), '" in2="result1" in="result1" yChannelSelector="G" id="feDisplacementMap2340"/>',
                   '<feComposite result="result2" operator="in" in2="result5" in="result0" id="feComposite2342"/>',
-                  '<feSpecularLighting lighting-color="4d4d4dff" surfaceScale="2" result="result4" specularConstant="2" specularExponent="65" in="result2" id="feSpecularLighting2346">',
+                  '<feSpecularLighting lighting-color="white" surfaceScale="2" result="result4" specularConstant="2" specularExponent="65" in="result2" id="feSpecularLighting2346">',
                     '<feDistantLight elevation="62" azimuth="225" id="feDistantLight2344"/>',
                   '</feSpecularLighting>',
                   '<feComposite k1="2.5" k3="1" k2="-0.5" in2="result2" in="result4" operator="arithmetic" result="result91" id="feComposite2348"/>',
@@ -150,7 +103,7 @@ contract Fossil is ERC721 {
                   '<feSpecularLighting in="result0" result="result1" lighting-color="', generateLightingColor(tokenId),'" surfaceScale="4" specularConstant="0.8" specularExponent="15" id="feSpecularLighting2360">',
                     '<fePointLight x="-5000" y="-10000" z="20000" id="fePointLight2358"/>',
                   '</feSpecularLighting>',
-                  '<feComposite in2="fbSourceGraphicAlpha" in="result1" result="result2" operator="in" id="feComposite2362"/>',
+                  '<feComposite in2="fbSourceGraphicAlpha" in="result1" result="result2" operator="out" id="feComposite2362"/>',
                   '<feComposite in="fbSourceGraphic" result="result4" operator="arithmetic" k2="2" k3="2" in2="result2" id="feComposite2364"/>',
                   '<feBlend mode="darken" in2="result4" id="feBlend2366"/>',
                 '</filter>'
@@ -170,5 +123,22 @@ contract Fossil is ERC721 {
                     '<rect class="rect1" width="500" height="500"/>',
                 '</svg>'
             );
+    }
+
+    function example(uint random) external view returns (string memory) {
+        return render(random);
+    }
+
+    function constructImageURI(uint seed) public view returns (string memory) {
+        console.log('start constructImageURI');
+        string memory svg = render(seed);
+        console.log(svg);
+        string memory image = Base64.encode(bytes(svg));
+        string memory output = string(
+            abi.encodePacked("data:image/svg+xml;base64,", image)
+        );
+
+        console.log('end constructImageURI');
+        return output;
     }
 }
