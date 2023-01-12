@@ -8,19 +8,13 @@ import { useContractRead, useBlockNumber } from 'wagmi'
 import Image from 'next/image'
 
 const Home: NextPage = () => {
-  // const randomInt = Math.floor(Math.random() * 1000000);
-  //
   const { data: blockNumber } = useBlockNumber({ watch: true });
-  console.log(blockNumber);
   const { data, error, isError, isLoading } = useContractRead({
     address: address,
     abi: abi,
     functionName: 'constructImageURI',
-    // args: [randomInt]
     args: [blockNumber]
   })
-
-  console.log('data', data, 'error', error, 'isError', isError, 'isLoading', isLoading);
 
   return (
     <div className={styles.container}>
@@ -32,8 +26,11 @@ const Home: NextPage = () => {
       </Head>
 
       <main className={styles.main}>
-        <ConnectButton />
-        {data && <Image src={data} alt="Fossil" width={500} height={500} />}
+        {false && <ConnectButton />}
+        {data &&
+          <div className={styles.frame}>
+            <Image className={styles.display}src={data} alt="Fossil" width={500} height={500} />
+        </div>}
       </main>
       <footer className={styles.footer}>
       </footer>
