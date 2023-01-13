@@ -42,6 +42,8 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 
+# output svgs
+outputs/
 
 ### Contracts ###
 # Compiler files

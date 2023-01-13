@@ -6,34 +6,71 @@ import { address } from '../contracts/deploys/fossil.31337.address.json';
 import { abi } from '../contracts/deploys/fossil.31337.compilerOutput.json';
 import { useContractRead, useBlockNumber } from 'wagmi'
 import Image from 'next/image'
+import { useState, useEffect } from 'react';
+
+const maxImages = 3;
 
 const Home: NextPage = () => {
   const { data: blockNumber } = useBlockNumber({ watch: true });
-  const { data, error, isError, isLoading } = useContractRead({
+  const { data, error, isError, isLoading, isFetched, isFetching } = useContractRead({
     address: address,
     abi: abi,
     functionName: 'constructImageURI',
+    // args: [796],
+    // args: [98]
+    // args: [200]
     args: [blockNumber]
+    // args: [54]
   })
+  console.log(blockNumber)
+  console.log(data)
+
+  const [pastImages, setPastImages] = useState<string[]>([])
+  useEffect(() => {
+    return () => {
+      if (data && pastImages.length < maxImages) {
+        setPastImages([...pastImages, data])
+      } else if (data && isFetched && !isFetching && pastImages.length >= maxImages) {
+        setPastImages([...pastImages.slice(1), data]);
+      } 
+    }
+  }, [data])
 
   return (
     <div className={styles.container}>
-      <Head>
-        <title>Fossils - NFT</title>
-        <meta name="description" content="TODO" />
-        <meta name="viewport" content="width=device-width, initial-scale=1" />
-        <link rel="icon" href="/favicon.ico" />
-      </Head>
-
-      <main className={styles.main}>
-        {false && <ConnectButton />}
-        {data &&
-          <div className={styles.frame}>
-            <Image className={styles.display}src={data} alt="Fossil" width={500} height={500} />
-        </div>}
-      </main>
-      <footer className={styles.footer}>
-      </footer>
+      <div className={styles.column}>
+        <Head>
+          <title>Fossils - NFT</title>
+          <meta name="description" content="TODO" />
+          <meta name="viewport" content="width=device-width, initial-scale=1" />
+          <link rel="icon" href="/favicon.ico" />
+        </Head>
+        <nav className={styles.navbar}>
+          <span className={styles.title}>Fossils</span>
+          <span className={styles.title}>Waffles</span>
+          <ConnectButton />
+        </nav>
+        <main className={styles.main}>
+          {data && <Image
+                      className={styles.display}
+                      src={data}
+                      width={500}
+                      height={500}
+            />}
+          <div className={styles.menu}>
+            <span className={styles.price}>$1000</span>
+            <button className={styles.buyButton}>Buy</button>
+          </div>
+          <div className={styles.pastImages}>
+            <h2>Recent Past Images</h2>
+            <div className={styles.pastImagesGrid}>
+              {false && data && pastImages.map((image, index) => (
+                <Image className={styles.pastImage} key={index} src={pastImages[index] || ""} width={200} height={150} />
+              ))}
+            </div>
+          </div>
+        </main>
+      </div>
     </div>
   );
 };

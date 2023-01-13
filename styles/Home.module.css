@@ -1,62 +1,53 @@
 .container {
   display: flex;
   flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 100vh;
+  background-color: #f0f0f0;
+}
+
+.column {
+}
+
+.navbar {
+  width: 100%;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
 }
 
 .main {
-  flex: 1; /* takes up remaining space in container */
   display: flex;
-  align-items: center; /* centers items horizontally */
-  justify-content: center; /* centers items vertically */
-}
-
-.frame {
-  /* background-color: #9B9B9B; */
-  /* padding: 20px; */ 
-
-  background-color:#ddc;
-  border:solid 5vmin #eee;
-  border-bottom-color:#fff;
-  border-left-color:#eee;
-  border-radius:2px;
-  border-right-color:#eee;
-  border-top-color:#ddd;
-  box-shadow:0 0 5px 0 rgba(0,0,0,.25) inset, 0 5px 10px 5px rgba(0,0,0,.25);
-  box-sizing:border-box;
-  /* display:inline-block; */
-  /* margin:10vh 10vw; */
-  /* height:80vh; */
-  padding:8vmin;
-  position:relative;
-  /* text-align:center; */
-}
-
-.frame:before {
-  border-radius:2px;
-  bottom:-2vmin;
-  box-shadow:0 2px 5px 0 rgba(0,0,0,.25) inset;
-  content:"";
-  left:-2vmin;
-  position:absolute;
-  right:-2vmin;
-  top:-2vmin;
-}
-
-.frame&:after {
-  border-radius:2px;
-  bottom:-2.5vmin;
-  box-shadow: 0 2px 5px 0 rgba(0,0,0,.25);
-  content:"";
-  left:-2.5vmin;
-  position:absolute;
-  right:-2.5vmin;
-  top:-2.5vmin;
+  flex-direction: column;
+  align-items: center;
+  width: 100%;
 }
 
 .display {
-  max-width: 500px; /* image will not exceed 500px wide */
-  max-height: 500px; /* image will not exceed 500px tall */
-  width: auto; /* maintains aspect ratio when resizing */
-  height: auto; /* maintains aspect ratio when resizing */
+  width: 80%;
+  /* width: 100%; */
+  /* height: auto; */
 }
 
+.menu {
+  width: 20%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.pastImages {
+  width: 100%;
+}
+
+.pastImagesGrid {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  width: 100%;
+}
+
+.pastImage {
+  width: 30%;
+}
