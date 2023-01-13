@@ -88,24 +88,25 @@ contract Fossil {
         return // prettier-ignore
             string.concat(
                 '<filter id="cracked-lava">',
-                  '<feGaussianBlur result="result0" in="SourceGraphic" stdDeviation="0.5" id="feGaussianBlur2336"/>',
-                  '<feTurbulence baseFrequency="0.', generateFrequency(tokenId), '" type=',generateTurbulenceType(tokenId), ' seed="488" numOctaves="', generateOctaves(tokenId),'" result="result1" id="feTurbulence2338"/>',
-                  '<feDisplacementMap result="result5" xChannelSelector="R" scale="', generateScale(tokenId), '" in2="result1" in="result1" yChannelSelector="G" id="feDisplacementMap2340"/>',
-                  '<feComposite result="result2" operator="in" in2="result5" in="result0" id="feComposite2342"/>',
-                  '<feSpecularLighting lighting-color="white" surfaceScale="2" result="result4" specularConstant="2" specularExponent="65" in="result2" id="feSpecularLighting2346">',
-                    '<feDistantLight elevation="62" azimuth="225" id="feDistantLight2344"/>',
+                  '<feGaussianBlur result="r0" in="SourceGraphic" stdDeviation="0.5"/>',
+                  '<feTurbulence baseFrequency="0.', generateFrequency(tokenId), '" type=',generateTurbulenceType(tokenId), ' numOctaves="', generateOctaves(tokenId),'" result="r1" id="feTurbulence2338"/>',
+                  '<feDisplacementMap result="r5" xChannelSelector="R" scale="', generateScale(tokenId), '" in2="r1" in="r1" yChannelSelector="G">',
+                  '</feDisplacementMap>', // can be paramerized
+                  '<feComposite result="r2" operator="in" in2="r5" in="r0"/>',
+                  '<feSpecularLighting lighting-color="white" surfaceScale="2" result="r4" specularConstant="2" specularExponent="65" in="r2">', // Maybe can be removed
+                    '<feDistantLight elevation="62" azimuth="225"/>',
                   '</feSpecularLighting>',
-                  '<feComposite k1="2.5" k3="1" k2="-0.5" in2="result2" in="result4" operator="arithmetic" result="result91" id="feComposite2348"/>',
-                  '<feBlend result="fbSourceGraphic" mode="multiply" in2="result91" id="feBlend2350"/>',
-                  '<feColorMatrix values="1 0 0 -1 0 1 0 1 -1 0 1 0 0 -1 0 -2 -0.5 0 5 -2" in="fbSourceGraphic" result="fbSourceGraphicAlpha" id="feColorMatrix2352"/>',
-                  '<feGaussianBlur stdDeviation="8" in="fbSourceGraphicAlpha" result="result0" id="feGaussianBlur2354"/>',
-                  '<feOffset dx="2" dy="2" in="result0" result="result3" id="feOffset2356"/>',
-                  '<feSpecularLighting in="result0" result="result1" lighting-color="', generateLightingColor(tokenId),'" surfaceScale="4" specularConstant="0.8" specularExponent="15" id="feSpecularLighting2360">',
-                    '<fePointLight x="-5000" y="-10000" z="20000" id="fePointLight2358"/>',
+                  '<feComposite k1="2.5" k3="1" k2="-0.5" in2="r2" in="r4" operator="arithmetic" result="r91"/>',
+                  '<feBlend result="fbSourceGraphic" mode="multiply" in2="r91"/>',
+                  '<feColorMatrix values="1 0 0 -1 0 1 0 1 -1 0 1 0 0 -1 0 -2 -0.5 0 5 -2" in="fbSourceGraphic" result="fb"/>',
+                  '<feGaussianBlur stdDeviation="2" in="fb" result="r0"/>',
+                  // '<feOffset dx="2" dy="2" in="r0" result="r3"/>', // CAN BE REMOVED
+                  '<feSpecularLighting in="r0" result="r1" lighting-color="', generateLightingColor(tokenId),'" surfaceScale="4" specularConstant="0.8" specularExponent="15">',
+                    '<fePointLight x="-5000" y="-10000" z="20000"/>',
                   '</feSpecularLighting>',
-                  '<feComposite in2="fbSourceGraphicAlpha" in="result1" result="result2" operator="out" id="feComposite2362"/>',
-                  '<feComposite in="fbSourceGraphic" result="result4" operator="arithmetic" k2="2" k3="2" in2="result2" id="feComposite2364"/>',
-                  '<feBlend mode="darken" in2="result4" id="feBlend2366"/>',
+                  '<feComposite in2="fb" in="r1" result="r2" operator="out"/>',
+                  '<feComposite in="fbSourceGraphic" result="r4" operator="arithmetic" k2="2" k3="2" in2="r2"/>',
+                  // '<feBlend mode="darken" in2="r4"/>', // MAYBE CAN BE REMOVED (small difference)
                 '</filter>'
             );
     }
