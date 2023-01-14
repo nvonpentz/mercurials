@@ -90,8 +90,12 @@ contract Fossil {
                 '<filter id="cracked-lava">',
                   // '<feGaussianBlur result="r0" in="SourceGraphic" stdDeviation="0.5"/>',
                   '<feTurbulence baseFrequency="0.', generateFrequency(tokenId), '" type=',generateTurbulenceType(tokenId), ' numOctaves="', generateOctaves(tokenId),'" result="r1" id="feTurbulence2338"/>',
-                  '<feDisplacementMap result="r5" xChannelSelector="R" scale="', generateScale(tokenId), '" in2="r1" in="r1" yChannelSelector="G">',
+
+                  // '<feDisplacementMap result="r5" xChannelSelector="R" scale="', generateScale(tokenId), '" in2="r1" in="r1" yChannelSelector="G">',
+                  '<feDisplacementMap result="r5" xChannelSelector="R" in2="r1" in="r1" yChannelSelector="G">',
+                    '<animate attributeName="scale" dur="10s" repeatCount="indefinite" values="', generateScale(tokenId), ';0;" />',
                   '</feDisplacementMap>', // can be paramerized
+
                   '<feComposite result="r2" operator="in" in2="r5" in="SourceGraphic"/>',
                   '<feSpecularLighting lighting-color="white" surfaceScale="2" result="r4" specularConstant="2" specularExponent="65" in="r2">',
                     '<feDistantLight elevation="60" azimuth="0">', // TODO maybe parameterize elevation to be between 90 and 120
@@ -100,15 +104,12 @@ contract Fossil {
                   '</feSpecularLighting>'
                   '<feComposite k1="2.5" k3="1" k2="-0.5" in2="r2" in="r4" operator="arithmetic" result="r91"/>',
                   '<feBlend result="fbSourceGraphic" mode="multiply" in2="r91"/>',
-                  '<feColorMatrix values="1 0 0 0 0 0 1 0 0 0 0 0 1 0 0 0 0 0 1 0" in="fbSourceGraphic" result="fb">',
-                  // '<feColorMatrix values="1 0 0 -1 0 1 0 1 -1 0 1 0 0 -1 0 -2 -0.5 0 5 -2" in="fbSourceGraphic" result="fb">',
-                    '<animate attributeName="values" values="1 0 0 0 0 0 1 0 0 0 0 0 1 0 0 0 0 0 1 0; 1 0 0 0 1 0 -1 0 0 1 0 0 -1 0 1 0 0 0 1 0;" dur="10s" repeatCount="indefinite"/>',
-                  '</feColorMatrix>',
-                  '<feGaussianBlur stdDeviation="2" in="fb" result="SourceGraphic"/>', // Could parameterize or animate the stdDeviation
+                  // '<feColorMatrix values="1 0 0 0 0 0 1 0 0 0 0 0 1 0 0 0 0 0 1 0" in="fbSourceGraphic" result="fb"/>',
+                  '<feGaussianBlur stdDeviation="2" in="fbSourceGraphic" result="SourceGraphic"/>', // Could parameterize or animate the stdDeviation
                   '<feSpecularLighting in="SourceGraphic" result="r1" lighting-color="', generateLightingColor(tokenId),'" surfaceScale="4" specularConstant="0.8" specularExponent="15">',
                     '<fePointLight x="-5000" y="-10000" z="20000"/>', // Could parameterize this
                   '</feSpecularLighting>',
-                  '<feComposite in2="fb" in="r1" result="r22" operator="out"/>',
+                  '<feComposite in2="fbSourceGraphic" in="r1" result="r22" operator="out"/>',
                   '<feComposite in="fbSourceGraphic" result="r4" operator="arithmetic" k2="2" k3="2" in2="r22"/>', // Frankly I should support both
                   // '<feComposite in="fbSourceGraphic" result="r4" operator="arithmetic" k2="2" k3="2"/>', // This is an alternative version of the thing above with a different in2 with a much shorter circuit
                 '</filter>'
