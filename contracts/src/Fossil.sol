@@ -24,8 +24,34 @@ contract Fossil {
       return min + uint(keccak256(abi.encodePacked(seed, min, max))) % (max - min + 1);
     }
 
+    function generateComplementaryColor(uint color) public pure returns(uint) {
+        uint red = color >> 16;
+        uint green = (color >> 8) & 0xFF;
+        uint blue = color & 0xFF;
+        
+        red = 255 - red;
+        green = 255 - green;
+        blue = 255 - blue;
+        
+        return (red << 16) | (green << 8) | blue;
+    }
+
     function generateRandomColor(uint seed) internal view returns (string memory) {
         return string.concat('#', toHexStringNoPrefix(generateRandom(0, 16777215, seed), uint(3)));
+    }
+
+    function toHexColor(uint colorInt) public view returns (string memory) {
+        return string.concat('#', toHexStringNoPrefix(colorInt, uint(3)));
+    } 
+
+    function generateBackgroundColor(uint tokenId) public view returns (string memory) {
+        string memory valForColor = generateRandom(0, 256, tokenId).toString();
+        return string.concat('rgb(', valForColor, ',', valForColor, ',', valForColor, ')');
+    }
+
+    function generatePrimaryColor(uint tokenId) public view returns (uint) {
+        uint seed = uint(keccak256(abi.encodePacked(tokenId, uint(0))));
+        return generateRandom(0, 16777215, seed);
     }
 
     function generateFrequency(uint tokenId) public view returns (string memory) {
@@ -53,24 +79,6 @@ contract Fossil {
 
     function generateScale(uint tokenId) public view returns (string memory) {
         return generateRandom(0, 80, tokenId).toString();
-    }
-
-    function generateBackgroundColor(uint tokenId) public view returns (string memory) {
-        uint seed = uint(keccak256(abi.encodePacked(tokenId, uint(0))));
-        return generateRandomColor(seed);
-    }
-
-    function generateLightingColor(uint tokenId) public view returns (string memory) {
-        uint seed = uint(keccak256(abi.encodePacked(tokenId, uint(1))));
-        return generateRandomColor(seed);
-        // return 'black';
-    }
-
-    function generateColor(uint tokenId) internal view returns (string memory) {
-        uint seed = uint(keccak256(abi.encodePacked(tokenId, uint(2))));
-        return generateRandomColor(seed);
-
-        // return 'darkblue';
     }
 
     function generateStyles(uint tokenId, string memory backgroundColor, string memory color) public view returns (string memory) {
@@ -114,10 +122,15 @@ contract Fossil {
 
     function render(uint256 _tokenId) public view returns (string memory) {
         string memory backgroundColor = generateBackgroundColor(_tokenId);
-        // string memory backgroundColor = 'white';
-        string memory color = generateColor(_tokenId);
-        string memory lightingColor = generateLightingColor(_tokenId);
-        string memory styles = generateStyles(_tokenId, backgroundColor, color);
+        uint primaryColorInt = generatePrimaryColor(_tokenId);
+        uint secondaryColorInt =  generateComplementaryColor(primaryColorInt);
+        string memory primaryColor = toHexColor(primaryColorInt);
+        string memory secondaryColor = toHexColor(secondaryColorInt);
+
+        // string memory color = generateColor(_tokenId);
+        // string memory lightingColor = generateLightingColor(_tokenId);
+
+        string memory styles = generateStyles(_tokenId, backgroundColor, primaryColor);
 
         string memory height = '500';
         return
@@ -125,14 +138,14 @@ contract Fossil {
             string.concat(
                 '<svg xmlns="http://www.w3.org/2000/svg" width="', height, '" height="', height,'">',
                     '<defs>',
-                        generateFilters(_tokenId, lightingColor),
+                        generateFilters(_tokenId, secondaryColor),
                     '</defs>',
                     styles,
                     '<rect class="rect0" width="', height, '" height="', height, '"/>',
                     '<rect class="rect1" width="', height, '" height="', height, '"/>',
                     '<rect fill="', backgroundColor,'" width="50" height="50" x="0"/>',
-                    '<rect fill="', color,'" width="50" height="50" x="50"/>',
-                    '<rect fill="', lightingColor,'" width="50" height="50" x="100"/>',
+                    '<rect fill="', primaryColor,'" width="50" height="50" x="50"/>',
+                    '<rect fill="', secondaryColor,'" width="50" height="50" x="100"/>',
                 '</svg>'
             );
     }
