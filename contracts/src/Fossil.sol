@@ -73,25 +73,22 @@ contract Fossil {
         // return 'darkblue';
     }
 
-    function generateStyles(uint tokenId) public view returns (string memory) {
+    function generateStyles(uint tokenId, string memory backgroundColor, string memory color) public view returns (string memory) {
         return
             // prettier-ignore
             string.concat(
                 '<style>',
-                    '.rect0 { fill: ', generateBackgroundColor(tokenId),' }',
-                    '.rect1 { fill: ', generateColor(tokenId), '; filter: url(#cracked-lava) }',
+                    '.rect0 { fill: ', backgroundColor,' }',
+                    '.rect1 { fill: ', color, '; filter: url(#cracked-lava) }',
                 '</style>'
             );
     }
 
-    function generateFilters(uint tokenId) public view returns (string memory) {
+    function generateFilters(uint tokenId, string memory lightingColor) public view returns (string memory) {
         return // prettier-ignore
             string.concat(
                 '<filter id="cracked-lava">',
-                  // '<feGaussianBlur result="r0" in="SourceGraphic" stdDeviation="0.5"/>',
                   '<feTurbulence baseFrequency="0.', generateFrequency(tokenId), '" type=',generateTurbulenceType(tokenId), ' numOctaves="', generateOctaves(tokenId),'" result="r1" id="feTurbulence2338"/>',
-
-                  // '<feDisplacementMap result="r5" xChannelSelector="R" scale="', generateScale(tokenId), '" in2="r1" in="r1" yChannelSelector="G">',
                   '<feDisplacementMap result="r5" xChannelSelector="R" in2="r1" in="r1" yChannelSelector="G">',
                     '<animate attributeName="scale" dur="10s" repeatCount="indefinite" values="', generateScale(tokenId), ';0;" />',
                   '</feDisplacementMap>', // can be paramerized
@@ -104,9 +101,8 @@ contract Fossil {
                   '</feSpecularLighting>'
                   '<feComposite k1="2.5" k3="1" k2="-0.5" in2="r2" in="r4" operator="arithmetic" result="r91"/>',
                   '<feBlend result="fbSourceGraphic" mode="multiply" in2="r91"/>',
-                  // '<feColorMatrix values="1 0 0 0 0 0 1 0 0 0 0 0 1 0 0 0 0 0 1 0" in="fbSourceGraphic" result="fb"/>',
                   '<feGaussianBlur stdDeviation="2" in="fbSourceGraphic" result="SourceGraphic"/>', // Could parameterize or animate the stdDeviation
-                  '<feSpecularLighting in="SourceGraphic" result="r1" lighting-color="', generateLightingColor(tokenId),'" surfaceScale="4" specularConstant="0.8" specularExponent="15">',
+                  '<feSpecularLighting in="SourceGraphic" result="r1" lighting-color="', lightingColor,'" surfaceScale="4" specularConstant="0.8" specularExponent="15">',
                     '<fePointLight x="-5000" y="-10000" z="20000"/>', // Could parameterize this
                   '</feSpecularLighting>',
                   '<feComposite in2="fbSourceGraphic" in="r1" result="r22" operator="out"/>',
@@ -117,16 +113,26 @@ contract Fossil {
     }
 
     function render(uint256 _tokenId) public view returns (string memory) {
+        string memory backgroundColor = generateBackgroundColor(_tokenId);
+        // string memory backgroundColor = 'white';
+        string memory color = generateColor(_tokenId);
+        string memory lightingColor = generateLightingColor(_tokenId);
+        string memory styles = generateStyles(_tokenId, backgroundColor, color);
+
+        string memory height = '500';
         return
             // prettier-ignore
             string.concat(
-                '<svg xmlns="http://www.w3.org/2000/svg" width="500" height="500">',
+                '<svg xmlns="http://www.w3.org/2000/svg" width="', height, '" height="', height,'">',
                     '<defs>',
-                        generateFilters(_tokenId),
+                        generateFilters(_tokenId, lightingColor),
                     '</defs>',
-                    generateStyles(_tokenId),
-                    '<rect class="rect0" width="500" height="500"/>',
-                    '<rect class="rect1" width="500" height="500"/>',
+                    styles,
+                    '<rect class="rect0" width="', height, '" height="', height, '"/>',
+                    '<rect class="rect1" width="', height, '" height="', height, '"/>',
+                    '<rect fill="', backgroundColor,'" width="50" height="50" x="0"/>',
+                    '<rect fill="', color,'" width="50" height="50" x="50"/>',
+                    '<rect fill="', lightingColor,'" width="50" height="50" x="100"/>',
                 '</svg>'
             );
     }

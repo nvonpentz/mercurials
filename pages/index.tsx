@@ -17,13 +17,8 @@ const Home: NextPage = () => {
     abi: abi,
     functionName: 'constructImageURI',
     // args: [796],
-    // args: [98]
-    // args: [200]
     args: [blockNumber]
-    // args: [54]
   })
-  console.log(blockNumber)
-  console.log(data)
 
   const [pastImages, setPastImages] = useState<string[]>([])
   useEffect(() => {
@@ -45,11 +40,11 @@ const Home: NextPage = () => {
           <meta name="viewport" content="width=device-width, initial-scale=1" />
           <link rel="icon" href="/favicon.ico" />
         </Head>
-        <nav className={styles.navbar}>
+        {false && <nav className={styles.navbar}>
           <span className={styles.title}>Fossils</span>
           <span className={styles.title}>Waffles</span>
-          <ConnectButton />
-        </nav>
+          <ConnectButton /> 
+        </nav>}
         <main className={styles.main}>
           {data && <Image
                       className={styles.display}
@@ -57,18 +52,18 @@ const Home: NextPage = () => {
                       width={500}
                       height={500}
             />}
-          <div className={styles.menu}>
+          { false && <div className={styles.menu}>
             <span className={styles.price}>$1000</span>
             <button className={styles.buyButton}>Buy</button>
-          </div>
-          <div className={styles.pastImages}>
+          </div>}
+          {false && <div className={styles.pastImages}>
             <h2>Recent Past Images</h2>
             <div className={styles.pastImagesGrid}>
               {false && data && pastImages.map((image, index) => (
                 <Image className={styles.pastImage} key={index} src={pastImages[index] || ""} width={200} height={150} />
               ))}
             </div>
-          </div>
+          </div>}
         </main>
       </div>
     </div>

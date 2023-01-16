@@ -10,7 +10,7 @@ import { publicProvider } from 'wagmi/providers/public';
 
 const { chains, provider, webSocketProvider } = configureChains(
   [
-    goerli,
+    // goerli,
     foundry
   ],
   [
