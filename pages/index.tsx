@@ -52,18 +52,6 @@ const Home: NextPage = () => {
                       width={500}
                       height={500}
             />}
-          { false && <div className={styles.menu}>
-            <span className={styles.price}>$1000</span>
-            <button className={styles.buyButton}>Buy</button>
-          </div>}
-          {false && <div className={styles.pastImages}>
-            <h2>Recent Past Images</h2>
-            <div className={styles.pastImagesGrid}>
-              {false && data && pastImages.map((image, index) => (
-                <Image className={styles.pastImage} key={index} src={pastImages[index] || ""} width={200} height={150} />
-              ))}
-            </div>
-          </div>}
         </main>
       </div>
     </div>
