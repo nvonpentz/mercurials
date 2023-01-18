@@ -119,30 +119,30 @@ contract Fossil {
             );
     }
 
-    function generateComponentTransfer(uint tokenId) public view returns (string memory) {
-        uint p = 1;
-        string[3] memory tableValues;
-        for (uint i=0; i < 3; i++) {
-            string memory tableValue = '0';
-            for (uint j=0; j<2; j++) {
-                uint random = generateRandom(0, 10, tokenId + p);
-                string memory v = random == 10 ? '1' : string.concat('0.', random.toString());
-                tableValue = string.concat(tableValue, ' ', v);
-                p++;
-            }
-            tableValues[i] = string.concat(tableValue, ' 1');
-        }
+    // function generateComponentTransfer(uint tokenId) public view returns (string memory) {
+    //     uint p = 1;
+    //     string[3] memory tableValues;
+    //     for (uint i=0; i < 3; i++) {
+    //         string memory tableValue = '0';
+    //         for (uint j=0; j<2; j++) {
+    //             uint random = generateRandom(0, 10, tokenId + p);
+    //             string memory v = random == 10 ? '1' : string.concat('0.', random.toString());
+    //             tableValue = string.concat(tableValue, ' ', v);
+    //             p++;
+    //         }
+    //         tableValues[i] = string.concat(tableValue, ' 1');
+    //     }
 
-        return
-            // prettier-ignore
-            string.concat(
-              '<feComponentTransfer result="result2">',
-                '<feFuncR type="table" tableValues="', tableValues[0], '" />',
-                '<feFuncG type="table" tableValues="', tableValues[1], '" />',
-                '<feFuncB type="table" tableValues="', tableValues[2], '" />',
-              '</feComponentTransfer>'
-            );
-    }
+    //     return
+    //         // prettier-ignore
+    //         string.concat(
+    //           '<feComponentTransfer result="result2">',
+    //             '<feFuncR type="table" tableValues="', tableValues[0], '" />',
+    //             '<feFuncG type="table" tableValues="', tableValues[1], '" />',
+    //             '<feFuncB type="table" tableValues="', tableValues[2], '" />',
+    //           '</feComponentTransfer>'
+    //         );
+    // }
 
     // createFilter is a JavaScript function that returns a string of SVG code
     // It takes a list of RGB colors, and outputs an feComponentTransfer filter,
@@ -172,6 +172,10 @@ contract Fossil {
         uint r;
         uint g;
         uint b;
+    }
+
+    function toString(RGB memory rgb) internal pure returns (string memory) {
+        return string.concat('rgb(', rgb.r.toString(), ', ', rgb.g.toString(), ', ', rgb.b.toString(), ')');
     }
 
     function divideAndFormat(uint input, uint divisor, uint decimalPlaces) public view returns (string memory) {
@@ -236,9 +240,12 @@ contract Fossil {
         string memory octaves = generateOctaves(seed, isFractalNoise, frequencyInt);
         string memory scale = generateScale(seed, isFractalNoise, frequencyInt);
 
+
+        RGB[5] memory colors = generateColorPalette(seed);
+
         string memory feComponentTransfer = generateComponentTransfer(
             seed,
-            generateColorPalette(seed)
+            colors
         );
         console.log('feComponentTransfer', feComponentTransfer);
 
@@ -252,7 +259,7 @@ contract Fossil {
             string.concat(
                 '<svg width="500" height="500" viewBox="0 0 500 500" version="1.1" xmlns="http://www.w3.org/2000/svg">',
                   '<defs>',
-                    '<filter id="cracked-lava">',
+                    '<filter id="cracked-lava" color-interpolation-filters="sRGB">',
                       '<feFlood flood-color="rgb(152,152,152)" result="r15" />',
                       '<feTurbulence baseFrequency="', frequency, '" type="', turbulenceType, '" numOctaves="', octaves,'" result="r1" />',
                       '<feDisplacementMap result="r5" xChannelSelector="R" in2="r1" in="r1" yChannelSelector="G" scale="', scale, '" />',
@@ -270,6 +277,11 @@ contract Fossil {
                     '</filter>',
                   '</defs>',
                   '<rect width="500" height="500" filter="url(#cracked-lava)" style="fill:#c4c4bc;fill-opacity:1;filter:url(#cracked-lava)" />',
+                  '<rect width="50" height="50" x="0" y="0" fill="', toString(colors[0]),'" />',
+                  '<rect width="50" height="50" x="50" y="0" fill="', toString(colors[1]),'" />',
+                  '<rect width="50" height="50" x="100" y="0" fill="', toString(colors[2]),'" />',
+                  '<rect width="50" height="50" x="150" y="0" fill="', toString(colors[3]),'" />',
+                  '<rect width="50" height="50" x="200" y="0" fill="', toString(colors[4]),'" />',
                 '</svg>'
             );
             // string.concat(
