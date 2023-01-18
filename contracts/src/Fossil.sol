@@ -49,10 +49,12 @@ contract Fossil {
     }
 
     function generateFrequency(uint tokenId, bool turbulenceType) public view returns (uint, string memory) {
+        // return  (53, "0.053");
         uint random;
         if (turbulenceType) {
             // Fractal noise
-            random = generateRandom(20, 150, tokenId);
+            // random = generateRandom(20, 150, tokenId);
+            random = generateRandom(30, 100, tokenId);
         } else {
             // Turbulent noise
             // random = generateRandom(1, 60, tokenId);
@@ -72,7 +74,7 @@ contract Fossil {
     }
 
     function generateOctaves(uint tokenId, bool isFractalNoise, uint frequency) public view returns (string memory) {
-        return generateRandom(1, 5, tokenId).toString();
+        return generateRandom(2, 4, tokenId).toString();
         // uint octaves;
         // if (isFractalNoise) {
         //     return generateRandom(1, 5, tokenId).toString();
@@ -96,6 +98,8 @@ contract Fossil {
     }
 
     function generateScale(uint tokenId, bool isFractalNoise, uint frequency) public view returns (string memory) {
+        return generateRandom(0, 50, tokenId).toString();
+        // return "99";
         if (isFractalNoise) {
             return generateRandom(0, 100, tokenId).toString();
             // if (frequency > 150) {
@@ -123,7 +127,7 @@ contract Fossil {
             // prettier-ignore
             string.concat(
               '<feSpecularLighting lighting-color="#ffffff" surfaceScale="', surfaceScale,'" result="r4" specularConstant="', specularConstant,'" specularExponent="15.19753456" in="r2">',
-                '<feDistantLight elevation="30" azimuth="60">',
+                '<feDistantLight elevation="60" azimuth="0">',
                     // '<animate attributeName="azimuth" values="0;360" dur="10s" repeatCount="indefinite"/>',
                 '</feDistantLight>',
               '</feSpecularLighting>'
@@ -199,14 +203,14 @@ contract Fossil {
 
         return string.concat(quotient.toString(), '.', decimal.toString());
     }
+
     function generateComponentTransfer(uint tokenId, RGB[5] memory colors) public view returns (string memory) {
         string memory filter = '<feComponentTransfer id="palette" result="rct">';
-        string memory funcR = '<feFuncR type="table" tableValues="0 ';
-        string memory funcG = '<feFuncG type="table" tableValues="0 ';
-        string memory funcB = '<feFuncB type="table" tableValues="0 ';
+        string memory funcR = '<feFuncR type="discrete" tableValues="0 ';
+        string memory funcG = '<feFuncG type="discrete" tableValues="0 ';
+        string memory funcB = '<feFuncB type="discrete" tableValues="0 ';
 
-        // for (uint i=0; i < colors.length; i++) {
-        for (uint i=0; i < 5; i++) {
+        for (uint i=0; i < 2; i++) {
             RGB memory color = colors[i];
             funcR = string.concat(funcR, divideAndFormat(color.r, 256, 1), ' ');
             funcG = string.concat(funcG, divideAndFormat(color.g, 256, 1), ' ');
@@ -324,8 +328,8 @@ contract Fossil {
                       '<feDisplacementMap result="r5" xChannelSelector="R" in2="r1" in="r1" yChannelSelector="G" scale="', scale, '" />',
                       '<feComposite result="r2" operator="in" in="r15" in2="r5" />',
                       generateSpecularLighting(seed, isFractalNoise),
-                      '<feComposite k1="0.3874092" k3="1" k2="-0.5" in2="r2" in="r4" operator="arithmetic" result="r91" k4="0" />',
-                      '<feComposite in="r91" result="r4" operator="arithmetic" k2="2" k3="3.9779434" in2="r91" k1="0" k4="-0.57127724" />',
+                      '<feComposite k1="0.5" k3="1" k2="-0.5" in2="r2" in="r4" operator="arithmetic" result="r91" k4="0" />',
+                      '<feComposite in="r91" result="r4" operator="arithmetic" k2="2" k3="4" in2="r91" k1="0" k4="-0.5" />',
                       feComponentTransfer,
                       // '<feFlood result="result1" flood-color="', generateRandomColor(seed),'" />',
 
