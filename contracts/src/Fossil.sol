@@ -74,26 +74,25 @@ contract Fossil {
     function generateOctaves(uint tokenId, bool isFractalNoise, uint frequency) public view returns (string memory) {
         return generateRandom(1, 5, tokenId).toString();
         // uint octaves;
-        if (isFractalNoise) {
-            return generateRandom(1, 5, tokenId).toString();
-            // if (frequency >= 100) {
-            //     octaves = 1;
-            // } else if (frequency >= 50) {
-            //     octaves = generateRandom(2, 5, tokenId);
-            // } else if (frequency > 20) {
-            //     octaves = generateRandom(3, 5, tokenId);
-            // } else {
-            //     octaves = generateRandom(4, 8, tokenId);
-            // }
+        // if (isFractalNoise) {
+        //     return generateRandom(1, 5, tokenId).toString();
+        //     // if (frequency >= 100) {
+        //     //     octaves = 1;
+        //     // } else if (frequency >= 50) {
+        //     //     octaves = generateRandom(2, 5, tokenId);
+        //     // } else if (frequency > 20) {
+        //     //     octaves = generateRandom(3, 5, tokenId);
+        //     // } else {
+        //     //     octaves = generateRandom(4, 8, tokenId);
+        //     // }
 
-            // Fractal noise
-            // return octaves.toString();
-            // return generateRandom(1, 3, tokenId).toString();
-        }
-
-        // Turbulence
-        // return generateRandom(2, 5, tokenId).toString();
-        return generateRandom(1, 5, tokenId).toString();
+        //     // Fractal noise
+        //     // return octaves.toString();
+        //     // return generateRandom(1, 3, tokenId).toString();
+        // }
+        // // Turbulence
+        // // return generateRandom(2, 5, tokenId).toString();
+        // return generateRandom(1, 5, tokenId).toString();
     }
 
     function generateScale(uint tokenId, bool isFractalNoise, uint frequency) public view returns (string memory) {
@@ -200,83 +199,6 @@ contract Fossil {
 
         return string.concat(quotient.toString(), '.', decimal.toString());
     }
-
-    // function hslToRgb(HSL memory hsl) public view returns (RGB memory) {
-    //     (uint h, uint s, uint l) = (hsl.h, hsl.s, hsl.l);
-    //     if (s == 0) {
-    //         return RGB(l, l, l);
-    //     } else {
-    //         uint p = l * (255 - s) / 255;
-    //         uint q = l * (255 - (s * h) / 255) / 255;
-    //         uint t = l * (255 - (s * (255 - h)) / 255) / 255;
-
-    //         if (h < 85) {
-    //             return RGB(l, t, p);
-    //         } else if (h < 170) {
-    //             return RGB(q, l, p);
-    //         } else {
-    //             return RGB(p, l, t);
-    //         }
-    //     }
-    // }
-
-    // function hslToRgb(HSL memory hsl) public pure returns (RGB memory) {
-    //     uint c = (2 * (100 - hsl.l)) * (hsl.s / 100);
-    //     uint x;
-    //     if (((hsl.h / 60) % 2) - 1 < 0) {
-    //         x = c * (1 + ((hsl.h / 60) % 2) - 1);
-    //     } else {
-    //         x = c * (1 - ((hsl.h / 60) % 2) - 1);
-    //     }
-    //     uint m = (100 - hsl.s) * (hsl.l / 100);
-
-    //     uint r;
-    //     uint g;
-    //     uint b;
-    //     if (hsl.h >= 0 && hsl.h < 60) {
-    //         r = c;
-    //         g = x;
-    //         b = 0;
-    //     } else if (hsl.h >= 60 && hsl.h < 120) {
-    //         r = x;
-    //         g = c;
-    //         b = 0;
-    //     } else if (hsl.h >= 120 && hsl.h < 180) {
-    //         r = 0;
-    //         g = c;
-    //         b = x;
-    //     } else if (hsl.h >= 180 && hsl.h < 240) {
-    //         r = 0;
-    //         g = x;
-    //         b = c;
-    //     } else if (hsl.h >= 240 && hsl.h < 300) {
-    //         r = x;
-    //         g = 0;
-    //         b = c;
-    //     } else {
-    //         r = c;
-    //         g = 0;
-    //         b = x;
-    //     }
-
-    //     if (r + m > 100) {
-    //         r = 100;
-    //     } else {
-    //         r = r + m;
-    //     }
-    //     if (g + m > 100) {
-    //         g = 100;
-    //     } else {
-    //         g = g + m;
-    //     }
-    //     if (b + m > 100) {
-    //         b = 100;
-    //     } else {
-    //         b = b + m;
-    //     }
-    //     return RGB(r, g, b);
-    // }
-
     function generateComponentTransfer(uint tokenId, RGB[5] memory colors) public view returns (string memory) {
         string memory filter = '<feComponentTransfer id="palette" result="rct">';
         string memory funcR = '<feFuncR type="table" tableValues="0 ';
@@ -338,30 +260,6 @@ contract Fossil {
             j += 3;
         }
 
-        // // Randomly generate first three colors
-        // for (uint i=0; i < 3; i++) {
-        //     colors[i] = RGB(
-        //         generateRandom(0, 255, seed + i + j),
-        //         generateRandom(0, 255, seed + i + 1 + j),
-        //         generateRandom(0, 255, seed + i + 2 + j)
-        //     );
-        //     j += 3;
-        // }
-
-        // // Use RandomMix (Triad Mixing) to generate the last two colors
-        // for (uint i=0; i < 2; i++) {
-        //     colors[i+3] = randomMix(colors[i], colors[i+1], colors[i+2], 0);
-        //     j += 1;
-        // }
-
-        // // loop through and console.log all colors
-        // for (uint i=0; i < colors.length; i++) {
-        //     console.log(colors[i].r, 'colors[i].r');
-        //     console.log(colors[i].g, 'colors[i].g');
-        //     console.log(colors[i].b, 'colors[i].b');
-        //     console.log(toString(colors[i]), 'colors[i]');
-        // }
-
         return colors;
     }
 
@@ -374,7 +272,6 @@ contract Fossil {
             (color.b + white.b) / 2
         );
     }
-
 
     function generateTriadicColors(uint seed) public view returns (RGB[5] memory) {
         RGB memory color = RGB(
@@ -390,58 +287,11 @@ contract Fossil {
             complement,
             splitComplementary1,
             splitComplementary2,
-            // RGB(generateRandom(0, 255, seed + 3),
-            //     generateRandom(0, 255, seed + 4),
-            //     generateRandom(0, 255, seed + 5)),
-            // RGB(gray, gray, gray)
             RGB(color.r, complement.g, complement.b)
         ];
 
-        // uint gray1 = generateRandom(0, 255, seed + 3);
-        // uint gray2 = generateRandom(0, 255, seed + 4);
-        // uint gray3 = generateRandom(0, 255, seed + 5);
-        // uint gray4 = generateRandom(0, 255, seed + 6);
-        // uint gray5 = generateRandom(0, 255, seed + 7);
-
-        // RGB[5] memory colors = [
-        //     RGB(gray1, gray1, gray1),
-        //     RGB(gray2, gray2, gray2),
-        //     RGB(gray3, gray3, gray3),
-        //     RGB(gray4, gray4, gray4),
-        //     RGB(gray5, gray5, gray5)
-        // ];
-
         return colors;
     }
-
-    // Generates a random color, then generates a palette of 5 colors with random saturation and luminosity
-    // but with the same hue
-    // function generateSimilarHSLColorPalette(uint seed) public view returns (RGB[5] memory) {
-    //     uint j = 0;
-
-    //     HSL memory hsl = HSL(
-    //         generateRandom(0, 360, seed),
-    //         generateRandom(0, 100, seed + 1),
-    //         generateRandom(0, 100, seed + 2)
-    //     );
-    //     j += 3;
-    //     console.log('HSL: %s', hsl.h.toString());
-
-    //     RGB[5] memory colors;
-    //     for (uint i=0; i < colors.length; i++) {
-    //         console.log('HSL: %s', hsl.h.toString());
-    //         colors[i] = hslToRgb(
-    //             HSL(
-    //                 hsl.h,
-    //                 generateRandom(0, 100, seed + i + j),
-    //                 generateRandom(0, 100, seed + i + j + 1)
-    //             )
-    //         );
-    //         j += 2;
-    //     }
-
-    //     return colors;
-    // }
 
     /* new */
     function generateSVG(uint seed) public view returns (string memory) {
@@ -453,11 +303,7 @@ contract Fossil {
         string memory octaves = generateOctaves(seed, isFractalNoise, frequencyInt);
         string memory scale = generateScale(seed, isFractalNoise, frequencyInt);
 
-        // string memory grayRGB = generateRandomGrayColor(seed + 3);
-        // string memory grayRGB2 = generateRandomGrayColor(seed + 5);
-
         // RGB[5] memory colors = generateRandomColorPalette(seed);
-        // RGB[5] memory colors = generateSimilarHSLColorPalette(seed);
         // RGB[5] memory colors = generateTriadicColors(seed);
         // string memory feComponentTransfer = generateComponentTransfer(
         //     seed,
