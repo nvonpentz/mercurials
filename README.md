@@ -13,3 +13,8 @@
   ```
   $ npm run dev
   ```
+
+
+https://yoksel.github.io/svg-gradient-map/#/
+
+Each has multiple forms you can cycle it through
