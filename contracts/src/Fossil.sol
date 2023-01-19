@@ -51,13 +51,13 @@ contract Fossil {
         return toString(RGB(grayVal, grayVal, grayVal));
     }
 
-    function generateFrequency(uint tokenId, bool turbulenceType) public view returns (uint, string memory) {
+    function generateFrequency(uint tokenId, bool isFractalNoise) public view returns (uint, string memory) {
         // return  (53, "0.053");
         uint random;
-        if (turbulenceType) {
+        if (isFractalNoise) {
             // Fractal noise
             // random = generateRandom(20, 150, tokenId);
-            random = generateRandom(30, 100, tokenId);
+            random = generateRandom(30, 90, tokenId);
         } else {
             // Turbulent noise
             // random = generateRandom(1, 60, tokenId);
@@ -101,7 +101,7 @@ contract Fossil {
     }
 
     function generateScale(uint tokenId, bool isFractalNoise, uint frequency) public view returns (string memory) {
-        return generateRandom(0, 50, tokenId).toString();
+        return generateRandom(50, 100, tokenId).toString();
         // return "99";
         if (isFractalNoise) {
             return generateRandom(0, 100, tokenId).toString();
@@ -204,6 +204,12 @@ contract Fossil {
             decimal = decimal + 1;
         }
 
+        // if the decimal is 10, we need to carry the 1
+        if (decimal == 10) {
+            decimal = 0;
+            quotient = quotient + 1;
+        }
+
         return string.concat(quotient.toString(), '.', decimal.toString());
     }
 
@@ -303,6 +309,23 @@ contract Fossil {
         return colors;
     }
 
+    function averageColors(RGB[5] memory colors) public pure returns (RGB memory) {
+        uint r = 0;
+        uint g = 0;
+        uint b = 0;
+        for (uint i=0; i < colors.length; i++) {
+            r += colors[i].r;
+            g += colors[i].g;
+            b += colors[i].b;
+        }
+
+        return RGB(r / colors.length, g / colors.length, b / colors.length);
+    }
+
+    function complementaryColor(RGB memory color) public pure returns (RGB memory) {
+        return RGB(255 - color.r, 255 - color.g, 255 - color.b);
+    }
+
     /* new */
     function generateSVG(uint seed) public view returns (string memory) {
         /* Filter parameters */
@@ -315,6 +338,7 @@ contract Fossil {
 
         // RGB[5] memory colors = generateRandomColorPalette(seed);
         RGB[5] memory colors = generateTriadicColors(seed);
+        RGB memory averageColor = averageColors(colors);
         string memory feComponentTransfer = generateComponentTransfer(
             seed,
             colors
@@ -327,8 +351,8 @@ contract Fossil {
                 '<svg width="500" height="500" viewBox="0 0 500 500" version="1.1" xmlns="http://www.w3.org/2000/svg">',
                   '<defs>',
                     '<filter id="cracked-lava" color-interpolation-filters="sRGB">',
-                      '<feFlood flood-color="rgb(152,152,152)" result="r15" />',
-                      // '<feFlood flood-color="#AAAAAA" result="r15" />',
+                      // '<feFlood flood-color="rgb(152,152,152)" result="r15" />',
+                      '<feFlood flood-color="#4A4A4A" result="r15" />',
                       // '<feFlood flood-color="', toString(colors[0]),'" result="r15" />',
                       // '<feFlood flood-color="', toString(generateRandomColor(seed)),'" result="r15" />',
                       // '<feFlood flood-color="rgb(250,250,250)" result="r15" />',
@@ -342,8 +366,8 @@ contract Fossil {
                       feComponentTransfer,
                       // '<feFlood result="result1" flood-color="', generateRandomColor(seed),'" />',
 
-                      // '<feFlood result="result1" flood-color="', grayRGB,'" />',
-                      // '<feBlend mode="normal" in2="result1" in="rct" />',
+                      '<feFlood result="result1" flood-color="', toString(complementaryColor(averageColor)),'" />',
+                      '<feBlend mode="normal" in="rct" in2="result1" />',
                     '</filter>',
                   '</defs>',
                   '<rect width="500" height="500" filter="url(#cracked-lava)" style="filter:url(#cracked-lava)" />',
