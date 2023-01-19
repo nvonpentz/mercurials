@@ -11,25 +11,17 @@ import { useState, useEffect } from 'react';
 const maxImages = 3;
 
 const Home: NextPage = () => {
-  const { data: blockNumber } = useBlockNumber({ watch: true });
+  const [blockNumber, setBlockNumber] = useState(0); // added state to keep track of the current value
   const { data, error, isError, isLoading, isFetched, isFetching } = useContractRead({
     address: address,
     abi: abi,
-    functionName: 'constructImageURI',
-    // args: [796],
-    args: [blockNumber]
-  })
+    functionName: 'generateSVG',
+    args: [blockNumber] // use the current value of blockNumber
+  });
 
-  const [pastImages, setPastImages] = useState<string[]>([])
-  useEffect(() => {
-    return () => {
-      if (data && pastImages.length < maxImages) {
-        setPastImages([...pastImages, data])
-      } else if (data && isFetched && !isFetching && pastImages.length >= maxImages) {
-        setPastImages([...pastImages.slice(1), data]);
-      } 
-    }
-  }, [data])
+  const handleButtonClick = () => {
+    setBlockNumber(blockNumber + 1); // increment the value on button click
+  }
 
   return (
     <div className={styles.container}>
@@ -45,13 +37,15 @@ const Home: NextPage = () => {
           <span className={styles.title}>Waffles</span>
           <ConnectButton /> 
         </nav>}
-        <main className={styles.main}>
-          {data && <Image
+          <main className={styles.main}>
+          {data && <div dangerouslySetInnerHTML={{ __html: data }} />}
+          {false && <Image
                       className={styles.display}
                       src={data}
                       width={500}
                       height={500}
             />}
+          <button onClick={handleButtonClick}>Increment</button> // added a button to increment the value
         </main>
       </div>
     </div>
