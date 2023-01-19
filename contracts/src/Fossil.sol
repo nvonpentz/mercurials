@@ -39,9 +39,12 @@ contract Fossil {
         return rand % (max - min) + min;
     }
 
-    // function generateRandomColor(uint seed) internal view returns (string memory) {
-    //     return string.concat('#', toHexStringNoPrefix(generateRandom(0, 16777215, seed), uint(3)));
-    // }
+    function generateRandomColor(uint seed) internal view returns (RGB memory) {
+        // return string.concat('#', toHexStringNoPrefix(generateRandom(0, 16777215, seed), uint(3)));
+        return RGB(generateRandom(85, 170, seed),
+                generateRandom(85, 170, seed+1),
+                generateRandom(85, 170, seed+2));
+    }
 
     function generateRandomGrayColor(uint seed) internal view returns (string memory) {
         uint grayVal = generateRandom(0, 255, seed);
@@ -206,11 +209,14 @@ contract Fossil {
 
     function generateComponentTransfer(uint tokenId, RGB[5] memory colors) public view returns (string memory) {
         string memory filter = '<feComponentTransfer id="palette" result="rct">';
-        string memory funcR = '<feFuncR type="discrete" tableValues="0 ';
-        string memory funcG = '<feFuncG type="discrete" tableValues="0 ';
-        string memory funcB = '<feFuncB type="discrete" tableValues="0 ';
+        string memory funcR = '<feFuncR type="table" tableValues="0 ';
+        string memory funcG = '<feFuncG type="table" tableValues="0 ';
+        string memory funcB = '<feFuncB type="table" tableValues="0 ';
 
-        for (uint i=0; i < 2; i++) {
+        for (uint i=0; i < colors.length; i++) {
+            // if (i == 0) {
+            //     continue;
+            // }
             RGB memory color = colors[i];
             funcR = string.concat(funcR, divideAndFormat(color.r, 256, 1), ' ');
             funcG = string.concat(funcG, divideAndFormat(color.g, 256, 1), ' ');
@@ -243,9 +249,9 @@ contract Fossil {
             // prettier-ignore
             string.concat(
               '<feComponentTransfer result="result2">',
-                '<feFuncR type="table" tableValues="', tableValues[0], '" />',
-                '<feFuncG type="table" tableValues="', tableValues[1], '" />',
-                '<feFuncB type="table" tableValues="', tableValues[2], '" />',
+                '<feFuncR type="discrete" tableValues="', tableValues[0], '" />',
+                '<feFuncG type="discrete" tableValues="', tableValues[1], '" />',
+                '<feFuncB type="discrete" tableValues="', tableValues[2], '" />',
               '</feComponentTransfer>'
             );
     }
@@ -308,12 +314,12 @@ contract Fossil {
         string memory scale = generateScale(seed, isFractalNoise, frequencyInt);
 
         // RGB[5] memory colors = generateRandomColorPalette(seed);
-        // RGB[5] memory colors = generateTriadicColors(seed);
-        // string memory feComponentTransfer = generateComponentTransfer(
-        //     seed,
-        //     colors
-        // );
-        string memory feComponentTransfer = generateComponentTransfer(seed);
+        RGB[5] memory colors = generateTriadicColors(seed);
+        string memory feComponentTransfer = generateComponentTransfer(
+            seed,
+            colors
+        );
+        // string memory feComponentTransfer = generateComponentTransfer(seed);
 
         return
             // prettier-ignore
@@ -322,7 +328,10 @@ contract Fossil {
                   '<defs>',
                     '<filter id="cracked-lava" color-interpolation-filters="sRGB">',
                       '<feFlood flood-color="rgb(152,152,152)" result="r15" />',
-                      // '<feFlood flood-color="', grayRGB2,'" result="r15" />',
+                      // '<feFlood flood-color="#AAAAAA" result="r15" />',
+                      // '<feFlood flood-color="', toString(colors[0]),'" result="r15" />',
+                      // '<feFlood flood-color="', toString(generateRandomColor(seed)),'" result="r15" />',
+                      // '<feFlood flood-color="rgb(250,250,250)" result="r15" />',
 
                       '<feTurbulence baseFrequency="', frequency, '" type="', turbulenceType, '" numOctaves="', octaves,'" result="r1" />',
                       '<feDisplacementMap result="r5" xChannelSelector="R" in2="r1" in="r1" yChannelSelector="G" scale="', scale, '" />',
@@ -338,11 +347,11 @@ contract Fossil {
                     '</filter>',
                   '</defs>',
                   '<rect width="500" height="500" filter="url(#cracked-lava)" style="filter:url(#cracked-lava)" />',
-                  // '<rect width="50" height="50" x="0" y="0" fill="', toString(colors[0]),'" />',
-                  // '<rect width="50" height="50" x="50" y="0" fill="', toString(colors[1]),'" />',
-                  // '<rect width="50" height="50" x="100" y="0" fill="', toString(colors[2]),'" />',
-                  // '<rect width="50" height="50" x="150" y="0" fill="', toString(colors[3]),'" />',
-                  // '<rect width="50" height="50" x="200" y="0" fill="', toString(colors[4]),'" />',
+                  '<rect width="50" height="50" x="0" y="0" fill="', toString(colors[0]),'" />',
+                  '<rect width="50" height="50" x="50" y="0" fill="', toString(colors[1]),'" />',
+                  '<rect width="50" height="50" x="100" y="0" fill="', toString(colors[2]),'" />',
+                  '<rect width="50" height="50" x="150" y="0" fill="', toString(colors[3]),'" />',
+                  '<rect width="50" height="50" x="200" y="0" fill="', toString(colors[4]),'" />',
                 '</svg>'
             );
     }
