@@ -120,17 +120,17 @@ contract Fossil {
 
     function generateSpecularLighting(uint tokenId, bool isFractalNoise) public view returns (string memory) {
         // string memory surfaceScale = string.concat('-', generateRandom(2, 4, tokenId).toString()); // Was -3.10131121
-        string memory surfaceScale = '-3.10131121';
+        string memory surfaceScale = '-5';
 
         // Perhaps we limit the specular lighting for HSL color generation techniques.
         // originall (probably should be 0, 99)
         // string memory specularConstant = string.concat('1.', generateRandom(25, 99, tokenId).toString()); // Was 2.13708425
-        string memory specularConstant = '2.13708425';
+        string memory specularConstant = '1';
         return
             // prettier-ignore
             string.concat(
-              '<feSpecularLighting lighting-color="#ffffff" surfaceScale="', surfaceScale,'" result="r4" specularConstant="', specularConstant,'" specularExponent="15.19753456" in="r2">',
-                '<feDistantLight elevation="60" azimuth="0">',
+              '<feSpecularLighting lighting-color="#ffffff" surfaceScale="', surfaceScale,'" result="r4" specularConstant="', specularConstant,'" specularExponent="1" in="r2">',
+                '<feDistantLight elevation="0" azimuth="0">',
                     // '<animate attributeName="azimuth" values="0;360" dur="10s" repeatCount="indefinite"/>',
                 '</feDistantLight>',
               '</feSpecularLighting>'
@@ -352,7 +352,7 @@ contract Fossil {
                   '<defs>',
                     '<filter id="cracked-lava" color-interpolation-filters="sRGB">',
                       // '<feFlood flood-color="rgb(152,152,152)" result="r15" />',
-                      '<feFlood flood-color="#4A4A4A" result="r15" />',
+                      '<feFlood flood-color="#5A5A5A" result="r15" />',
                       // '<feFlood flood-color="', toString(colors[0]),'" result="r15" />',
                       // '<feFlood flood-color="', toString(generateRandomColor(seed)),'" result="r15" />',
                       // '<feFlood flood-color="rgb(250,250,250)" result="r15" />',
@@ -362,7 +362,7 @@ contract Fossil {
                       '<feComposite result="r2" operator="in" in="r15" in2="r5" />',
                       generateSpecularLighting(seed, isFractalNoise),
                       '<feComposite k1="0.5" k3="1" k2="-0.5" in2="r2" in="r4" operator="arithmetic" result="r91" k4="0" />',
-                      '<feComposite in="r91" result="r4" operator="arithmetic" k2="2" k3="4" in2="r91" k1="0" k4="-0.5" />',
+                      '<feComposite in="r91" result="r4" operator="arithmetic" k2="0" k3="4" in2="r91" k1="0" k4="-0" />',
                       feComponentTransfer,
                       // '<feFlood result="result1" flood-color="', generateRandomColor(seed),'" />',
 
