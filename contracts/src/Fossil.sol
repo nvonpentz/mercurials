@@ -240,7 +240,7 @@ contract Fossil {
         return string.concat(quotient.toString(), '.', decimal.toString());
     }
 
-    function generateComponentTransfer(uint tokenId, RGB[4] memory colors) public view returns (string memory) {
+    function generateComponentTransfer(uint tokenId, RGB[] memory colors) public view returns (string memory) {
         string memory filter = '<feComponentTransfer id="palette" result="rct">';
         string memory funcR = '<feFuncR type="table" tableValues="';
         string memory funcG = '<feFuncG type="table" tableValues="';
@@ -290,9 +290,9 @@ contract Fossil {
     }
 
     // Color pallete of all random colors
-    function generateRandomColorPalette(uint seed) public view returns (RGB[4] memory) {
+    function generateRandomColorPalette(uint seed) public view returns (RGB[] memory) {
         uint j = 0;
-        RGB[4] memory colors;
+        RGB[] memory colors;
         for (uint i=0; i < colors.length; i++) {
             // console.log(seed + i + j, 'seed + i + j');
             colors[i] = RGB(
@@ -316,30 +316,58 @@ contract Fossil {
         );
     }
 
-    function generateAnalogousColorPalette(uint seed) public view returns(RGB[4] memory) {
-        RGB[4] memory colors;
-        // RGB memory color = generateRandomColor(seed);
+    function generateMonochromaticColorPalette(uint seed) public view returns (RGB[] memory) {
+        RGB[] memory colors = new RGB[](7);
+        HSL memory hsl = HSL(
+            generateRandom(0, 360, seed),
+            100,
+            generateRandom(0, 20, seed + 1)
+        );
+        RGB memory color = toColorRGB(hsl);
+        // calculate the lightness delta each step based on size of colors
+        uint delta = 100 / colors.length;
+        for (uint i=0; i < colors.length; i++) {
+            colors[i] = color;
+            hsl.lightness = hsl.lightness + delta;
+            color = toColorRGB(hsl);
+        }
+
+        // for (uint i=0; i < colors.length; i++) {
+        //     colors[i] = color;
+        //     hsl.lightness = hsl.lightness + 20;
+        //     color = toColorRGB(hsl);
+        // }
+        return colors;
+    }
+
+    function generateAnalogousColorPalette(uint seed) public view returns(RGB[] memory) {
+        RGB[] memory colors;
         HSL memory hsl = HSL(
             generateRandom(0, 360, seed),
             100,
             50
         );
-        colors[0] = toColorRGB(hsl);
-        colors[1] = toColorRGB(HSL(hsl.hue + 30, hsl.saturation, hsl.lightness));
-        colors[2] = toColorRGB(HSL(hsl.hue + 60, hsl.saturation, hsl.lightness));
-        colors[3] = toColorRGB(HSL(hsl.hue + 90, hsl.saturation, hsl.lightness));
+        uint degrees = 30;
+        for (uint i=0; i < colors.length; i++) {
+            colors[i] = toColorRGB(hsl);
+            hsl.hue = (hsl.hue + degrees) % 360;
+        }
+        // colors[0] = toColorRGB(hsl);
+        // colors[1] = toColorRGB(HSL(hsl.hue + 30, hsl.saturation, hsl.lightness));
+        // colors[2] = toColorRGB(HSL(hsl.hue + 60, hsl.saturation, hsl.lightness));
+        // colors[3] = toColorRGB(HSL(hsl.hue + 90, hsl.saturation, hsl.lightness));
         return colors;
     }
 
-    function generateAnalogousColors(HSL memory hsl) public view returns (HSL[2] memory) {
-        uint degrees = 15;
-        HSL[2] memory colors;
-        colors[0] = HSL(hsl.hue - degrees, hsl.saturation, hsl.lightness);
-        colors[1] = HSL(hsl.hue + degrees, hsl.saturation, hsl.lightness);
-        return colors;
-    }
+    // function generateAnalogousColors(HSL memory hsl) public view returns (HSL[2] memory) {
+    //     uint degrees = 15;
+    //     HSL[2] memory colors;
+    //     colors[0] = HSL(hsl.hue - degrees, hsl.saturation, hsl.lightness);
+    //     colors[1] = HSL(hsl.hue + degrees, hsl.saturation, hsl.lightness);
+    //     return colors;
+    // }
 
-    function generateTetradicColorPalette(uint seed) public view returns (RGB[4] memory) {
+    function generateTetradicColorPalette(uint seed) public view returns (RGB[] memory) {
         uint lightnessRangeStart = 0;
         uint lightnessRangeEnd = 25;
         // uint lightnessRangeStart = 50;
@@ -360,7 +388,7 @@ contract Fossil {
         // uint lightnessRangeStart = 0;
         // uint lightnessRangeEnd = 100;
 
-        RGB[4] memory colors;
+        RGB[] memory colors;
         colors[0] = toColorRGB(hsl);
         lightnessRangeStart += 25;
         lightnessRangeEnd += 25;
@@ -381,28 +409,28 @@ contract Fossil {
         return colors;
     }
 
-    function generateColorsNovelApproach(uint seed) public view returns (RGB[4] memory) {
-        // It is generating a base color, its complement, and two split-complementary colors.
-        RGB memory color = RGB(
-            generateRandom(0, 255, seed),
-            generateRandom(0, 255, seed + 1),
-            generateRandom(0, 255, seed + 2)
-        );
-        RGB memory complement = RGB(255 - color.r, 255 - color.g, 255 - color.b);
-        RGB memory splitComplementary1 = RGB((color.r + 85) % 256, (color.g + 85) % 256, (color.b + 85) % 256);
-        RGB memory splitComplementary2 = RGB((color.r + 170) % 256, (color.g + 170) % 256, (color.b + 170) % 256);
-        RGB[4] memory colors = [
-            color,
-            complement,
-            splitComplementary1,
-            splitComplementary2
-            // RGB(color.r, complement.g, complement.b)
-        ];
+    // function generateColorsNovelApproach(uint seed) public view returns (RGB[] memory) {
+    //     // It is generating a base color, its complement, and two split-complementary colors.
+    //     RGB memory color = RGB(
+    //         generateRandom(0, 255, seed),
+    //         generateRandom(0, 255, seed + 1),
+    //         generateRandom(0, 255, seed + 2)
+    //     );
+    //     RGB memory complement = RGB(255 - color.r, 255 - color.g, 255 - color.b);
+    //     RGB memory splitComplementary1 = RGB((color.r + 85) % 256, (color.g + 85) % 256, (color.b + 85) % 256);
+    //     RGB memory splitComplementary2 = RGB((color.r + 170) % 256, (color.g + 170) % 256, (color.b + 170) % 256);
+    //     RGB[] memory colors = [
+    //         color,
+    //         complement,
+    //         splitComplementary1,
+    //         splitComplementary2
+    //         // RGB(color.r, complement.g, complement.b)
+    //     ];
 
-        return colors;
-    }
+    //     return colors;
+    // }
 
-    function averageColors(RGB[4] memory colors) public pure returns (RGB memory) {
+    function averageColors(RGB[] memory colors) public pure returns (RGB memory) {
         uint r = 0;
         uint g = 0;
         uint b = 0;
@@ -430,9 +458,10 @@ contract Fossil {
         string memory scale = generateScale(seed, isFractalNoise, frequencyInt);
 
         // RG4[4] memory colors = generateRandomColorPalette(seed);
-        // RGB[4] memory colors = generateColorsNovelApproach(seed);
-        // RGB[4] memory colors = generateTetradicColorPalette(seed);
-        RGB[4] memory colors = generateAnalogousColorPalette(seed);
+        // RGB[] memory colors = generateColorsNovelApproach(seed);
+        // RGB[] memory colors = generateTetradicColorPalette(seed);
+        // RGB[] memory colors = generateAnalogousColorPalette(seed);
+        RGB[] memory colors = generateMonochromaticColorPalette(seed);
 
         RGB memory averageColor = averageColors(colors);
         string memory feComponentTransfer = generateComponentTransfer(
@@ -441,6 +470,7 @@ contract Fossil {
         );
         // string memory feComponentTransfer = generateComponentTransfer(seed);
 
+        string memory rects = createRectsForColors(colors);
         return
             // prettier-ignore
             string.concat(
@@ -467,20 +497,25 @@ contract Fossil {
                       feComponentTransfer,
                       // '<feFlood result="result1" flood-color="', generateRandomColor(seed),'" />',
 
-                      '<feFlood result="result1" flood-color="', toString(complementaryColor(averageColor)),'" />',
+                      // '<feFlood result="result1" flood-color="', toString(complementaryColor(averageColor)),'" />',
+                      // '<feFlood result="result1" flood-color="', ," />',
                       // '<feFlood result="result1" flood-color="white" />',
                       '<feBlend mode="normal" in="rct" in2="result1" />',
                     '</filter>',
                   '</defs>',
                   '<rect width="500" height="500" fill="url(#linearGradient14277)" filter="url(#cracked-lava)" style="filter:url(#cracked-lava)" />',
                   '<rect width="50" height="50" x="0" y="0" fill="', toString(colors[0]),'" />',
-                  '<rect width="50" height="50" x="50" y="0" fill="', toString(colors[1]),'" />',
-                  '<rect width="50" height="50" x="100" y="0" fill="', toString(colors[2]),'" />',
-                  '<rect width="50" height="50" x="150" y="0" fill="', toString(colors[3]),'" />',
-                  // '<rect width="50" height="50" x="200" y="0" fill="', toString(colors[4]),'" />',
-
-                  // '<rect width="50" height="50" x="200" y="0" fill="', toString(averageColor),'" />',
+                  rects,
                 '</svg>'
             );
+    }
+
+    function createRectsForColors(RGB[] memory colors) public pure returns (string memory) {
+        string memory rects = "";
+        for (uint i=0; i < colors.length; i++) {
+            rects = string.concat(rects, '<rect width="50" height="50" x="', (i * 50).toString(), '" y="0" fill="', toString(colors[i]),'" />');
+        }
+
+        return rects;
     }
 }
