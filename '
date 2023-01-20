@@ -349,24 +349,13 @@ contract Fossil {
             // 100, // saturation
             // 50 // lightness
         );
-        HSL memory initialColor = HSL({
-            hue: hsl.hue,
-            saturation: hsl.saturation,
-            lightness: hsl.lightness
-        });
+        uint initialHue = hsl.hue;
         uint degrees = 360 / colors.length;
         for (uint i=0; i < colors.length; i++) {
             colors[i] = toColorRGB(hsl);
             hsl.hue = (hsl.hue + degrees) % 360;
             if (i == colors.length - 1) {
-
-                // console.log('initialHue', initialHue);
-                hsl.hue = (initialColor.hue + 180) % 360;
-                hsl.saturation = initialColor.saturation;
-                hsl.lightness = initialColor.lightness;
-
-
-                // console.log('hsl.hue', hsl.hue);
+                hsl.hue = (initialHue+ 180) % 360;
                 continue;
             }
             hsl.saturation = generateRandom(0, 100, seed + i + 3);
