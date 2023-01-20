@@ -51,32 +51,32 @@ contract Fossil {
         return toString(RGB(grayVal, grayVal, grayVal));
     }
 
-    function generateFrequency(uint tokenId, bool isFractalNoise) public view returns (uint, string memory) {
+    function generateFrequency(uint tokenId, bool isFractalNoise) public view returns (string memory) {
         // return  (53, "0.053");
-        uint random;
+        uint xVal;
         if (isFractalNoise) {
             // Fractal noise
-            // random = generateRandom(20, 150, tokenId);
-            random = generateRandom(30, 90, tokenId);
+            // xVal = generateRandom(20, 150, tokenId);
+            xVal = generateRandom(30, 90, tokenId);
         } else {
             // Turbulent noise
-            // random = generateRandom(1, 60, tokenId);
-            random = generateRandom(15, 60, tokenId);
+            // xVal = generateRandom(1, 60, tokenId);
+            xVal = generateRandom(15, 40, tokenId);
         }
 
         string memory frequency; 
-        if (random >= 100) {
-             frequency = string.concat('0.', random.toString()); // E.g. 0.200
-        } else if (random >= 10) {
-            frequency = string.concat('0.0', random.toString()); // E.g. 0.020
+        if (xVal >= 100) {
+             frequency = string.concat('0.', xVal.toString()); // E.g. 0.200
+        } else if (xVal >= 10) {
+            frequency = string.concat('0.0', xVal.toString()); // E.g. 0.020
         } else {
-            frequency = string.concat('0.00', random.toString()); // E.g. 0.002
+            frequency = string.concat('0.00', xVal.toString()); // E.g. 0.002
         }
 
-        return (random, frequency);
+        return frequency;
     }
 
-    function generateOctaves(uint tokenId, bool isFractalNoise, uint frequency) public view returns (string memory) {
+    function generateOctaves(uint tokenId) public view returns (string memory) {
         return generateRandom(2, 4, tokenId).toString();
         // uint octaves;
         // if (isFractalNoise) {
@@ -100,7 +100,7 @@ contract Fossil {
         // return generateRandom(1, 5, tokenId).toString();
     }
 
-    function generateScale(uint tokenId, bool isFractalNoise, uint frequency) public view returns (string memory) {
+    function generateScale(uint tokenId, bool isFractalNoise) public view returns (string memory) {
         return generateRandom(50, 100, tokenId).toString();
         // return "99";
         if (isFractalNoise) {
@@ -242,9 +242,9 @@ contract Fossil {
 
     function generateComponentTransfer(uint tokenId, RGB[] memory colors) public view returns (string memory) {
         string memory filter = '<feComponentTransfer id="palette" result="rct">';
-        string memory funcR = '<feFuncR type="table" tableValues="';
-        string memory funcG = '<feFuncG type="table" tableValues="';
-        string memory funcB = '<feFuncB type="table" tableValues="';
+        string memory funcR = '<feFuncR type="table" tableValues=" 0';
+        string memory funcG = '<feFuncG type="table" tableValues=" 0';
+        string memory funcB = '<feFuncB type="table" tableValues=" 0';
 
         for (uint i=0; i < colors.length; i++) {
             // if (i == 0) {
@@ -332,11 +332,14 @@ contract Fossil {
             color = toColorRGB(hsl);
         }
 
+        // randomize the array manually
         // for (uint i=0; i < colors.length; i++) {
-        //     colors[i] = color;
-        //     hsl.lightness = hsl.lightness + 20;
-        //     color = toColorRGB(hsl);
+        //     uint random = generateRandom(0, colors.length - 1, seed + i);
+        //     RGB memory temp = colors[i];
+        //     colors[i] = colors[random];
+        //     colors[random] = temp;
         // }
+
         return colors;
     }
 
@@ -491,8 +494,13 @@ contract Fossil {
 
         // generate the stop elements. there should be 2 or 3 stops, with offsets
         // starting at 0, and ending at 100 they should alternate between white and black
-        string memory stops;
-        uint numStops = generateRandom(2, 4, seed + 1);
+        string memory stops = 2;
+
+        // uint numStops = generateRandom(2, 4, seed + 1);
+        // uint numStops = (seed % 2 == 0) || (seed % 3 == 0) ? 2 : 3;
+
+        uint numStops = (seed % 2 == 0) || (seed % 3 == 0) ? 2 : 3;
+
         for (uint i=0; i < numStops; i++) {
             uint offset = i * 100 / (numStops - 1);
             string memory color = i % 2 == 0 ? 'white' : 'black';
@@ -515,17 +523,19 @@ contract Fossil {
         bool isFractalNoise = true;
         string memory turbulenceType = isFractalNoise ? "fractalNoise" : "turbulence";
         // string memory turbulenceType = "turbulence";
-        (uint frequencyInt, string memory frequency) = generateFrequency(seed, isFractalNoise);
-        string memory octaves = generateOctaves(seed, isFractalNoise, frequencyInt);
-        string memory scale = generateScale(seed, isFractalNoise, frequencyInt);
+        string memory frequency = generateFrequency(seed, isFractalNoise);
+        string memory octaves = generateOctaves(seed);
+        string memory scale = generateScale(seed, isFractalNoise);
 
         // RG4[4] memory colors = generateRandomColorPalette(seed);
         // RGB[] memory colors = generateColorsNovelApproach(seed);
 
-        // RGB[] memory colors = generateTetradicColorPalette(seed);
+        RGB[] memory colors = generateTetradicColorPalette(seed);
 
-        RGB[] memory colors = generateAnalogousColorPalette(seed);
+        // RGB[] memory colors = generateAnalogousColorPalette(seed);
+
         // RGB[] memory colors = generateMonochromaticColorPalette(seed);
+
         // RGB[] memory colors = generateTetradicAnalogousColorPalette(seed);
 
         RGB memory averageColor = averageColors(colors);
@@ -557,7 +567,8 @@ contract Fossil {
                       feComponentTransfer,
                       // '<feFlood result="result1" flood-color="', generateRandomColor(seed),'" />',
 
-                      '<feFlood result="result1" flood-color="', toString(complementaryColor(averageColor)),'" />',
+                      '<feFlood result="result1" flood-color="', toString(colors[0]),'" />',
+                      // '<feFlood result="result1" flood-color="', toString(complementaryColor(averageColor)),'" />',
                       // '<feFlood result="result1" flood-color="', ," />',
                       // '<feFlood result="result1" flood-color="white" />',
                       '<feBlend mode="normal" in="rct" in2="result1" />',
