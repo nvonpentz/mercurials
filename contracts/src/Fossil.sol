@@ -497,7 +497,7 @@ contract Fossil {
                       feComponentTransfer,
                       // '<feFlood result="result1" flood-color="', generateRandomColor(seed),'" />',
 
-                      // '<feFlood result="result1" flood-color="', toString(complementaryColor(averageColor)),'" />',
+                      '<feFlood result="result1" flood-color="', toString(complementaryColor(averageColor)),'" />',
                       // '<feFlood result="result1" flood-color="', ," />',
                       // '<feFlood result="result1" flood-color="white" />',
                       '<feBlend mode="normal" in="rct" in2="result1" />',
