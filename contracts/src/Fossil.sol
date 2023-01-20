@@ -57,7 +57,7 @@ contract Fossil {
         if (isFractalNoise) {
             // Fractal noise
             // xVal = generateRandom(20, 150, tokenId);
-            xVal = generateRandom(30, 90, tokenId);
+            xVal = generateRandom(40, 85, tokenId);
         } else {
             // Turbulent noise
             // xVal = generateRandom(1, 60, tokenId);
@@ -242,9 +242,9 @@ contract Fossil {
 
     function generateComponentTransfer(uint tokenId, RGB[] memory colors) public view returns (string memory) {
         string memory filter = '<feComponentTransfer id="palette" result="rct">';
-        string memory funcR = '<feFuncR type="table" tableValues=" 0';
-        string memory funcG = '<feFuncG type="table" tableValues=" 0';
-        string memory funcB = '<feFuncB type="table" tableValues=" 0';
+        string memory funcR = '<feFuncR type="table" tableValues="';
+        string memory funcG = '<feFuncG type="table" tableValues="';
+        string memory funcB = '<feFuncB type="table" tableValues="';
 
         for (uint i=0; i < colors.length; i++) {
             // if (i == 0) {
@@ -392,30 +392,65 @@ contract Fossil {
         // uint lightnessDelta = 20; // The average delta between the lightness of each color
         HSL memory hsl = HSL(
             generateRandom(0, 360, seed),
-            generateRandom(50, 100, seed+1),
-            generateRandom(25, 75, seed+2)
+            generateRandom(25, 75, seed+1),
+            generateRandom(40, 75, seed+2)
             // generateRandom(0, lightnessDelta-5, seed+2)
         );
-        console.log('hsl', hsl.hue, hsl.saturation, hsl.lightness);
+
+        HSL memory darkHsl = HSL({
+            hue: hsl.hue,
+            saturation: hsl.saturation,
+            lightness: generateRandom(0, 15, seed+3)
+        });
 
         // add it to the final output
-        RGB[] memory colors = new RGB[](4);
-        colors[0] = toColorRGB(hsl);
+        RGB[] memory colors = new RGB[](6);
+        colors[0] = toColorRGB(darkHsl);
+        colors[1] = toColorRGB(hsl);
 
         // Generate the remaining three tetradic colors by rotating the hue,
         // increasing the lightness
         uint degrees = 360 / 4; // 90 degrees
-        for (uint i=1; i < colors.length; i++) {
+        for (uint i=2; i < colors.length; i++) {
             hsl.hue = (hsl.hue + degrees) % 360;
-            hsl.saturation = generateRandom(50, 100, seed + i);
-            hsl.lightness = generateRandom(25, 100, seed + i + 1);
+            hsl.saturation = generateRandom(20, 80, seed + i);
+            hsl.lightness = generateRandom(40, 80, seed + i + 1);
             // hsl.lightness = i * 20 + generateRandom(0, lightnessDelta, seed + i + 2);
             console.log('hsl', hsl.hue, hsl.saturation, hsl.lightness);
             colors[i] = toColorRGB(hsl);
         }
 
+        colors[5] = toColorRGB(HSL({
+            hue: hsl.hue,
+            saturation: hsl.saturation,
+            lightness: generateRandom(85, 100, seed+4)
+        }));
+
         return colors;
     }
+
+    // function generateTetradicColorPalette(uint seed) public view returns (RGB[4] memory) {
+    //     // generate a random color
+    //     HSL memory hsl = HSL(
+    //         generateRandom(0, 360, seed),
+    //         generateRandom(25, 75, seed+1),
+    //         generateRandom(25, 75, seed+2)
+    //     );
+
+    //     // Generate the remaining three tetradic colors by rotating the hue
+    //     // and generating random saturation and lightness
+    //     uint saturationRangeStart = 0;
+    //     uint saturationRangeEnd = 100;
+    //     uint lightnessRangeStart = 0;
+    //     uint lightnessRangeEnd = 100;
+    //     RGB[4] memory colors;
+    //     colors[0] = toColorRGB(hsl);
+    //     colors[1] = toColorRGB(HSL((hsl.hue + 90) % 360, generateRandom(saturationRangeStart, saturationRangeEnd, seed+3), generateRandom(lightnessRangeStart, lightnessRangeEnd, seed+4)));
+    //     colors[2] = toColorRGB(HSL((hsl.hue + 180) % 360, generateRandom(saturationRangeStart, saturationRangeEnd, seed+5), generateRandom(lightnessRangeStart, lightnessRangeEnd, seed+6)));
+    //     colors[3] = toColorRGB(HSL((hsl.hue + 270) % 360, generateRandom(saturationRangeStart, saturationRangeEnd, seed+7), generateRandom(lightnessRangeStart, lightnessRangeEnd, seed+8)));
+
+    //     return colors;
+    // }
 
     function generateTetradicAnalogousColorPalette(uint seed) public view returns (RGB[] memory) {
         // generate a random base color
@@ -494,12 +529,13 @@ contract Fossil {
 
         // generate the stop elements. there should be 2 or 3 stops, with offsets
         // starting at 0, and ending at 100 they should alternate between white and black
-        string memory stops = 2;
+        string memory stops;
 
         // uint numStops = generateRandom(2, 4, seed + 1);
         // uint numStops = (seed % 2 == 0) || (seed % 3 == 0) ? 2 : 3;
 
-        uint numStops = (seed % 2 == 0) || (seed % 3 == 0) ? 2 : 3;
+        // uint numStops = (seed % 2 == 0) || (seed % 3 == 0) ? 2 : 3;
+        uint numStops = 2;
 
         for (uint i=0; i < numStops; i++) {
             uint offset = i * 100 / (numStops - 1);
@@ -575,7 +611,6 @@ contract Fossil {
                     '</filter>',
                   '</defs>',
                   '<rect width="500" height="500" fill="url(#linearGradient14277)" filter="url(#cracked-lava)" style="filter:url(#cracked-lava)" />',
-                  '<rect width="50" height="50" x="0" y="0" fill="', toString(colors[0]),'" />',
                   rects,
                 '</svg>'
             );
@@ -584,7 +619,9 @@ contract Fossil {
     function createRectsForColors(RGB[] memory colors) public pure returns (string memory) {
         string memory rects = "";
         for (uint i=0; i < colors.length; i++) {
-            rects = string.concat(rects, '<rect width="50" height="50" x="', (i * 50).toString(), '" y="0" fill="', toString(colors[i]),'" />');
+            rects = string.concat(rects,
+                '<rect width="50" height="50" x="', (i * 50).toString(), '" y="0" fill="', toString(colors[i]),'" />'
+            );
         }
 
         return rects;
