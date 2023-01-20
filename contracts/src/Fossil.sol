@@ -141,52 +141,79 @@ contract Fossil {
         uint r; // Value between 0 and 255
         uint g; // Value between 0 and 255
         uint b; // Value between 0 and 255
+        // uint red; // Value between 0 and 255
+        // uint green; // Value between 0 and 255
+        // uint blue; // Value between 0 and 255
     }
 
     struct HSL {
-        uint h; // Value between 0 and 360
-        uint s; // Value between 0 and 100
-        uint l; // Value between 0 and 100
+        uint hue; // Value between 0 and 360
+        uint saturation; // Value between 0 and 100
+        uint lightness; // Value between 0 and 100
     }
 
-    function randomMix(RGB memory color1, RGB memory color2, RGB memory color3, uint greyControl) public view returns (RGB memory) {
-        uint randomIndex = uint(uint256(keccak256(abi.encodePacked(block.timestamp, block.difficulty))) % 3);
-
-        uint mixRatio1;
-        uint mixRatio2;
-        uint mixRatio3;
-
-        if (randomIndex == 0) {
-            mixRatio1 = uint(uint256(keccak256(abi.encodePacked(block.timestamp, block.difficulty))) % (greyControl + 1));
-        } else {
-            mixRatio1 = uint(uint256(keccak256(abi.encodePacked(block.timestamp, block.difficulty))) % 256);
+    function hue2rgb(int256 p, int256 q, int256 t) internal pure returns (uint256 v) {
+        if(t < 0) t = t + 10000;
+        if(t > 10000) t = t - 10000;
+        if(t < 1666) {
+            return uint256(p + (q - p) * 6 * t / 10000);
         }
-
-        if (randomIndex == 1) {
-            mixRatio2 = uint(uint256(keccak256(abi.encodePacked(block.timestamp, block.difficulty))) % (greyControl + 1));
-        } else {
-            mixRatio2 = uint(uint256(keccak256(abi.encodePacked(block.timestamp, block.difficulty))) % 256);
+        if(t < 5000) return uint256(q);
+        if(t < 6666) {
+            return uint256(p + 6 * ((q - p) * (6666 - t) / 10000) );
         }
-
-        if (randomIndex == 2) {
-            mixRatio3 = uint(uint256(keccak256(abi.encodePacked(block.timestamp, block.difficulty))) % (greyControl + 1));
-        } else {
-            mixRatio3 = uint(uint256(keccak256(abi.encodePacked(block.timestamp, block.difficulty))) % 256);
-        }
-
-        uint256 sum = mixRatio1 + mixRatio2 + mixRatio3;
-
-        mixRatio1 = uint(mixRatio1 * 255 / sum);
-        mixRatio2 = uint(mixRatio2 * 255 / sum);
-        mixRatio3 = uint(mixRatio3 * 255 / sum);
-
-        RGB memory newRGB;
-        newRGB.r = mixRatio1 * color1.r + mixRatio2 * color2.r + mixRatio3 * color3.r;
-        newRGB.g = mixRatio1 * color1.g + mixRatio2 * color2.g + mixRatio3 * color3.g;
-        newRGB.b = mixRatio1 * color1.b + mixRatio2 * color2.b + mixRatio3 * color3.b;
-
-        return newRGB;
+        return uint256(p);
     }
+
+    function toColorRGB(HSL memory color) public pure returns (RGB memory) {
+        uint256 r;
+        uint256 g;
+        uint256 b;
+        int256 h = int256(color.hue * 10000 / 360);
+        int256 s = int256(color.saturation * 100);
+        int256 l = int256(color.lightness * 100);
+
+        if(s == 0){
+            r = g = b = uint256(l);
+        } else {
+            int256 q = l < 5000 ? l * (10000 + s) / 10000 : l + s - ((l*s)/10000);
+            int256 p = 2 * l - q;
+            r = hue2rgb(p, q, h + 3333);
+            g = hue2rgb(p, q, h);
+            b = hue2rgb(p, q, h - 3333);
+            
+        }
+        return RGB(255 * r / 10000, 255 * g / 10000, 255 * b / 10000);
+    }
+
+    // function toColorHSL(RGB memory colorRGB) internal pure returns (HSL memory) {
+    //     int256 r = int256(colorRGB.red  * 10000 / 255);
+    //     int256 g = int256(colorRGB.green * 10000 /255);
+    //     int256 b = int256(colorRGB.blue * 10000 /255);
+
+    //     int256 max = int256(Math.max(uint256(r), Math.max(uint256(g), uint256(b))));
+    //     int256 min = int256(Math.min(uint256(r), Math.min(uint256(g), uint256(b))));
+
+    //     int256 h;
+    //     int256 s;
+    //     int256 l = (max + min) / 2;
+
+    //     if (max == min){
+    //         h = s = 0;
+    //     } else {
+    //         int256 d = max - min;
+    //         s = l > 5000 ? 10000 * d / (20000 - max - min) : 10000 * d / (max + min);
+    //         if (max == r) {
+    //             h = int256(10000) * (g - b) / d + (g < b ? int256(60000) : int256(0));
+    //         } else if (max == g) {
+    //             h = int256(10000) *(b - r) / d + int256(20000);
+    //         } else {
+    //             h = int256(10000) * (r - g) / d + int256(40000);
+    //         }
+    //         h = h/ 6;
+    //     }
+    //     return HSL(uint256(36*h/1000), uint256(s/100), uint256(l/100));
+    // }
 
     function toString(RGB memory rgb) internal pure returns (string memory) {
         return string.concat('rgb(', rgb.r.toString(), ', ', rgb.g.toString(), ', ', rgb.b.toString(), ')');
@@ -213,7 +240,7 @@ contract Fossil {
         return string.concat(quotient.toString(), '.', decimal.toString());
     }
 
-    function generateComponentTransfer(uint tokenId, RGB[5] memory colors) public view returns (string memory) {
+    function generateComponentTransfer(uint tokenId, RGB[4] memory colors) public view returns (string memory) {
         string memory filter = '<feComponentTransfer id="palette" result="rct">';
         string memory funcR = '<feFuncR type="table" tableValues="0 ';
         string memory funcG = '<feFuncG type="table" tableValues="0 ';
@@ -263,9 +290,9 @@ contract Fossil {
     }
 
     // Color pallete of all random colors
-    function generateRandomColorPalette(uint seed) public view returns (RGB[5] memory) {
+    function generateRandomColorPalette(uint seed) public view returns (RGB[4] memory) {
         uint j = 0;
-        RGB[5] memory colors;
+        RGB[4] memory colors;
         for (uint i=0; i < colors.length; i++) {
             // console.log(seed + i + j, 'seed + i + j');
             colors[i] = RGB(
@@ -289,7 +316,31 @@ contract Fossil {
         );
     }
 
-    function generateTriadicColors(uint seed) public view returns (RGB[5] memory) {
+    function generateTetradicColorPalette(uint seed) public view returns (RGB[4] memory) {
+        // generate a random color
+        HSL memory hsl = HSL(
+            generateRandom(0, 360, seed),
+            generateRandom(25, 75, seed+1),
+            generateRandom(25, 75, seed+2)
+        );
+
+        // Generate the remaining three tetradic colors by rotating the hue
+        // and generating random saturation and lightness
+        uint saturationRangeStart = 0;
+        uint saturationRangeEnd = 100;
+        uint lightnessRangeStart = 0;
+        uint lightnessRangeEnd = 100;
+        RGB[4] memory colors;
+        colors[0] = toColorRGB(hsl);
+        colors[1] = toColorRGB(HSL((hsl.hue + 90) % 360, generateRandom(saturationRangeStart, saturationRangeEnd, seed+3), generateRandom(lightnessRangeStart, lightnessRangeEnd, seed+4)));
+        colors[2] = toColorRGB(HSL((hsl.hue + 180) % 360, generateRandom(saturationRangeStart, saturationRangeEnd, seed+5), generateRandom(lightnessRangeStart, lightnessRangeEnd, seed+6)));
+        colors[3] = toColorRGB(HSL((hsl.hue + 270) % 360, generateRandom(saturationRangeStart, saturationRangeEnd, seed+7), generateRandom(lightnessRangeStart, lightnessRangeEnd, seed+8)));
+
+        return colors;
+    }
+
+    function generateColorsNovelApproach(uint seed) public view returns (RGB[4] memory) {
+        // It is generating a base color, its complement, and two split-complementary colors.
         RGB memory color = RGB(
             generateRandom(0, 255, seed),
             generateRandom(0, 255, seed + 1),
@@ -298,18 +349,18 @@ contract Fossil {
         RGB memory complement = RGB(255 - color.r, 255 - color.g, 255 - color.b);
         RGB memory splitComplementary1 = RGB((color.r + 85) % 256, (color.g + 85) % 256, (color.b + 85) % 256);
         RGB memory splitComplementary2 = RGB((color.r + 170) % 256, (color.g + 170) % 256, (color.b + 170) % 256);
-        RGB[5] memory colors = [
+        RGB[4] memory colors = [
             color,
             complement,
             splitComplementary1,
-            splitComplementary2,
-            RGB(color.r, complement.g, complement.b)
+            splitComplementary2
+            // RGB(color.r, complement.g, complement.b)
         ];
 
         return colors;
     }
 
-    function averageColors(RGB[5] memory colors) public pure returns (RGB memory) {
+    function averageColors(RGB[4] memory colors) public pure returns (RGB memory) {
         uint r = 0;
         uint g = 0;
         uint b = 0;
@@ -336,8 +387,10 @@ contract Fossil {
         string memory octaves = generateOctaves(seed, isFractalNoise, frequencyInt);
         string memory scale = generateScale(seed, isFractalNoise, frequencyInt);
 
-        // RGB[5] memory colors = generateRandomColorPalette(seed);
-        RGB[5] memory colors = generateTriadicColors(seed);
+        // RG4[4] memory colors = generateRandomColorPalette(seed);
+        // RGB[4] memory colors = generateColorsNovelApproach(seed);
+        RGB[4] memory colors = generateTetradicColorPalette(seed);
+
         RGB memory averageColor = averageColors(colors);
         string memory feComponentTransfer = generateComponentTransfer(
             seed,
@@ -380,7 +433,7 @@ contract Fossil {
                   '<rect width="50" height="50" x="50" y="0" fill="', toString(colors[1]),'" />',
                   '<rect width="50" height="50" x="100" y="0" fill="', toString(colors[2]),'" />',
                   '<rect width="50" height="50" x="150" y="0" fill="', toString(colors[3]),'" />',
-                  '<rect width="50" height="50" x="200" y="0" fill="', toString(colors[4]),'" />',
+                  // '<rect width="50" height="50" x="200" y="0" fill="', toString(colors[4]),'" />',
                 '</svg>'
             );
     }
