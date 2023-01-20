@@ -368,13 +368,16 @@ contract Fossil {
     // }
 
     function generateTetradicColorPalette(uint seed) public view returns (RGB[] memory) {
+        seed = seed + 1;
         // generate a random color
-        uint lightnessDelta = 20; // The average delta between the lightness of each color
+        // uint lightnessDelta = 20; // The average delta between the lightness of each color
         HSL memory hsl = HSL(
             generateRandom(0, 360, seed),
-            generateRandom(100, 101, seed+1),
-            generateRandom(0, lightnessDelta-5, seed+2)
+            generateRandom(50, 100, seed+1),
+            generateRandom(25, 75, seed+2)
+            // generateRandom(0, lightnessDelta-5, seed+2)
         );
+        console.log('hsl', hsl.hue, hsl.saturation, hsl.lightness);
 
         // add it to the final output
         RGB[] memory colors = new RGB[](4);
@@ -385,10 +388,46 @@ contract Fossil {
         uint degrees = 360 / 4; // 90 degrees
         for (uint i=1; i < colors.length; i++) {
             hsl.hue = (hsl.hue + degrees) % 360;
+            hsl.saturation = generateRandom(50, 100, seed + i);
+            hsl.lightness = generateRandom(25, 100, seed + i + 1);
             // hsl.lightness = i * 20 + generateRandom(0, lightnessDelta, seed + i + 2);
+            console.log('hsl', hsl.hue, hsl.saturation, hsl.lightness);
             colors[i] = toColorRGB(hsl);
         }
 
+        return colors;
+    }
+
+    function generateTetradicAnalogousColorPalette(uint seed) public view returns (RGB[] memory) {
+        // generate a random base color
+        HSL memory hsl = HSL(
+            generateRandom(0, 360, seed),
+            generateRandom(100, 101, seed+1),
+            generateRandom(50, 51, seed+2)
+        );
+
+        // initialize the output
+        RGB[] memory colors = new RGB[](12); // 12 = 4 tetradic colors + 8 analogous colors (2 for each tetradic color)
+
+        // Generate the remaining three tetradic colors by rotating the hue,
+        // and for each tetradic color, generate two analogous colors
+        uint degrees = 360 / 4; // 90 degrees
+        uint analogousDegrees = 30;
+        for (uint i=0; i < colors.length; i++) {
+            // add the tetradic color
+            colors[i] = toColorRGB(hsl);
+
+            // add the analogous colors
+            colors[i+1] = toColorRGB(HSL(hsl.hue - analogousDegrees, hsl.saturation, hsl.lightness));
+            colors[i+2] = toColorRGB(HSL(hsl.hue + analogousDegrees, hsl.saturation, hsl.lightness));
+
+            // increment the hue
+            hsl.hue = (hsl.hue + degrees) % 360;
+            i += 2;
+        }
+
+        // Randomly select colors from the old array and add them to the new array
+        // create a new array half the size with half the colors randomly selected
         return colors;
     }
 
@@ -430,6 +469,30 @@ contract Fossil {
         return RGB(255 - color.r, 255 - color.g, 255 - color.b);
     }
 
+    function generateGradient(uint seed) public view returns (string memory) {
+        // generate a random number between 0 and 90 for the rotation
+        uint rotation = generateRandom(0, 90, seed);
+
+        // generate the stop elements. there should be 2 or 3 stops, with offsets
+        // starting at 0, and ending at 100 they should alternate between white and black
+        string memory stops;
+        uint numStops = generateRandom(2, 4, seed + 1);
+        for (uint i=0; i < numStops; i++) {
+            uint offset = i * 100 / (numStops - 1);
+            string memory color = i % 2 == 0 ? 'white' : 'black';
+            stops = string.concat(stops, '<stop offset="', offset.toString(), '%" stop-color="', color, '"/>');
+        }
+
+        return string.concat(
+            // prettier-ignore
+            '<linearGradient id="linearGradient14277" gradientTransform="rotate(',rotation.toString(),')" >',
+                stops,
+              // '<stop stop-color="black" offset="0" id="stop14273"/>',
+              // '<stop stop-color="white" offset="1" id="stop14275"/>',
+            '</linearGradient>'
+        );
+    }
+
     /* new */
     function generateSVG(uint seed) public view returns (string memory) {
         /* Filter parameters */
@@ -442,9 +505,12 @@ contract Fossil {
 
         // RG4[4] memory colors = generateRandomColorPalette(seed);
         // RGB[] memory colors = generateColorsNovelApproach(seed);
+
         RGB[] memory colors = generateTetradicColorPalette(seed);
+
         // RGB[] memory colors = generateAnalogousColorPalette(seed);
         // RGB[] memory colors = generateMonochromaticColorPalette(seed);
+        // RGB[] memory colors = generateTetradicAnalogousColorPalette(seed);
 
         RGB memory averageColor = averageColors(colors);
         string memory feComponentTransfer = generateComponentTransfer(
@@ -459,18 +525,13 @@ contract Fossil {
             string.concat(
                 '<svg width="500" height="500" viewBox="0 0 500 500" version="1.1" xmlns="http://www.w3.org/2000/svg">',
                   '<defs>',
-                    '<linearGradient id="linearGradient14277">',
-                      '<stop stop-color="black" offset="0" id="stop14273"/>',
-                      '<stop stop-color="white" offset="1" id="stop14275"/>',
-                    '</linearGradient>',
+                    // '<linearGradient id="linearGradient14277">',
+                    //   '<stop stop-color="black" offset="0" id="stop14273"/>',
+                    //   '<stop stop-color="white" offset="1" id="stop14275"/>',
+                    // '</linearGradient>',
+                    generateGradient(seed),
 
                     '<filter id="cracked-lava" color-interpolation-filters="sRGB">',
-                      // '<feFlood flood-color="rgb(152,152,152)" result="r15" />',
-                      // '<feFlood flood-color="#5A5A5A" result="r15" />',
-                      // '<feFlood flood-color="', toString(colors[0]),'" result="r15" />',
-                      // '<feFlood flood-color="', toString(generateRandomColor(seed)),'" result="r15" />',
-                      // '<feFlood flood-color="rgb(250,250,250)" result="r15" />',
-
                       '<feTurbulence baseFrequency="', frequency, '" type="', turbulenceType, '" numOctaves="', octaves,'" result="r1" in="SourceGraphic" />',
                       '<feDisplacementMap result="r5" xChannelSelector="R" in2="r1" in="r1" yChannelSelector="G" scale="', scale, '" />',
                       '<feComposite result="r2" operator="in" in="SourceGraphic" in2="r5" />',
