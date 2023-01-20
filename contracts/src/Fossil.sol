@@ -368,43 +368,26 @@ contract Fossil {
     // }
 
     function generateTetradicColorPalette(uint seed) public view returns (RGB[] memory) {
-        uint lightnessRangeStart = 0;
-        uint lightnessRangeEnd = 25;
-        // uint lightnessRangeStart = 50;
-        // uint lightnessRangeEnd = 51;
-        uint saturationRangeStart = 100;
-        uint saturationRangeEnd = 101;
-
         // generate a random color
+        uint lightnessDelta = 20; // The average delta between the lightness of each color
         HSL memory hsl = HSL(
             generateRandom(0, 360, seed),
-            generateRandom(saturationRangeStart, saturationRangeEnd, seed+1),
-            generateRandom(lightnessRangeStart, lightnessRangeEnd, seed+2)
+            generateRandom(100, 101, seed+1),
+            generateRandom(0, lightnessDelta-5, seed+2)
         );
-        console.log(hsl.hue, hsl.saturation, hsl.lightness, 'hsl');
+
+        // add it to the final output
+        RGB[] memory colors = new RGB[](4);
+        colors[0] = toColorRGB(hsl);
 
         // Generate the remaining three tetradic colors by rotating the hue,
-        // increasing the lightness, and random genrating random 
-        // uint lightnessRangeStart = 0;
-        // uint lightnessRangeEnd = 100;
-
-        RGB[] memory colors;
-        colors[0] = toColorRGB(hsl);
-        lightnessRangeStart += 25;
-        lightnessRangeEnd += 25;
-        colors[1] = toColorRGB(HSL((hsl.hue + 90) % 360, generateRandom(saturationRangeStart, saturationRangeEnd, seed+3), generateRandom(lightnessRangeStart, lightnessRangeEnd, seed+4)));
-        lightnessRangeStart += 25;
-        lightnessRangeEnd += 25;
-        colors[2] = toColorRGB(HSL((hsl.hue + 180) % 360, generateRandom(saturationRangeStart, saturationRangeEnd, seed+5), generateRandom(lightnessRangeStart, lightnessRangeEnd, seed+6)));
-        lightnessRangeStart += 25;
-        lightnessRangeEnd += 25;
-        colors[3] = toColorRGB(HSL((hsl.hue + 270) % 360, generateRandom(saturationRangeStart, saturationRangeEnd, seed+7), generateRandom(lightnessRangeStart, lightnessRangeEnd, seed+8)));
-
-        // Randomly reorder the colors
-        // uint random = generateRandom(0, 4, seed+9);
-        // RGB memory temp = colors[0];
-        // colors[0] = colors[random];
-        // colors[random] = temp;
+        // increasing the lightness
+        uint degrees = 360 / 4; // 90 degrees
+        for (uint i=1; i < colors.length; i++) {
+            hsl.hue = (hsl.hue + degrees) % 360;
+            // hsl.lightness = i * 20 + generateRandom(0, lightnessDelta, seed + i + 2);
+            colors[i] = toColorRGB(hsl);
+        }
 
         return colors;
     }
@@ -459,9 +442,9 @@ contract Fossil {
 
         // RG4[4] memory colors = generateRandomColorPalette(seed);
         // RGB[] memory colors = generateColorsNovelApproach(seed);
-        // RGB[] memory colors = generateTetradicColorPalette(seed);
+        RGB[] memory colors = generateTetradicColorPalette(seed);
         // RGB[] memory colors = generateAnalogousColorPalette(seed);
-        RGB[] memory colors = generateMonochromaticColorPalette(seed);
+        // RGB[] memory colors = generateMonochromaticColorPalette(seed);
 
         RGB memory averageColor = averageColors(colors);
         string memory feComponentTransfer = generateComponentTransfer(
