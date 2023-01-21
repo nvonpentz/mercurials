@@ -298,7 +298,7 @@ contract Fossil {
             );
     }
 
-    // Color pallete of all random colors
+    // Color palette of all random colors
     function generateBaseColorPalette(uint seed) public view returns (RGB[] memory) {
         uint j = 0;
         RGB[] memory colors;
@@ -574,16 +574,10 @@ contract Fossil {
         colorPool[4] = mix2;
 
         // Create final palette using the color pool
-        RGB[] memory palette = new RGB[](6);
-
-        // Add black and white to the edges of the palette
-        HSL memory black = HSL(0, 0, 0);
-        HSL memory white = HSL(0, 0, 100);
-        palette[0] = toColorRGB(black);
-        palette[5] = toColorRGB(white);
+        HSL[] memory palette = new HSL[](6);
 
         // Add base color to the palette
-        palette[1] = toColorRGB(base);
+        palette[1] = base;
 
         // Pick the remaining colors for the palette
         // by selecting a random element from the pool
@@ -601,13 +595,25 @@ contract Fossil {
             // 1/2 also use the complementary color of the mixed color
             if (seed % 2 == 0) {
                 HSL memory complementary = generateComplementaryColor(mixed);
-                palette[i] = toColorRGB(complementary);
+                palette[i] = complementary;
             } else {
-                palette[i] = toColorRGB(mixed);
+                palette[i] = mixed;
             }
         }
 
-        return palette;
+        // Add black and white to the edges of the palette
+        // HSL memory black = HSL(0, 0, 0);
+        // HSL memory white = HSL(0, 0, 100);
+        palette[0] = HSL(palette[1].hue, palette[1].saturation, 10);
+        palette[5] = HSL(palette[4].hue, palette[4].saturation, 90);
+
+        // Convert HSL colors to RGB
+        RGB[] memory rgbColors = new RGB[](palette.length);
+        for (uint i=0; i < palette.length; i++) {
+            rgbColors[i] = toColorRGB(palette[i]);
+        }
+
+        return rgbColors;
 }
 
 
@@ -714,7 +720,7 @@ contract Fossil {
 
         for (uint i=0; i < numStops; i++) {
             uint offset = i * 100 / (numStops - 1);
-            string memory color = i % 2 == 0 ? 'white' : 'black';
+            string memory color = i % 2 == 0 ? '#222' : '#ddd';
             stops = string.concat(stops, '<stop offset="', offset.toString(), '%" stop-color="', color, '"/>');
         }
 
@@ -760,10 +766,6 @@ contract Fossil {
             string.concat(
                 '<svg width="500" height="500" viewBox="0 0 500 500" version="1.1" xmlns="http://www.w3.org/2000/svg">',
                   '<defs>',
-                    // '<linearGradient id="linearGradient14277">',
-                    //   '<stop stop-color="black" offset="0" id="stop14273"/>',
-                    //   '<stop stop-color="white" offset="1" id="stop14275"/>',
-                    // '</linearGradient>',
                     generateGradient(seed),
 
                     '<filter id="cracked-lava" color-interpolation-filters="sRGB">',
