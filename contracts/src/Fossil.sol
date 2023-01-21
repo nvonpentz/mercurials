@@ -31,7 +31,7 @@ contract Fossil {
         return string(buffer);
     }
 
-    function generateRandom(uint min, uint max, uint seed) internal view returns (uint) {
+    function generateRandom(uint min, uint max, uint seed) public view returns (uint) {
         // safely generates a random uint between min and max using the seed
         require(max > min, "max must be greater than min");
         require(max != 0, "max must be greater than 0");
@@ -39,11 +39,20 @@ contract Fossil {
         return rand % (max - min) + min;
     }
 
-    function generateRandomColor(uint seed) internal view returns (RGB memory) {
-        // return string.concat('#', toHexStringNoPrefix(generateRandom(0, 16777215, seed), uint(3)));
-        return RGB(generateRandom(85, 170, seed),
-                generateRandom(85, 170, seed+1),
-                generateRandom(85, 170, seed+2));
+    function generateBaseColor(uint seed) internal view returns (HSL memory) {
+        // generates a random primary, secondary, or tertiary color
+        console.log("generating base color -->");
+        uint rand = generateRandom(0, 3 + 3 + 6, seed);
+        if (rand < 3) {
+            console.log("  primary");
+            return generatePrimaryColor(seed);
+        } else if (rand < 6) {
+            console.log("  secondary");
+            return generateSecondaryColor(seed);
+        } else {
+            console.log("  tertiary");
+            return generateTertiaryColor(seed);
+        }
     }
 
     function generateRandomGrayColor(uint seed) internal view returns (string memory) {
@@ -290,7 +299,7 @@ contract Fossil {
     }
 
     // Color pallete of all random colors
-    function generateRandomColorPalette(uint seed) public view returns (RGB[] memory) {
+    function generateBaseColorPalette(uint seed) public view returns (RGB[] memory) {
         uint j = 0;
         RGB[] memory colors;
         for (uint i=0; i < colors.length; i++) {
@@ -378,28 +387,74 @@ contract Fossil {
         return colors;
     }
 
-    // function generateAnalogousColors(HSL memory hsl) public view returns (HSL[2] memory) {
-    //     uint degrees = 15;
-    //     HSL[2] memory colors;
-    //     colors[0] = HSL(hsl.hue - degrees, hsl.saturation, hsl.lightness);
-    //     colors[1] = HSL(hsl.hue + degrees, hsl.saturation, hsl.lightness);
-    //     return colors;
-    // }
+    function generatePrimaryColor(uint seed) public view returns (HSL memory) {
+        uint random = generateRandom(0, 3, seed);
+        if (random == 0) {
+            return HSL(0, 100, 50); // red
+        } else if (random == 1) {
+            return HSL(60, 100, 50); // yellow
+        } else {
+            return HSL(240, 100, 50); // blue
+        }
+    }
+
+    // purple green orange
+    function generateSecondaryColor(uint seed) public view returns (HSL memory) {
+        uint random = generateRandom(0, 3, seed);
+        require(random != 3, 'random cannot be 0');
+        if (random == 0) {
+            return HSL(300, 100, 50); // purple
+        } else if (random == 1) {
+            return HSL(120, 100, 50); // green
+        } else {
+            return HSL(30, 100, 50); // orange
+        }
+    }
+
+    // Tertiary colors come from mixing one of the primary colors with one of the nearest secondary colors. Tertiary colors are found in between all of the primary colors and secondary colors.
+    // Red + Orange = Red-orange
+    // Yellow + Orange = Yellow-orange
+    // Yellow + Green = Yellow-green
+    // Blue + Green = Blue-green
+    // Blue + Purple = Blue-purple
+    // Red + Purple = Red-purple
+    function generateTertiaryColor(uint seed) public view returns (HSL memory) {
+        uint random = generateRandom(0, 6, seed);
+        if (random == 0) {
+            return HSL(15, 100, 50); // red-orange
+        } else if (random == 1) {
+            return HSL(45, 100, 50); // yellow-orange
+        } else if (random == 2) {
+            return HSL(75, 100, 50); // yellow-green
+        } else if (random == 3) {
+            return HSL(165, 100, 50); // blue-green
+        } else if (random == 4) {
+            return HSL(255, 100, 50); // blue-purple
+        } else {
+            return HSL(345, 100, 50); // red-purple
+        }
+    }
 
     function generateTetradicColorPalette(uint seed) public view returns (RGB[] memory) {
         seed = seed + 1;
+
+        uint satStart = generateRandom(20, 80, seed);
+        uint satEnd = generateRandom(satStart+1, 100, seed + 1);
+        uint lightStart = generateRandom(50, 80, seed + 2);
+        uint lightEnd = generateRandom(lightStart+1, 100, seed + 3);
+
         // generate a random color
-        // uint lightnessDelta = 20; // The average delta between the lightness of each color
         HSL memory hsl = HSL(
             generateRandom(0, 360, seed),
-            generateRandom(25, 75, seed+1),
-            generateRandom(40, 75, seed+2)
+            generateRandom(satStart, satEnd, seed+1), // 25 75
+            generateRandom(lightStart, lightEnd, seed+2)  // 40 75
             // generateRandom(0, lightnessDelta-5, seed+2)
         );
 
         HSL memory darkHsl = HSL({
             hue: hsl.hue,
             saturation: hsl.saturation,
+            // lightness: generateRandom(0, 15, seed+3)
             lightness: generateRandom(0, 15, seed+3)
         });
 
@@ -413,8 +468,8 @@ contract Fossil {
         uint degrees = 360 / 4; // 90 degrees
         for (uint i=2; i < colors.length; i++) {
             hsl.hue = (hsl.hue + degrees) % 360;
-            hsl.saturation = generateRandom(20, 80, seed + i);
-            hsl.lightness = generateRandom(40, 80, seed + i + 1);
+            hsl.saturation = generateRandom(satStart, satEnd, seed + i);
+            hsl.lightness = generateRandom(lightStart, lightEnd, seed + i + 1);
             // hsl.lightness = i * 20 + generateRandom(0, lightnessDelta, seed + i + 2);
             console.log('hsl', hsl.hue, hsl.saturation, hsl.lightness);
             colors[i] = toColorRGB(hsl);
@@ -429,28 +484,144 @@ contract Fossil {
         return colors;
     }
 
-    // function generateTetradicColorPalette(uint seed) public view returns (RGB[4] memory) {
-    //     // generate a random color
-    //     HSL memory hsl = HSL(
-    //         generateRandom(0, 360, seed),
-    //         generateRandom(25, 75, seed+1),
-    //         generateRandom(25, 75, seed+2)
-    //     );
+    function generateAnalogousColors(HSL memory color) public view returns (HSL memory, HSL memory) {
+        uint degrees = 30;
+        // generate left and right safely such that we don't risk integer underflow
+        HSL memory left = HSL({
+            hue: color.hue >= degrees ? color.hue - degrees : 360 - (degrees - color.hue),
+            // hue: color.hue - degrees,
+            saturation: color.saturation,
+            lightness: color.lightness
+        });
+        HSL memory right = HSL({
+            hue: (color.hue + degrees) % 360,
+            // hue: color.hue + degrees,
+            saturation: color.saturation,
+            lightness: color.lightness
+        });
+        return (left, right);
+    }
 
-    //     // Generate the remaining three tetradic colors by rotating the hue
-    //     // and generating random saturation and lightness
-    //     uint saturationRangeStart = 0;
-    //     uint saturationRangeEnd = 100;
-    //     uint lightnessRangeStart = 0;
-    //     uint lightnessRangeEnd = 100;
-    //     RGB[4] memory colors;
-    //     colors[0] = toColorRGB(hsl);
-    //     colors[1] = toColorRGB(HSL((hsl.hue + 90) % 360, generateRandom(saturationRangeStart, saturationRangeEnd, seed+3), generateRandom(lightnessRangeStart, lightnessRangeEnd, seed+4)));
-    //     colors[2] = toColorRGB(HSL((hsl.hue + 180) % 360, generateRandom(saturationRangeStart, saturationRangeEnd, seed+5), generateRandom(lightnessRangeStart, lightnessRangeEnd, seed+6)));
-    //     colors[3] = toColorRGB(HSL((hsl.hue + 270) % 360, generateRandom(saturationRangeStart, saturationRangeEnd, seed+7), generateRandom(lightnessRangeStart, lightnessRangeEnd, seed+8)));
+    function generateTriadicColors(HSL memory color) public view returns (HSL memory, HSL memory) {
+        uint degrees = 120;
+        // generate left and right safely such that we don't risk integer underflow
+        HSL memory left = HSL({
+            // hue: color.hue - degrees, // <-- risks integer underflow
+            hue: (color.hue + 360 - degrees) % 360,
+            saturation: color.saturation,
+            lightness: color.lightness
+        });
+        HSL memory right = HSL({
+            hue: (color.hue + degrees) % 360,
+            saturation: color.saturation,
+            lightness: color.lightness
+        });
+        return (left, right);
+    }
 
-    //     return colors;
-    // }
+    function generateComplementaryColor(HSL memory color) public view returns (HSL memory) {
+        uint degrees = 180;
+        HSL memory color = HSL({
+            hue: (color.hue + degrees) % 360,
+            saturation: color.saturation,
+            lightness: color.lightness
+        });
+
+        return color;
+    }
+
+    function mixColors(HSL memory color1, HSL memory color2) public view returns (HSL memory) {
+        HSL memory color = HSL({
+            hue: (color1.hue + color2.hue) / 2,
+            saturation: (color1.saturation + color2.saturation) / 2,
+            lightness: (color1.lightness + color2.lightness) / 2
+        });
+
+        return color;
+    }
+
+    function generatePalette(uint seed) public view returns (RGB[] memory) {
+        HSL[] memory hslColors = new HSL[](9);
+
+        // Gray (utility color)
+        HSL memory gray = HSL(0, 0, 50);
+
+        // Black (edge color)
+        HSL memory black = HSL(0, 0, 0);
+
+        // Base color
+        HSL memory base = generateBaseColor(seed);
+
+        // Secondary colors (2) 
+        HSL memory second1;
+        HSL memory second2;
+        console.log("generating second two colors -->");
+        if (seed % 2 == 0) {
+            console.log("  splitcomplementary");
+            HSL memory complementary = generateComplementaryColor(base);
+            (second1, second2) = generateAnalogousColors(complementary);
+        } else {
+            console.log("  triadic");
+            (second1, second2) = generateTriadicColors(base);
+        }
+
+        // White (edge color)
+        HSL memory white = HSL(0, 0, 100);
+
+        // Create intermediate colors by mixing 
+        HSL memory mix1 = mixColors(black, base);
+        HSL memory mix2 = mixColors(base, second1);
+        HSL memory mix3 = mixColors(second1, second2);
+        HSL memory mix4 = mixColors(second2, white);
+
+
+        // Add the colors to the array
+        hslColors[0] = black;
+        hslColors[1] = mix1;
+        hslColors[2] = base;
+        hslColors[3] = mix2;
+        hslColors[4] = second1;
+        hslColors[5] = mix3;
+        hslColors[6] = second2;
+        hslColors[7] = mix4;
+        hslColors[8] = white;
+
+        // mix every color with gray
+        // for (uint i=0; i < hslColors.length; i++) {
+        //     hslColors[i] = mixColors(hslColors[i], gray);
+        //     console.log(i, 'hsl:');
+        //     console.log(hslColors[i].hue, hslColors[i].saturation, hslColors[i].lightness);
+        //     // hslColors[i] = mixColors(hslColors[i], white);
+        //     // hslColors[i] = mixColors(hslColors[i], black);
+        // }
+
+        RGB[] memory colors = new RGB[](5);
+
+        // take a random subset of hsl colors (preserving the order), convert to RGB, and add
+        // to the colors
+        uint[] memory indices = generateRandomMonotonicSubset(5, 9, seed);
+        for (uint i=0; i < indices.length; i++) {
+            colors[i] = toColorRGB(hslColors[indices[i]]);
+        }
+
+        return colors;
+    }
+
+    function generateRandomMonotonicSubset(uint size, uint max, uint seed) public view returns (uint[] memory) {
+        // generate a random subset of size `size` from the set {0, 1, ..., max-1}
+        // the subset is guaranteed to be monotonic (i.e. increasing)
+        uint[] memory subset = new uint[](size);
+        uint[] memory indices = new uint[](max);
+        for (uint i=0; i < max; i++) {
+            indices[i] = i;
+        }
+        for (uint i=0; i < size; i++) {
+            uint index = generateRandom(i, max, seed+i);
+            subset[i] = indices[index];
+            indices[index] = indices[i];
+        }
+        return subset;
+    }
 
     function generateTetradicAnalogousColorPalette(uint seed) public view returns (RGB[] memory) {
         // generate a random base color
@@ -545,7 +716,7 @@ contract Fossil {
 
         return string.concat(
             // prettier-ignore
-            '<linearGradient id="linearGradient14277" gradientTransform="rotate(',rotation.toString(),')" >',
+            '<linearGradient id="linearGradient14277" gradientTransform="rotate(',rotation.toString(),')" gradientUnits="userSpaceOnUse">',
                 stops,
               // '<stop stop-color="black" offset="0" id="stop14273"/>',
               // '<stop stop-color="white" offset="1" id="stop14275"/>',
@@ -565,16 +736,14 @@ contract Fossil {
 
         // RG4[4] memory colors = generateRandomColorPalette(seed);
         // RGB[] memory colors = generateColorsNovelApproach(seed);
-
-        RGB[] memory colors = generateTetradicColorPalette(seed);
-
+        // RGB[] memory colors = generateTetradicColorPalette(seed);
         // RGB[] memory colors = generateAnalogousColorPalette(seed);
-
         // RGB[] memory colors = generateMonochromaticColorPalette(seed);
-
         // RGB[] memory colors = generateTetradicAnalogousColorPalette(seed);
 
-        RGB memory averageColor = averageColors(colors);
+        RGB[] memory colors = generatePalette(seed);
+
+        // RGB memory averageColor = averageColors(colors);
         string memory feComponentTransfer = generateComponentTransfer(
             seed,
             colors
@@ -605,7 +774,6 @@ contract Fossil {
 
                       '<feFlood result="result1" flood-color="', toString(colors[0]),'" />',
                       // '<feFlood result="result1" flood-color="', toString(complementaryColor(averageColor)),'" />',
-                      // '<feFlood result="result1" flood-color="', ," />',
                       // '<feFlood result="result1" flood-color="white" />',
                       '<feBlend mode="normal" in="rct" in2="result1" />',
                     '</filter>',
