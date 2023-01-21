@@ -574,7 +574,6 @@ contract Fossil {
         HSL memory mix3 = mixColors(second1, second2);
         HSL memory mix4 = mixColors(second2, white);
 
-
         // Add the colors to the array
         hslColors[0] = black;
         hslColors[1] = mix1;
@@ -595,33 +594,30 @@ contract Fossil {
         //     // hslColors[i] = mixColors(hslColors[i], black);
         // }
 
-        RGB[] memory colors = new RGB[](5);
-
-        // take a random subset of hsl colors (preserving the order), convert to RGB, and add
-        // to the colors
-        uint[] memory indices = generateRandomMonotonicSubset(5, 9, seed);
-        for (uint i=0; i < indices.length; i++) {
-            colors[i] = toColorRGB(hslColors[indices[i]]);
+        // Convert to RGB
+        RGB[] memory colors = new RGB[](hslColors.length);
+        for (uint i=0; i < hslColors.length; i++) {
+            colors[i] = toColorRGB(hslColors[i]);
         }
 
         return colors;
     }
 
-    function generateRandomMonotonicSubset(uint size, uint max, uint seed) public view returns (uint[] memory) {
-        // generate a random subset of size `size` from the set {0, 1, ..., max-1}
-        // the subset is guaranteed to be monotonic (i.e. increasing)
-        uint[] memory subset = new uint[](size);
-        uint[] memory indices = new uint[](max);
-        for (uint i=0; i < max; i++) {
-            indices[i] = i;
-        }
-        for (uint i=0; i < size; i++) {
-            uint index = generateRandom(i, max, seed+i);
-            subset[i] = indices[index];
-            indices[index] = indices[i];
-        }
-        return subset;
-    }
+    // function generateRandomMonotonicSubset(uint size, uint max, uint seed) public view returns (uint[] memory) {
+    //     // generate a random subset of size `size` from the set {0, 1, ..., max-1}
+    //     // the subset is guaranteed to be monotonic (i.e. increasing)
+    //     uint[] memory subset = new uint[](size);
+    //     uint[] memory indices = new uint[](max);
+    //     for (uint i=0; i < max; i++) {
+    //         indices[i] = i;
+    //     }
+    //     for (uint i=0; i < size; i++) {
+    //         uint index = generateRandom(i, max, seed+i);
+    //         subset[i] = indices[index];
+    //         indices[index] = indices[i];
+    //     }
+    //     return subset;
+    // }
 
     function generateTetradicAnalogousColorPalette(uint seed) public view returns (RGB[] memory) {
         // generate a random base color
