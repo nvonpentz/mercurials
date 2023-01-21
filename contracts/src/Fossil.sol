@@ -541,18 +541,12 @@ contract Fossil {
     }
 
     function generatePalette(uint seed) public view returns (RGB[] memory) {
+        // Generate a base color
+        HSL memory base = generateBaseColor(seed);
         HSL[] memory hslColors = new HSL[](9);
 
-        // Gray (utility color)
-        HSL memory gray = HSL(0, 0, 50);
-
-        // Black (edge color)
-        HSL memory black = HSL(0, 0, 0);
-
-        // Base color
-        HSL memory base = generateBaseColor(seed);
-
-        // Secondary colors (2) 
+        // Then two secondary colors, either split-complements or triadic
+        // with base
         HSL memory second1;
         HSL memory second2;
         console.log("generating second two colors -->");
@@ -565,43 +559,57 @@ contract Fossil {
             (second1, second2) = generateTriadicColors(base);
         }
 
-        // White (edge color)
+        // Create a color pool to randomly select from when creating the final
+        // set later
+        HSL[] memory colorPool = new HSL[](5);
+        colorPool[0] = base;
+        colorPool[1] = second1;
+        colorPool[2] = second2;
+
+        // Create mix colors with base and secondary colors
+        // and add to the pool
+        HSL memory mix1 = mixColors(base, second1);
+        HSL memory mix2 = mixColors(base, second2);
+        colorPool[3] = mix1;
+        colorPool[4] = mix2;
+
+        // Create final palette using the color pool
+        RGB[] memory palette = new RGB[](6);
+
+        // Add black and white to the edges of the palette
+        HSL memory black = HSL(0, 0, 0);
         HSL memory white = HSL(0, 0, 100);
+        palette[0] = toColorRGB(black);
+        palette[5] = toColorRGB(white);
 
-        // Create intermediate colors by mixing 
-        HSL memory mix1 = mixColors(black, base);
-        HSL memory mix2 = mixColors(base, second1);
-        HSL memory mix3 = mixColors(second1, second2);
-        HSL memory mix4 = mixColors(second2, white);
+        // Add base color to the palette
+        palette[1] = toColorRGB(base);
 
-        // Add the colors to the array
-        hslColors[0] = black;
-        hslColors[1] = mix1;
-        hslColors[2] = base;
-        hslColors[3] = mix2;
-        hslColors[4] = second1;
-        hslColors[5] = mix3;
-        hslColors[6] = second2;
-        hslColors[7] = mix4;
-        hslColors[8] = white;
+        // Pick the remaining colors for the palette
+        // by selecting a random element from the pool
+        // and mixing it with a random gray color
+        for (uint i=2; i < palette.length-1; i++) {
+            uint randomIndex = generateRandom(0, colorPool.length-1, seed + i);
+            HSL memory randomColor = colorPool[randomIndex];
+            HSL memory gray = HSL({
+                hue: 0,
+                saturation: 0,
+                lightness: generateRandom(0, 100, seed + i + 1)
+            });
+            HSL memory mixed = mixColors(randomColor, gray);
 
-        // mix every color with gray
-        // for (uint i=0; i < hslColors.length; i++) {
-        //     hslColors[i] = mixColors(hslColors[i], gray);
-        //     console.log(i, 'hsl:');
-        //     console.log(hslColors[i].hue, hslColors[i].saturation, hslColors[i].lightness);
-        //     // hslColors[i] = mixColors(hslColors[i], white);
-        //     // hslColors[i] = mixColors(hslColors[i], black);
-        // }
-
-        // Convert to RGB
-        RGB[] memory colors = new RGB[](hslColors.length);
-        for (uint i=0; i < hslColors.length; i++) {
-            colors[i] = toColorRGB(hslColors[i]);
+            // 1/2 also use the complementary color of the mixed color
+            if (seed % 2 == 0) {
+                HSL memory complementary = generateComplementaryColor(mixed);
+                palette[i] = toColorRGB(complementary);
+            } else {
+                palette[i] = toColorRGB(mixed);
+            }
         }
 
-        return colors;
-    }
+        return palette;
+}
+
 
     // function generateRandomMonotonicSubset(uint size, uint max, uint seed) public view returns (uint[] memory) {
     //     // generate a random subset of size `size` from the set {0, 1, ..., max-1}
