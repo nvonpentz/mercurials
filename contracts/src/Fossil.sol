@@ -613,6 +613,14 @@ contract Fossil {
             rgbColors[i] = toColorRGB(palette[i]);
         }
 
+        // randomize the colors
+        for (uint i=0; i < rgbColors.length; i++) {
+            uint randomIndex = generateRandom(0, rgbColors.length-1, seed + i);
+            RGB memory temp = rgbColors[i];
+            rgbColors[i] = rgbColors[randomIndex];
+            rgbColors[randomIndex] = temp;
+        }
+
         return rgbColors;
 }
 
@@ -714,7 +722,6 @@ contract Fossil {
 
         // uint numStops = generateRandom(2, 4, seed + 1);
         // uint numStops = (seed % 2 == 0) || (seed % 3 == 0) ? 2 : 3;
-
         // uint numStops = (seed % 2 == 0) || (seed % 3 == 0) ? 2 : 3;
         uint numStops = 2;
 
