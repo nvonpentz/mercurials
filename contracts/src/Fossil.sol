@@ -41,16 +41,16 @@ contract Fossil {
 
     function generateBaseColor(uint seed) internal view returns (HSL memory) {
         // generates a random primary, secondary, or tertiary color
-        console.log("generating base color -->");
+        // console.log("generating base color -->");
         uint rand = generateRandom(0, 3 + 3 + 6, seed);
         if (rand < 3) {
-            console.log("  primary");
+            // console.log("  primary");
             return generatePrimaryColor(seed);
         } else if (rand < 6) {
-            console.log("  secondary");
+            // console.log("  secondary");
             return generateSecondaryColor(seed);
         } else {
-            console.log("  tertiary");
+            // console.log("  tertiary");
             return generateTertiaryColor(seed);
         }
     }
@@ -66,7 +66,7 @@ contract Fossil {
         if (isFractalNoise) {
             // Fractal noise
             // xVal = generateRandom(20, 150, tokenId);
-            xVal = generateRandom(40, 85, tokenId);
+            xVal = generateRandom(15, 80, tokenId);
         } else {
             // Turbulent noise
             // xVal = generateRandom(1, 60, tokenId);
@@ -110,7 +110,7 @@ contract Fossil {
     }
 
     function generateScale(uint tokenId, bool isFractalNoise) public view returns (string memory) {
-        return generateRandom(50, 100, tokenId).toString();
+        return generateRandom(0, 101, tokenId).toString();
         // return "99";
         if (isFractalNoise) {
             return generateRandom(0, 100, tokenId).toString();
@@ -744,7 +744,7 @@ contract Fossil {
     /* new */
     function generateSVG(uint seed) public view returns (string memory) {
         /* Filter parameters */
-        bool isFractalNoise = true;
+        bool isFractalNoise = seed % 2 == 0;
         string memory turbulenceType = isFractalNoise ? "fractalNoise" : "turbulence";
         // string memory turbulenceType = "turbulence";
         string memory frequency = generateFrequency(seed, isFractalNoise);
@@ -785,10 +785,11 @@ contract Fossil {
                       feComponentTransfer,
                       // '<feFlood result="result1" flood-color="', generateRandomColor(seed),'" />',
 
-                      '<feFlood result="result1" flood-color="', toString(colors[0]),'" />',
+                      // '<feFlood result="result1" flood-color="', toString(colors[0]),'" />',
                       // '<feFlood result="result1" flood-color="', toString(complementaryColor(averageColor)),'" />',
                       // '<feFlood result="result1" flood-color="white" />',
-                      '<feBlend mode="normal" in="rct" in2="result1" />',
+
+                      '<feBlend mode="normal" in="rct" in2="r2" />',
                     '</filter>',
                   '</defs>',
                   '<rect width="500" height="500" fill="url(#linearGradient14277)" filter="url(#cracked-lava)" style="filter:url(#cracked-lava)" />',
