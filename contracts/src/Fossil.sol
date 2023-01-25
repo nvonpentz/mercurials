@@ -396,7 +396,13 @@ contract Fossil {
         uint numStops = 2;
         for (uint i=0; i < numStops; i++) {
             uint offset = i * 100 / (numStops - 1);
-            string memory color = i % 2 == 0 ? '#222' : '#ddd';
+            // string memory color = i % 2 == 0 ? '#222' : '#ddd';
+            // generate random color from totally black to halfway gray if i is even
+            // otherwise generate random color from halfway gray to totally white
+            uint lightness = i % 2 == 0
+                ? generateRandom(0, 50, seed + i)
+                : generateRandom(50, 100, seed + i);
+            string memory color = toString(toColorRGB(HSL(0, 0, lightness)));
             stops = string.concat(stops, '<stop offset="', offset.toString(), '%" stop-color="', color, '"/>');
         }
 
