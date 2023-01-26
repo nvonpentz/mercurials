@@ -51,26 +51,44 @@ contract Fossil {
         }
     }
 
+    function generateChannelSelector(uint seed) internal view returns (string memory) {
+        // generates a random channel selector or empty string
+        uint rand = generateRandom(0, 4, seed);
+        if (rand == 0) {
+            return "";
+        } else if (rand == 1) {
+            return "R";
+        } else if (rand == 2) {
+            return "G";
+        } else {
+            return "B";
+        }
+    }
+
     function generateFrequency(
         uint seed,
         bool isFractalNoise,
         uint octaves
-    ) public view returns (string memory) {
+    ) public view returns (string memory, uint frequency) {
         uint frequencyUint;
         if (isFractalNoise) {
             // Fractal noise
             if (octaves == 1) {
-                console.log('octaves is 1');
-                frequencyUint = generateRandom(40, 100, seed);
-            } else {
-                frequencyUint = generateRandom(20, 80, seed);
+                frequencyUint = generateRandom(30, 100, seed);
+            } else if (octaves == 2 || octaves == 3) {
+                frequencyUint = generateRandom(20, 90, seed);
+            } else if (octaves >= 4) {
+                frequencyUint = generateRandom(10, 70, seed);
             }
+
+
         } else {
             // Turbulent noise
             // frequencyUint = generateRandom(1, 60, seed);
-            frequencyUint = generateRandom(15, 60, seed);
+            frequencyUint = generateRandom(10, 40, seed);
         }
 
+        // convert to string
         string memory frequency; 
         if (frequencyUint >= 100) {
              frequency = string.concat('0.', frequencyUint.toString()); // E.g. 0.200
@@ -80,61 +98,46 @@ contract Fossil {
             frequency = string.concat('0.00', frequencyUint.toString()); // E.g. 0.002
         }
 
-        return frequency;
+        return (frequency, frequencyUint);
     }
 
     function generateSurfaceScale(uint seed, bool isFractalNoise) public view returns (string memory) {
-        return '-5';
-        // generate a string which is a number between -1 and -5 if isFractalNoise is false
-        // otherwise returns -5
-        // uint surfaceScaleUint;
         // if (isFractalNoise) {
-        //     surfaceScaleUint = 5;
+        // // return '-5';
+        //     return '1';
         // } else {
-        //     surfaceScaleUint = generateRandom(1, 5, seed);
+        //     // return '-5';
         // }
-        // // convert to string representation
-        // string memory surfaceScale = string.concat('-', surfaceScaleUint.toString());
-        // return surfaceScale;
+
+        return '-5';
     }
 
     function generateOctaves(uint seed, bool isFractalNoise) public view returns (string memory, uint) {
-        // if (isFractalNoise) {
-        //     // Fractal noise
-        //     uint octavesUint = generateRandom(1, 5, seed);
-        //     string memory octaves = octavesUint.toString();
-        //     return octaves;
-        // } else {
-        //     // Turbulent noise
-        //     return '1';
-        // }
-        return ('1', 1);
-        uint octavesUint = generateRandom(3, 5, seed);
-        return (octavesUint.toString(), octavesUint);
+        uint octaves;
+        if (isFractalNoise) {
+            octaves = generateRandom(1, 6, seed);
+        } else {
+            // octaves = generateRandom(1, 3, seed);
+            octaves = 1;
+        }
+        return (octaves.toString(), octaves);
     }
 
-    function generateScale(uint seed, bool isFractalNoise) public view returns (string memory) {
-        return generateRandom(20, 80, seed).toString();
+    function generateScale(
+        uint seed,
+        bool isFractalNoise,
+        uint frequency,
+        uint octaves
+    ) public view returns (string memory) {
+        uint lower = 20;
+        uint upper = 100;
+        if (isFractalNoise && octaves <= 2 && frequency <= 50) {
+            lower = 60;
+        } else {
+            upper = 80;
+        }
+        return generateRandom(lower, upper, seed).toString();
     }
-
-    // function generateSpecularLighting(uint seed, bool isFractalNoise) public view returns (string memory) {
-    //     // string memory surfaceScale = string.concat('-', generateRandom(2, 4, seed).toString()); // Was -3.10131121
-    //     string memory surfaceScale = '-5';
-
-    //     // Perhaps we limit the specular lighting for HSL color generation techniques.
-    //     // originall (probably should be 0, 99)
-    //     // string memory specularConstant = string.concat('1.', generateRandom(25, 99, seed).toString()); // Was 2.13708425
-    //     string memory specularConstant = '1';
-    //     return
-    //         // prettier-ignore
-    //         string.concat(
-    //           '<feSpecularLighting lighting-color="#ffffff" surfaceScale="', surfaceScale,'" result="r4" specularConstant="', specularConstant,'" specularExponent="1" in="r2">',
-    //             '<feDistantLight elevation="0" azimuth="0">',
-    //                 // '<animate attributeName="azimuth" values="0;360" dur="10s" repeatCount="indefinite"/>',
-    //             '</feDistantLight>',
-    //           '</feSpecularLighting>'
-    //         );
-    // }
 
     struct RGB {
         uint r; // Value between 0 and 255
@@ -184,6 +187,10 @@ contract Fossil {
 
     function toString(RGB memory rgb) internal pure returns (string memory) {
         return string.concat('rgb(', rgb.r.toString(), ', ', rgb.g.toString(), ', ', rgb.b.toString(), ')');
+    }
+
+    function toString(HSL memory hsl) internal pure returns (string memory) {
+        return string.concat('hsl(', hsl.hue.toString(), ', ', hsl.saturation.toString(), '%, ', hsl.lightness.toString(), '%)');
     }
 
     function divideAndFormat(uint input, uint divisor, uint decimalPlaces) public view returns (string memory) {
@@ -332,200 +339,42 @@ contract Fossil {
         return color;
     }
 
-    function generatePalette(uint seed) public view returns (RGB[] memory) {
-        // Generate a base color
-        HSL memory base = generateBaseColor(seed);
-        HSL[] memory hslColors = new HSL[](9);
-
-        // Then two secondary colors, either split-complements or triadic
-        // with base
-        HSL memory second1;
-        HSL memory second2;
-        console.log("generating second two colors -->");
-        if (seed % 2 == 0) {
-            console.log("  splitcomplementary");
-            HSL memory complementary = generateComplementaryColor(base);
-            (second1, second2) = generateAnalogousColors(complementary);
-        } else {
-            console.log("  triadic");
-            (second1, second2) = generateTriadicColors(base);
-        }
-
-        // Create a color pool to randomly select from when creating the final
-        // set later
-        HSL[] memory colorPool = new HSL[](5);
-        colorPool[0] = base;
-        colorPool[1] = second1;
-        colorPool[2] = second2;
-
-        // Create mix colors with base and secondary colors
-        // and add to the pool
-        HSL memory mix1 = mixColors(base, second1);
-        HSL memory mix2 = mixColors(base, second2);
-        colorPool[3] = mix1;
-        colorPool[4] = mix2;
-
-        // Create final palette using the color pool
-        HSL[] memory palette = new HSL[](6);
-
-        // Add base color to the palette
-        palette[1] = base;
-
-        // Pick the remaining colors for the palette
-        // by selecting a random element from the pool
-        // and mixing it with a random gray color
-        for (uint i=2; i < palette.length-1; i++) {
-            uint randomIndex = generateRandom(0, colorPool.length-1, seed + i);
-            HSL memory randomColor = colorPool[randomIndex];
-            HSL memory gray = HSL({
-                hue: 0,
-                saturation: 0,
-                lightness: generateRandom(0, 100, seed + i + 1)
-            });
-            HSL memory mixed = mixColors(randomColor, gray);
-
-            // 1/2 also use the complementary color of the mixed color
-            if (seed % 2 == 0) {
-                HSL memory complementary = generateComplementaryColor(mixed);
-                palette[i] = complementary;
-            } else {
-                palette[i] = mixed;
-            }
-        }
-
-        // Add black and white to the edges of the palette
-        // HSL memory black = HSL(0, 0, 0);
-        // HSL memory white = HSL(0, 0, 100);
-        palette[0] = HSL(palette[1].hue, palette[1].saturation, 10);
-        palette[5] = HSL(palette[4].hue, palette[4].saturation, 90);
-
-        // Convert HSL colors to RGB
-        RGB[] memory rgbColors = new RGB[](palette.length);
-        for (uint i=0; i < palette.length; i++) {
-            rgbColors[i] = toColorRGB(palette[i]);
-        }
-
-        // randomize the colors
-        for (uint i=0; i < rgbColors.length; i++) {
-            uint randomIndex = generateRandom(0, rgbColors.length-1, seed + i);
-            RGB memory temp = rgbColors[i];
-            rgbColors[i] = rgbColors[randomIndex];
-            rgbColors[randomIndex] = temp;
-        }
-
-        return rgbColors;
-    }
-
     function generatePalette2(uint seed) public view returns (RGB[] memory) {
         // generate a random hue value
         uint hue = generateRandom(0, 361, seed);
         uint colorsLength = 6;
         // RGB[] memory colors = new RGB[](colorsLength-1);
         RGB[] memory colors = new RGB[](colorsLength-1);
+        HSL[] memory colorsHsl = new HSL[](colorsLength-1);
 
-        // if ((seed % 10) < 5) {
         uint lightnessDelta = 100 / colorsLength;
-        console.log("lightnessDelta: %s", lightnessDelta);
         uint lightness = 0;
-        // uint lightness = 0;
-        console.log("initial lightness: %s", lightness);
-
         // generate random saturation
         uint saturation = generateRandom(20, 100, seed);
-        console.log("saturation: %s", saturation);
         for (uint i=0; i < colors.length; i++) {
-            console.log(i, "hue: %s", hue);
-            // generate a hue within 90 degrees of the previous hue
-            uint delta = generateRandom(0, 91, seed + i);
-            console.log("  delta: %s", delta);
+            // generate a hue within 121 degrees of the previous hue
+            uint delta = generateRandom(0, 121, seed + i);
             if (generateRandom(0, 2, seed + i) % 2 == 0) {
-                console.log(" even");
                 hue = hue + delta;
             } else if (delta > hue) {
-                console.log(" odd, delta > hue");
                 uint diff = delta - hue;
                 hue = 360 - diff;
             } else {
-                console.log(" odd, delta < hue");
                 hue = hue - delta;
             }
-
-            console.log(" hue after: %s", hue);
             hue = hue % 361;
+
+            // override hue for the last color and set to 180 from the first
+            if (i == colors.length-1) {
+                hue = (colorsHsl[0].hue + 180) % 360;
+            }
+
             lightness += lightnessDelta;
-
+            colorsHsl[i] = HSL(hue, saturation, lightness);
             colors[i] = toColorRGB(HSL(hue, saturation, lightness));
-            // colors[i] = toColorRGB(HSL(hue, 100, lightness));
-            // console.log(i, "lightness: %s", lightness);
         }
+
         return colors;
-
-        // reverse
-        // RGB[] memory reversed = new RGB[](6);
-        // for (uint i=0; i < colors.length; i++) {
-        //     reversed[i] = colors[colors.length - i - 1];
-        // }
-        // return reversed;
-
-        // return colors;
-
-        // generate three monochromatic colors
-        // HSL[] memory colorsHsl = new HSL[](6);
-        // colorsHsl[0] = HSL(0, 0, 100);
-        // colorsHsl[1] = HSL({
-        //     hue: generateRandom(0, 360, seed),
-        //     saturation: 100,
-        //     lightness: 25
-        // });
-        // colorsHsl[2] = HSL({
-        //     hue: generateRandom(0, 360, seed),
-        //     saturation: 100,
-        //     lightness: 50
-        // });
-        // colorsHsl[3] = HSL({
-        //     hue: generateRandom(0, 360, seed),
-        //     saturation: 100,
-        //     lightness: 75
-        // });
-
-        // // add black
-        // colorsHsl[4] = HSL(0, 0, 0);
-
-        // // last color is a complement
-        // colorsHsl[4] = HSL({
-        //     hue: (colorsHsl[0].hue + 180) % 360,
-        //     saturation: 100,
-        //     lightness: 75
-        // });
-
-        // // Convert colorsHsl to RGB
-        // RGB[] memory colorsRgb = new RGB[](colorsHsl.length);
-        // for (uint i=0; i < colorsHsl.length; i++) {
-        //     colorsRgb[i] = toColorRGB(colorsHsl[i]);
-        // }
-
-        // randomize the colors
-        // for (uint i=0; i < colorsRgb.length; i++) {
-        //     uint randomIndex = generateRandom(0, colorsRgb.length-1, seed + i);
-        //     RGB memory temp = colorsRgb[i];
-        //     colorsRgb[i] = colorsRgb[randomIndex];
-        //     colorsRgb[randomIndex] = temp;
-        // }
-        // return colorsRgb;
-        
-        // seed = seed + seed % 100;
-        // // Generate 4 totall random colors
-        // RGB[] memory colors = new RGB[](4);
-        // for (uint i=0; i < colors.length; i++) {
-        //     colors[i] = RGB({
-        //         r: generateRandom(0, 255, seed + i),
-        //         g: generateRandom(0, 255, seed + i + 1),
-        //         b: generateRandom(0, 255, seed + i + 2)
-        //     });
-        //     console.log("  color %s: %s", i, toString(colors[i]));
-        // }
-
-        // return colors;
     }
 
     function complementaryColor(RGB memory color) public pure returns (RGB memory) {
@@ -536,37 +385,44 @@ contract Fossil {
     function generateSVG(uint seed) public view returns (string memory) {
         /* Filter parameters */
         // bool isFractalNoise = seed % 2 == 0;
-        bool isFractalNoise = true;
+        bool isFractalNoise = false;
         string memory turbulenceType = isFractalNoise ? "fractalNoise" : "turbulence";
         // string memory turbulenceType = "turbulence";
         (string memory octaves, uint octavesUint) = generateOctaves(seed, isFractalNoise);
-        string memory frequency = generateFrequency(seed, isFractalNoise, octavesUint);
-        string memory scale = generateScale(seed, isFractalNoise);
+        (string memory frequency, uint frequencyUint) = generateFrequency(seed, isFractalNoise, octavesUint);
+        string memory scale = generateScale(seed, isFractalNoise, frequencyUint, octavesUint);
         // RGB[] memory colors = generatePalette(seed);
         RGB[] memory colors = generatePalette2(seed);
         string memory feComponentTransfer = generateComponentTransfer(seed, colors);
         string memory rects = createRectsForColors(colors);
         string memory light;
-        uint xLight = generateRandom(0, 501, seed+200);
-        uint yLight = generateRandom(0, 501, seed+201);
+        // uint xLight = generateRandom(0, 501, seed+200);
+        uint xLight = 250;
+        uint yLight = 250;
         // uint zLight = generateRandom(0, 10, seed+202);
-        uint zLight = 0;
+        uint zLight = 2; // maybe 0 for fractal
         light = string.concat(
             // prettier-ignore
             '<fePointLight x="',
                 xLight.toString(),
                 '" y="', yLight.toString(),
                 '" z="-', zLight.toString(),
-                '" lighting-color="',
-                toString(colors[colors.length-1]),
+                // '" lighting-color="',
+                // toString(colors[colors.length-1]),
                 '"></fePointLight>'
         );
         string memory diffuseConstant;
         if (isFractalNoise) {
-            diffuseConstant = '2';
+            diffuseConstant = '10';
         } else {
-            diffuseConstant = '1';
+            diffuseConstant = '4';
         }
+
+        // generate two random strings xChannelSelector and yChannelSelector
+        // that are either R, G, B or ''
+        string memory xChannelSelector = generateChannelSelector(seed);
+        string memory yChannelSelector = generateChannelSelector(seed+1);
+
         return
             // prettier-ignore
             string.concat(
@@ -575,9 +431,12 @@ contract Fossil {
                     '<filter id="cracked-lava" color-interpolation-filters="sRGB">',
                       '<feFlood flood-color="black" result="floodResult" />',
                       '<feTurbulence baseFrequency="', frequency, '" type="', turbulenceType, '" numOctaves="', octaves,'" in="floodResult" result="turbulenceResult" />',
-                      '<feDisplacementMap xChannelSelector="R" in="turbulenceResult" in2="turbulenceResult" yChannelSelector="G" scale="', scale, '" result="displacementResult" />',
-                      '<feComposite operator="out" in="floodResult" in2="displacementResult" result="compositeResult1" />',
-                      '<feDiffuseLighting surfaceScale="', generateSurfaceScale(seed, isFractalNoise),'" diffuseConstant="', diffuseConstant, '" result="diffuseResult">',
+                      '<feDisplacementMap xChannelSelector="', xChannelSelector, '" in="turbulenceResult" in2="turbulenceResult" yChannelSelector="', yChannelSelector,'" scale="', scale, '" result="displacementResult" />',
+                      '<feComposite operator="in" in="floodResult" in2="displacementResult" result="compositeResult1" />',
+                      '<feComposite operator="arithmetic" k1="1" k2="1" k3="3" k4="-0.5" in="compositeResult1" in2="compositeResult1" result="compositeResult2" />',
+                      '<feDiffuseLighting surfaceScale="',
+                            generateSurfaceScale(seed, isFractalNoise),'" diffuseConstant="', diffuseConstant,
+                            '" lighting-color="', toString(colors[colors.length-1]),'" result="diffuseResult">',
                         light,
                       '</feDiffuseLighting>',
                       feComponentTransfer,
