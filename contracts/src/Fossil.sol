@@ -129,7 +129,7 @@ contract Fossil {
         uint frequency,
         uint octaves
     ) public view returns (string memory) {
-        uint lower = 20;
+        uint lower = 0;
         uint upper = 100;
         if (isFractalNoise && octaves <= 2 && frequency <= 50) {
             lower = 60;
@@ -342,7 +342,7 @@ contract Fossil {
     function generatePalette2(uint seed) public view returns (RGB[] memory) {
         // generate a random hue value
         uint hue = generateRandom(0, 361, seed);
-        uint colorsLength = 6;
+        uint colorsLength = 5;
         // RGB[] memory colors = new RGB[](colorsLength-1);
         RGB[] memory colors = new RGB[](colorsLength-1);
         HSL[] memory colorsHsl = new HSL[](colorsLength-1);
@@ -376,12 +376,24 @@ contract Fossil {
         }
 
         // randomize
-        for (uint i=0; i < colors.length; i++) {
-            uint randomIndex = generateRandom(0, colors.length, seed + i);
-            RGB memory temp = colors[i];
-            colors[i] = colors[randomIndex];
-            colors[randomIndex] = temp;
-        }
+        // for (uint i=0; i < colors.length; i++) {
+        //     uint randomIndex = generateRandom(0, colors.length, seed + i);
+        //     RGB memory temp = colors[i];
+        //     colors[i] = colors[randomIndex];
+        //     colors[randomIndex] = temp;
+        // }
+
+        // reverse
+        // for (uint i=0; i < colors.length / 2; i++) {
+        //     RGB memory temp = colors[i];
+        //     colors[i] = colors[colors.length - i - 1];
+        //     colors[colors.length - i - 1] = temp;
+        // }
+
+        // swap middle two elements
+        // RGB memory temp = colors[1];
+        // colors[1] = colors[2];
+        // colors[2] = temp;
 
         return colors;
     }
@@ -409,7 +421,7 @@ contract Fossil {
         uint xLight = 250;
         uint yLight = 250;
         // uint zLight = generateRandom(0, 10, seed+202);
-        uint zLight = 2; // maybe 0 for fractal
+        uint zLight = 5; // maybe 0 for fractal
         light = string.concat(
             // prettier-ignore
             '<fePointLight x="',
@@ -442,10 +454,12 @@ contract Fossil {
                       '<feTurbulence baseFrequency="', frequency, '" type="', turbulenceType, '" numOctaves="', octaves,'" in="floodResult" result="turbulenceResult" />',
                       '<feDisplacementMap xChannelSelector="', xChannelSelector, '" in="turbulenceResult" in2="turbulenceResult" yChannelSelector="', yChannelSelector,'" scale="', scale, '" result="displacementResult" />',
                       '<feComposite operator="in" in="floodResult" in2="displacementResult" result="compositeResult1" />',
-                      '<feComposite operator="arithmetic" k1="1" k2="1" k3="3" k4="-0.5" in="compositeResult1" in2="compositeResult1" result="compositeResult2" />',
+
+                      '<feComposite operator="arithmetic" k1="1" k2="1" k3="1" k4="0.', (isFractalNoise ? '0' : '0' ), '" in="compositeResult1" in2="compositeResult1" result="compositeResult2" />',
                       '<feDiffuseLighting surfaceScale="',
                             generateSurfaceScale(seed, isFractalNoise),'" diffuseConstant="', diffuseConstant,
-                            '" lighting-color="', toString(colors[colors.length-1]),'" result="diffuseResult">',
+                            // '" lighting-color="', toString(colors[colors.length-1]),'" result="diffuseResult">',
+                            '" lighting-color="white" result="diffuseResult">',
                         light,
                       '</feDiffuseLighting>',
                       feComponentTransfer,
