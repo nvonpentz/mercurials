@@ -56,11 +56,11 @@ contract Fossil {
         if (isFractalNoise) {
             // Fractal noise
             // frequencyUint = generateRandom(20, 150, tokenId);
-            frequencyUint = generateRandom(15, 80, tokenId);
+            frequencyUint = generateRandom(15, 100, tokenId);
         } else {
             // Turbulent noise
             // frequencyUint = generateRandom(1, 60, tokenId);
-            frequencyUint = generateRandom(15, 40, tokenId);
+            frequencyUint = generateRandom(15, 60, tokenId);
         }
 
         string memory frequency; 
@@ -75,7 +75,30 @@ contract Fossil {
         return frequency;
     }
 
-    function generateOctaves(uint tokenId) public view returns (string memory) {
+    function generateSurfaceScale(uint tokenId, bool isFractalNoise) public view returns (string memory) {
+        // generate a string which is a number between -1 and -5 if isFractalNoise is false
+        // otherwise returns -5
+        uint surfaceScaleUint;
+        if (isFractalNoise) {
+            surfaceScaleUint = 5;
+        } else {
+            surfaceScaleUint = generateRandom(1, 5, tokenId);
+        }
+        // convert to string representation
+        string memory surfaceScale = string.concat('-', surfaceScaleUint.toString());
+        return surfaceScale;
+    }
+
+    function generateOctaves(uint tokenId, bool isFractalNoise) public view returns (string memory) {
+        if (isFractalNoise) {
+            // Fractal noise
+            uint octavesUint = generateRandom(1, 5, tokenId);
+            string memory octaves = octavesUint.toString();
+            return octaves;
+        } else {
+            // Turbulent noise
+            return '1';
+        }
         return generateRandom(2, 4, tokenId).toString();
     }
 
@@ -382,38 +405,100 @@ contract Fossil {
         return rgbColors;
     }
 
-    function complementaryColor(RGB memory color) public pure returns (RGB memory) {
-        return RGB(255 - color.r, 255 - color.g, 255 - color.b);
-    }
+    function generatePalette2(uint seed) public view returns (RGB[] memory) {
+        // generate a random hue value
+        uint hue;
+        uint colorsLength = 6;
+        RGB[] memory colors = new RGB[](colorsLength);
 
-    function generateGradient(uint seed) public view returns (string memory) {
-        // generate a random number between 0 and 90 for the rotation
-        uint rotation = generateRandom(0, 90, seed);
+        // if ((seed % 10) < 5) {
+        uint lightnessDelta = 100 / colorsLength;
+        uint lightness = 0;
 
-        // generate the stop elements. there should be 2 or 3 stops, with offsets
-        // starting at 0, and ending at 100 they should alternate between white and black
-        string memory stops;
-        uint numStops = 2;
-        for (uint i=0; i < numStops; i++) {
-            uint offset = i * 100 / (numStops - 1);
-            // string memory color = i % 2 == 0 ? '#222' : '#ddd';
-            // generate random color from totally black to halfway gray if i is even
-            // otherwise generate random color from halfway gray to totally white
-            uint lightness = i % 2 == 0
-                ? generateRandom(0, 50, seed + i)
-                : generateRandom(50, 100, seed + i);
-            string memory color = toString(toColorRGB(HSL(0, 0, lightness)));
-            stops = string.concat(stops, '<stop offset="', offset.toString(), '%" stop-color="', color, '"/>');
+        // generate random saturation
+        uint saturation = generateRandom(20, 100, seed);
+        console.log("saturation: %s", saturation);
+        for (uint i=0; i < colors.length; i++) {
+            hue = generateRandom(0, 360, seed + i);
+            lightness += lightnessDelta;
+            colors[i] = toColorRGB(HSL(hue, saturation, lightness));
+            // colors[i] = toColorRGB(HSL(hue, 100, lightness));
+            console.log("lightness: %s", lightness);
         }
 
-        return string.concat(
-            // prettier-ignore
-            '<linearGradient id="linearGradient14277" gradientTransform="rotate(',rotation.toString(),')" gradientUnits="userSpaceOnUse">',
-                stops,
-              // '<stop stop-color="black" offset="0" id="stop14273"/>',
-              // '<stop stop-color="white" offset="1" id="stop14275"/>',
-            '</linearGradient>'
-        );
+        return colors;
+
+        // reverse
+        // RGB[] memory reversed = new RGB[](6);
+        // for (uint i=0; i < colors.length; i++) {
+        //     reversed[i] = colors[colors.length - i - 1];
+        // }
+
+        // return reversed;
+
+        // return colors;
+
+        // generate three monochromatic colors
+        // HSL[] memory colorsHsl = new HSL[](6);
+        // colorsHsl[0] = HSL(0, 0, 100);
+        // colorsHsl[1] = HSL({
+        //     hue: generateRandom(0, 360, seed),
+        //     saturation: 100,
+        //     lightness: 25
+        // });
+        // colorsHsl[2] = HSL({
+        //     hue: generateRandom(0, 360, seed),
+        //     saturation: 100,
+        //     lightness: 50
+        // });
+        // colorsHsl[3] = HSL({
+        //     hue: generateRandom(0, 360, seed),
+        //     saturation: 100,
+        //     lightness: 75
+        // });
+
+        // // add black
+        // colorsHsl[4] = HSL(0, 0, 0);
+
+        // // last color is a complement
+        // colorsHsl[4] = HSL({
+        //     hue: (colorsHsl[0].hue + 180) % 360,
+        //     saturation: 100,
+        //     lightness: 75
+        // });
+
+        // // Convert colorsHsl to RGB
+        // RGB[] memory colorsRgb = new RGB[](colorsHsl.length);
+        // for (uint i=0; i < colorsHsl.length; i++) {
+        //     colorsRgb[i] = toColorRGB(colorsHsl[i]);
+        // }
+
+        // randomize the colors
+        // for (uint i=0; i < colorsRgb.length; i++) {
+        //     uint randomIndex = generateRandom(0, colorsRgb.length-1, seed + i);
+        //     RGB memory temp = colorsRgb[i];
+        //     colorsRgb[i] = colorsRgb[randomIndex];
+        //     colorsRgb[randomIndex] = temp;
+        // }
+        // return colorsRgb;
+        
+        // seed = seed + seed % 100;
+        // // Generate 4 totall random colors
+        // RGB[] memory colors = new RGB[](4);
+        // for (uint i=0; i < colors.length; i++) {
+        //     colors[i] = RGB({
+        //         r: generateRandom(0, 255, seed + i),
+        //         g: generateRandom(0, 255, seed + i + 1),
+        //         b: generateRandom(0, 255, seed + i + 2)
+        //     });
+        //     console.log("  color %s: %s", i, toString(colors[i]));
+        // }
+
+        // return colors;
+    }
+
+    function complementaryColor(RGB memory color) public pure returns (RGB memory) {
+        return RGB(255 - color.r, 255 - color.g, 255 - color.b);
     }
 
     /* new */
@@ -425,7 +510,8 @@ contract Fossil {
         string memory frequency = generateFrequency(seed, isFractalNoise);
         string memory octaves = generateOctaves(seed);
         string memory scale = generateScale(seed, isFractalNoise);
-        RGB[] memory colors = generatePalette(seed);
+        // RGB[] memory colors = generatePalette(seed);
+        RGB[] memory colors = generatePalette2(seed);
         string memory feComponentTransfer = generateComponentTransfer(seed, colors);
         string memory rects = createRectsForColors(colors);
         return
@@ -433,13 +519,12 @@ contract Fossil {
             string.concat(
                 '<svg width="500" height="500" viewBox="0 0 500 500" version="1.1" xmlns="http://www.w3.org/2000/svg">',
                   '<defs>',
-                    // generateGradient(seed),
                     '<filter id="cracked-lava" color-interpolation-filters="sRGB">',
                       '<feFlood flood-color="black" result="floodResult" />',
                       '<feTurbulence baseFrequency="', frequency, '" type="', turbulenceType, '" numOctaves="', octaves,'" in="floodResult" result="turbulenceResult" />',
                       '<feDisplacementMap xChannelSelector="R" in="turbulenceResult" in2="turbulenceResult" yChannelSelector="G" scale="', scale, '" result="displacementResult" />',
                       '<feComposite operator="out" in="floodResult" in2="displacementResult" result="compositeResult1" />',
-                      '<feDiffuseLighting surfaceScale="-2.5" diffuseConstant="3" result="diffuseResult">',
+                      '<feDiffuseLighting surfaceScale="', generateSurfaceScale(seed, isFractalNoise),'" diffuseConstant="1.5" result="diffuseResult">',
                         '<feDistantLight elevation="15" azimuth="0"/>',
                       '</feDiffuseLighting>',
                       // generateSpecularLighting(seed, isFractalNoise),
