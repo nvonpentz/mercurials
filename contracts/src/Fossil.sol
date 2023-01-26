@@ -51,16 +51,24 @@ contract Fossil {
         }
     }
 
-    function generateFrequency(uint tokenId, bool isFractalNoise) public view returns (string memory) {
+    function generateFrequency(
+        uint seed,
+        bool isFractalNoise,
+        uint octaves
+    ) public view returns (string memory) {
         uint frequencyUint;
         if (isFractalNoise) {
             // Fractal noise
-            // frequencyUint = generateRandom(20, 150, tokenId);
-            frequencyUint = generateRandom(15, 100, tokenId);
+            if ((octaves >= 1) && (octaves < 3)) {
+                console.log('octaves is 1 or 2');
+                frequencyUint = generateRandom(20, 70, seed);
+            } else {
+                frequencyUint = generateRandom(20, 100, seed);
+            }
         } else {
             // Turbulent noise
-            // frequencyUint = generateRandom(1, 60, tokenId);
-            frequencyUint = generateRandom(15, 60, tokenId);
+            // frequencyUint = generateRandom(1, 60, seed);
+            frequencyUint = generateRandom(15, 60, seed);
         }
 
         string memory frequency; 
@@ -75,44 +83,46 @@ contract Fossil {
         return frequency;
     }
 
-    function generateSurfaceScale(uint tokenId, bool isFractalNoise) public view returns (string memory) {
+    function generateSurfaceScale(uint seed, bool isFractalNoise) public view returns (string memory) {
+        return '-5';
         // generate a string which is a number between -1 and -5 if isFractalNoise is false
         // otherwise returns -5
-        uint surfaceScaleUint;
-        if (isFractalNoise) {
-            surfaceScaleUint = 5;
-        } else {
-            surfaceScaleUint = generateRandom(1, 5, tokenId);
-        }
-        // convert to string representation
-        string memory surfaceScale = string.concat('-', surfaceScaleUint.toString());
-        return surfaceScale;
+        // uint surfaceScaleUint;
+        // if (isFractalNoise) {
+        //     surfaceScaleUint = 5;
+        // } else {
+        //     surfaceScaleUint = generateRandom(1, 5, seed);
+        // }
+        // // convert to string representation
+        // string memory surfaceScale = string.concat('-', surfaceScaleUint.toString());
+        // return surfaceScale;
     }
 
-    function generateOctaves(uint tokenId, bool isFractalNoise) public view returns (string memory) {
-        if (isFractalNoise) {
-            // Fractal noise
-            uint octavesUint = generateRandom(1, 5, tokenId);
-            string memory octaves = octavesUint.toString();
-            return octaves;
-        } else {
-            // Turbulent noise
-            return '1';
-        }
-        return generateRandom(2, 4, tokenId).toString();
+    function generateOctaves(uint seed, bool isFractalNoise) public view returns (string memory, uint) {
+        // if (isFractalNoise) {
+        //     // Fractal noise
+        //     uint octavesUint = generateRandom(1, 5, seed);
+        //     string memory octaves = octavesUint.toString();
+        //     return octaves;
+        // } else {
+        //     // Turbulent noise
+        //     return '1';
+        // }
+        uint octavesUint = generateRandom(2, 4, seed);
+        return (octavesUint.toString(), octavesUint);
     }
 
-    function generateScale(uint tokenId, bool isFractalNoise) public view returns (string memory) {
-        return generateRandom(0, 101, tokenId).toString();
+    function generateScale(uint seed, bool isFractalNoise) public view returns (string memory) {
+        return generateRandom(0, 101, seed).toString();
     }
 
-    function generateSpecularLighting(uint tokenId, bool isFractalNoise) public view returns (string memory) {
-        // string memory surfaceScale = string.concat('-', generateRandom(2, 4, tokenId).toString()); // Was -3.10131121
+    function generateSpecularLighting(uint seed, bool isFractalNoise) public view returns (string memory) {
+        // string memory surfaceScale = string.concat('-', generateRandom(2, 4, seed).toString()); // Was -3.10131121
         string memory surfaceScale = '-5';
 
         // Perhaps we limit the specular lighting for HSL color generation techniques.
         // originall (probably should be 0, 99)
-        // string memory specularConstant = string.concat('1.', generateRandom(25, 99, tokenId).toString()); // Was 2.13708425
+        // string memory specularConstant = string.concat('1.', generateRandom(25, 99, seed).toString()); // Was 2.13708425
         string memory specularConstant = '1';
         return
             // prettier-ignore
@@ -196,7 +206,7 @@ contract Fossil {
         return string.concat(quotient.toString(), '.', decimal.toString());
     }
 
-    function generateComponentTransfer(uint tokenId, RGB[] memory colors) public view returns (string memory) {
+    function generateComponentTransfer(uint seed, RGB[] memory colors) public view returns (string memory) {
         string memory filter = '<feComponentTransfer id="palette" result="rct">';
         string memory funcR = '<feFuncR type="table" tableValues="';
         string memory funcG = '<feFuncG type="table" tableValues="';
@@ -507,13 +517,21 @@ contract Fossil {
         bool isFractalNoise = seed % 2 == 0;
         string memory turbulenceType = isFractalNoise ? "fractalNoise" : "turbulence";
         // string memory turbulenceType = "turbulence";
-        string memory frequency = generateFrequency(seed, isFractalNoise);
-        string memory octaves = generateOctaves(seed);
+        (string memory octaves, uint octavesUint) = generateOctaves(seed, isFractalNoise);
+        string memory frequency = generateFrequency(seed, isFractalNoise, octavesUint);
         string memory scale = generateScale(seed, isFractalNoise);
         // RGB[] memory colors = generatePalette(seed);
         RGB[] memory colors = generatePalette2(seed);
         string memory feComponentTransfer = generateComponentTransfer(seed, colors);
         string memory rects = createRectsForColors(colors);
+
+        string memory light;
+        uint xLight = generateRandom(0, 501, seed+200);
+        uint yLight = generateRandom(0, 501, seed+201);
+        light = string.concat(
+            '<fePointLight x="', xLight.toString(), '" y="', yLight.toString(), '" z="-1"></fePointLight>',
+            '<fePointLight x="', '10', '" y="', '20', '" z="-1"></fePointLight>'
+        );
         return
             // prettier-ignore
             string.concat(
@@ -524,8 +542,9 @@ contract Fossil {
                       '<feTurbulence baseFrequency="', frequency, '" type="', turbulenceType, '" numOctaves="', octaves,'" in="floodResult" result="turbulenceResult" />',
                       '<feDisplacementMap xChannelSelector="R" in="turbulenceResult" in2="turbulenceResult" yChannelSelector="G" scale="', scale, '" result="displacementResult" />',
                       '<feComposite operator="out" in="floodResult" in2="displacementResult" result="compositeResult1" />',
-                      '<feDiffuseLighting surfaceScale="', generateSurfaceScale(seed, isFractalNoise),'" diffuseConstant="1.5" result="diffuseResult">',
-                        '<feDistantLight elevation="15" azimuth="0"/>',
+                      '<feDiffuseLighting surfaceScale="', generateSurfaceScale(seed, isFractalNoise),'" diffuseConstant="2.5" result="diffuseResult">',
+                        light,
+                        // '<feDistantLight elevation="15" azimuth="0"/>',
                       '</feDiffuseLighting>',
                       // generateSpecularLighting(seed, isFractalNoise),
                       feComponentTransfer,
