@@ -85,7 +85,7 @@ contract Fossil {
         } else {
             // Turbulent noise
             // frequencyUint = generateRandom(1, 60, seed);
-            frequencyUint = generateRandom(10, 40, seed);
+            frequencyUint = generateRandom(10, 30, seed);
         }
 
         // convert to string
@@ -350,7 +350,8 @@ contract Fossil {
         uint lightnessDelta = 100 / colorsLength;
         uint lightness = 0;
         // generate random saturation
-        uint saturation = generateRandom(20, 100, seed);
+        // uint saturation = generateRandom(20, 100, seed);
+        uint saturation = 0;
         for (uint i=0; i < colors.length; i++) {
             // generate a hue within 121 degrees of the previous hue
             uint delta = generateRandom(0, 121, seed + i);
@@ -372,6 +373,14 @@ contract Fossil {
             lightness += lightnessDelta;
             colorsHsl[i] = HSL(hue, saturation, lightness);
             colors[i] = toColorRGB(HSL(hue, saturation, lightness));
+        }
+
+        // randomize
+        for (uint i=0; i < colors.length; i++) {
+            uint randomIndex = generateRandom(0, colors.length, seed + i);
+            RGB memory temp = colors[i];
+            colors[i] = colors[randomIndex];
+            colors[randomIndex] = temp;
         }
 
         return colors;
