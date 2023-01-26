@@ -59,11 +59,11 @@ contract Fossil {
         uint frequencyUint;
         if (isFractalNoise) {
             // Fractal noise
-            if ((octaves >= 1) && (octaves < 3)) {
-                console.log('octaves is 1 or 2');
-                frequencyUint = generateRandom(20, 70, seed);
+            if (octaves == 1) {
+                console.log('octaves is 1');
+                frequencyUint = generateRandom(40, 100, seed);
             } else {
-                frequencyUint = generateRandom(20, 100, seed);
+                frequencyUint = generateRandom(20, 80, seed);
             }
         } else {
             // Turbulent noise
@@ -108,32 +108,33 @@ contract Fossil {
         //     // Turbulent noise
         //     return '1';
         // }
-        uint octavesUint = generateRandom(2, 4, seed);
+        return ('1', 1);
+        uint octavesUint = generateRandom(3, 5, seed);
         return (octavesUint.toString(), octavesUint);
     }
 
     function generateScale(uint seed, bool isFractalNoise) public view returns (string memory) {
-        return generateRandom(0, 101, seed).toString();
+        return generateRandom(20, 80, seed).toString();
     }
 
-    function generateSpecularLighting(uint seed, bool isFractalNoise) public view returns (string memory) {
-        // string memory surfaceScale = string.concat('-', generateRandom(2, 4, seed).toString()); // Was -3.10131121
-        string memory surfaceScale = '-5';
+    // function generateSpecularLighting(uint seed, bool isFractalNoise) public view returns (string memory) {
+    //     // string memory surfaceScale = string.concat('-', generateRandom(2, 4, seed).toString()); // Was -3.10131121
+    //     string memory surfaceScale = '-5';
 
-        // Perhaps we limit the specular lighting for HSL color generation techniques.
-        // originall (probably should be 0, 99)
-        // string memory specularConstant = string.concat('1.', generateRandom(25, 99, seed).toString()); // Was 2.13708425
-        string memory specularConstant = '1';
-        return
-            // prettier-ignore
-            string.concat(
-              '<feSpecularLighting lighting-color="#ffffff" surfaceScale="', surfaceScale,'" result="r4" specularConstant="', specularConstant,'" specularExponent="1" in="r2">',
-                '<feDistantLight elevation="0" azimuth="0">',
-                    // '<animate attributeName="azimuth" values="0;360" dur="10s" repeatCount="indefinite"/>',
-                '</feDistantLight>',
-              '</feSpecularLighting>'
-            );
-    }
+    //     // Perhaps we limit the specular lighting for HSL color generation techniques.
+    //     // originall (probably should be 0, 99)
+    //     // string memory specularConstant = string.concat('1.', generateRandom(25, 99, seed).toString()); // Was 2.13708425
+    //     string memory specularConstant = '1';
+    //     return
+    //         // prettier-ignore
+    //         string.concat(
+    //           '<feSpecularLighting lighting-color="#ffffff" surfaceScale="', surfaceScale,'" result="r4" specularConstant="', specularConstant,'" specularExponent="1" in="r2">',
+    //             '<feDistantLight elevation="0" azimuth="0">',
+    //                 // '<animate attributeName="azimuth" values="0;360" dur="10s" repeatCount="indefinite"/>',
+    //             '</feDistantLight>',
+    //           '</feSpecularLighting>'
+    //         );
+    // }
 
     struct RGB {
         uint r; // Value between 0 and 255
@@ -417,25 +418,46 @@ contract Fossil {
 
     function generatePalette2(uint seed) public view returns (RGB[] memory) {
         // generate a random hue value
-        uint hue;
+        uint hue = generateRandom(0, 361, seed);
         uint colorsLength = 6;
-        RGB[] memory colors = new RGB[](colorsLength);
+        // RGB[] memory colors = new RGB[](colorsLength-1);
+        RGB[] memory colors = new RGB[](colorsLength-1);
 
         // if ((seed % 10) < 5) {
         uint lightnessDelta = 100 / colorsLength;
+        console.log("lightnessDelta: %s", lightnessDelta);
         uint lightness = 0;
+        // uint lightness = 0;
+        console.log("initial lightness: %s", lightness);
 
         // generate random saturation
         uint saturation = generateRandom(20, 100, seed);
         console.log("saturation: %s", saturation);
         for (uint i=0; i < colors.length; i++) {
-            hue = generateRandom(0, 360, seed + i);
+            console.log(i, "hue: %s", hue);
+            // generate a hue within 90 degrees of the previous hue
+            uint delta = generateRandom(0, 91, seed + i);
+            console.log("  delta: %s", delta);
+            if (generateRandom(0, 2, seed + i) % 2 == 0) {
+                console.log(" even");
+                hue = hue + delta;
+            } else if (delta > hue) {
+                console.log(" odd, delta > hue");
+                uint diff = delta - hue;
+                hue = 360 - diff;
+            } else {
+                console.log(" odd, delta < hue");
+                hue = hue - delta;
+            }
+
+            console.log(" hue after: %s", hue);
+            hue = hue % 361;
             lightness += lightnessDelta;
+
             colors[i] = toColorRGB(HSL(hue, saturation, lightness));
             // colors[i] = toColorRGB(HSL(hue, 100, lightness));
-            console.log("lightness: %s", lightness);
+            // console.log(i, "lightness: %s", lightness);
         }
-
         return colors;
 
         // reverse
@@ -443,7 +465,6 @@ contract Fossil {
         // for (uint i=0; i < colors.length; i++) {
         //     reversed[i] = colors[colors.length - i - 1];
         // }
-
         // return reversed;
 
         // return colors;
@@ -514,7 +535,8 @@ contract Fossil {
     /* new */
     function generateSVG(uint seed) public view returns (string memory) {
         /* Filter parameters */
-        bool isFractalNoise = seed % 2 == 0;
+        // bool isFractalNoise = seed % 2 == 0;
+        bool isFractalNoise = true;
         string memory turbulenceType = isFractalNoise ? "fractalNoise" : "turbulence";
         // string memory turbulenceType = "turbulence";
         (string memory octaves, uint octavesUint) = generateOctaves(seed, isFractalNoise);
@@ -524,14 +546,27 @@ contract Fossil {
         RGB[] memory colors = generatePalette2(seed);
         string memory feComponentTransfer = generateComponentTransfer(seed, colors);
         string memory rects = createRectsForColors(colors);
-
         string memory light;
         uint xLight = generateRandom(0, 501, seed+200);
         uint yLight = generateRandom(0, 501, seed+201);
+        // uint zLight = generateRandom(0, 10, seed+202);
+        uint zLight = 0;
         light = string.concat(
-            '<fePointLight x="', xLight.toString(), '" y="', yLight.toString(), '" z="-1"></fePointLight>',
-            '<fePointLight x="', '10', '" y="', '20', '" z="-1"></fePointLight>'
+            // prettier-ignore
+            '<fePointLight x="',
+                xLight.toString(),
+                '" y="', yLight.toString(),
+                '" z="-', zLight.toString(),
+                '" lighting-color="',
+                toString(colors[colors.length-1]),
+                '"></fePointLight>'
         );
+        string memory diffuseConstant;
+        if (isFractalNoise) {
+            diffuseConstant = '2';
+        } else {
+            diffuseConstant = '1';
+        }
         return
             // prettier-ignore
             string.concat(
@@ -542,11 +577,9 @@ contract Fossil {
                       '<feTurbulence baseFrequency="', frequency, '" type="', turbulenceType, '" numOctaves="', octaves,'" in="floodResult" result="turbulenceResult" />',
                       '<feDisplacementMap xChannelSelector="R" in="turbulenceResult" in2="turbulenceResult" yChannelSelector="G" scale="', scale, '" result="displacementResult" />',
                       '<feComposite operator="out" in="floodResult" in2="displacementResult" result="compositeResult1" />',
-                      '<feDiffuseLighting surfaceScale="', generateSurfaceScale(seed, isFractalNoise),'" diffuseConstant="2.5" result="diffuseResult">',
+                      '<feDiffuseLighting surfaceScale="', generateSurfaceScale(seed, isFractalNoise),'" diffuseConstant="', diffuseConstant, '" result="diffuseResult">',
                         light,
-                        // '<feDistantLight elevation="15" azimuth="0"/>',
                       '</feDiffuseLighting>',
-                      // generateSpecularLighting(seed, isFractalNoise),
                       feComponentTransfer,
                     '</filter>',
                   '</defs>',
