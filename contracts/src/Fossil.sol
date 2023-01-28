@@ -411,7 +411,7 @@ contract Fossil {
         // string memory turbulenceType = "turbulence";
         (string memory octaves, uint octavesUint) = generateOctaves(seed, isFractalNoise);
         (string memory frequency, uint frequencyUint) = generateFrequency(seed, isFractalNoise, octavesUint);
-        string memory scale = generateScale(seed, isFractalNoise, frequencyUint, octavesUint);
+        // string memory scale = generateScale(seed, isFractalNoise, frequencyUint, octavesUint);
         // RGB[] memory colors = generatePalette(seed);
         RGB[] memory colors = generatePalette2(seed);
         string memory feComponentTransfer = generateComponentTransfer(seed, colors);
@@ -439,7 +439,7 @@ contract Fossil {
             diffuseConstant = '4';
         }
 
-        uint frequency2 = generateRandom(30, 301, seed -1);
+        uint frequency2 = generateRandom(20, 251, seed -1);
         string memory frequency2Str; 
         if (frequency2 >= 0 && frequency2 < 10) {
             frequency2Str = string.concat('0.000', frequency2.toString()); // 0.0001 - 0.0010
@@ -453,12 +453,12 @@ contract Fossil {
         }
 
         // generate random k4 value between 0.01 and 0.50
-        uint k4Uint = generateRandom(0, 51, seed - 2);
+        uint k4Uint = generateRandom(0, 76, seed - 2);
         string memory operator;
         string memory k4;
         if (generateRandom(0, 2, seed - 3) % 2 == 0) {
             operator = 'out';
-            k4 = string.concat('-0.', (50 + k4Uint).toString());
+            k4 = string.concat('-0.', (75 + k4Uint).toString());
         } else{
             operator = 'in';
             k4 = string.concat('0.', k4Uint.toString());
@@ -469,6 +469,8 @@ contract Fossil {
             '<feComposite in="blurResult" in2="displacementResult" operator="', operator, '" result="compositeResult2"/>',
             (seed % 3 == 0) ? string.concat('<feComposite in="compositeResult2" in2="compositeResult2" operator="arithmetic" k1="0" k2="1" k3="1" k4="', k4,'"/>') : ''
         );
+
+        uint scale = generateRandom(0, 101, seed+2);
 
         // generate two random strings xChannelSelector and yChannelSelector
         // that are either R, G, B or ''
@@ -486,20 +488,24 @@ contract Fossil {
                             'result="turbulenceResult"> </feTurbulence>',
 
                         // For animation
-                        // '<feColorMatrix type="hueRotate">',
-                        //   // '<animate attributeName="values" from="0" to="360"',
-                        //   //          'dur="60s" repeatCount="indefinite" result="colorMatrixResult"/>',
-                        // '</feColorMatrix>',
+                        '<feColorMatrix type="hueRotate">',
+                          '<animate attributeName="values" from="0" to="360"',
+                                   'dur="3s" repeatCount="indefinite" result="colorMatrixResult"/>',
+                        '</feColorMatrix>',
+
                         // For animation
-                        // '<feColorMatrix type="matrix"',
-                        //    'values="0 0 0 0 0 ',
-                        //            '0 0 0 0 0 ',
-                        //            '0 0 0 0 0 ',
-                        //            '1 0 0 0 0">',
-                        // '</feColorMatrix>',
+                        '<feColorMatrix type="matrix"',
+                           'values="0 0 0 0 0 ',
+                                   '0 0 0 0 0 ',
+                                   '0 0 0 0 0 ',
+                                   '1 0 0 0 0">',
+                        '</feColorMatrix>',
 
                         // For scale effect
-                        '<feDisplacementMap scale="', generateRandom(0, 101, seed+2).toString(),'" result="displacementResult"> </feDisplacementMap>',
+                        '<feDisplacementMap scale="', scale.toString(),'" result="displacementResult">',
+                            // '<animate attributeName="scale" from="-', scale.toString() ,'" to="', (scale+100).toString(), '"',
+                            //          'dur="10s" repeatCount="indefinite" result="displacementResult"/>',
+                        '</feDisplacementMap>',
 
                         // Add the flatness
                         // '<feComposite in="blurResult" in2="displacementResult" operator="', (generateRandom(0, 2, seed +3) % 2) == 0 ? 'in' : 'out', '" result="compositeResult2"/>',
@@ -510,6 +516,9 @@ contract Fossil {
                         // Light
                         '<feDiffuseLighting lighting-color="white" diffuseConstant="', generateRandom(1, 11, seed+6).toString(), '"',
                                            'result="diffuseResult" surfaceScale="-5">',
+                            // '<animate attributeName="surfaceScale" values="-5; 5; -5" dur="300s" repeatCount="indefinite"/>',
+                                     // 'dur="3s" repeatCount="indefinite" result="diffuseResult"/>',
+
                           // '<feDistantLight elevation="', generateRandom(0, 5, seed+4).toString(),'">',
                           '<feDistantLight elevation="', generateRandom(0, 5, seed+4).toString(),'">',
                           '</feDistantLight>',
