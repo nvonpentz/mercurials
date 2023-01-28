@@ -452,6 +452,14 @@ contract Fossil {
             assert(false);
         }
 
+        // generate random k4 value between 0.01 and 0.50
+        string memory k4 = string.concat('0.', generateRandom(0, 51, seed - 2).toString());
+        //  make half negative
+        // if (generateRandom(0, 2, seed - 3) % 2 == 0) {
+        //     k4 = string.concat('-', k4);
+        // }
+        console.log('k4: %s', k4);
+
         // generate two random strings xChannelSelector and yChannelSelector
         // that are either R, G, B or ''
         return
@@ -484,8 +492,9 @@ contract Fossil {
                         '<feDisplacementMap scale="', generateRandom(0, 101, seed+2).toString(),'" result="displacementResult"> </feDisplacementMap>',
 
                         // Add the flatness
-                        '<feComposite in="blurResult" in2="displacementResult" operator="in"', (generateRandom(0, 2, seed +3) % 2) == 0 ? 'in' : 'out', '" result="compositeResult2"/>',
-                        // '<feComposite in="compositeResult2" in2="compositeResult2" operator="arithmetic" k1="1" k2="1" k3="1" k4="0.', generateRandom(0, 6, seed+3).toString(), '"/>',
+                        // '<feComposite in="blurResult" in2="displacementResult" operator="', (generateRandom(0, 2, seed +3) % 2) == 0 ? 'in' : 'out', '" result="compositeResult2"/>',
+                        '<feComposite in="blurResult" in2="displacementResult" operator="in" result="compositeResult2"/>',
+                        '<feComposite in="compositeResult2" in2="compositeResult2" operator="arithmetic" k1="0" k2="1" k3="1" k4="', k4,'"/>',
 
                         // Light
                         '<feDiffuseLighting lighting-color="white" diffuseConstant="10"',
