@@ -452,7 +452,10 @@ contract Fossil {
                     '<filter id="cracked-lava" color-interpolation-filters="sRGB">',
                       '<feFlood flood-color="black" result="floodResult" />',
                       '<feTurbulence baseFrequency="', frequency, '" type="', turbulenceType, '" numOctaves="', octaves,'" in="floodResult" result="turbulenceResult" />',
-                      '<feDisplacementMap xChannelSelector="', xChannelSelector, '" in="turbulenceResult" in2="turbulenceResult" yChannelSelector="', yChannelSelector,'" scale="', scale, '" result="displacementResult" />',
+                      '<feDisplacementMap xChannelSelector="', xChannelSelector, '" in="turbulenceResult" in2="turbulenceResult" yChannelSelector="', yChannelSelector,'" scale="', scale, '" result="displacementResult">',
+                        '<animate attributeName="scale" values="0;100;" dur="5s" duration="2" repeatCount="indefinite"  keyTimes="0;1" keySplines=".5 0 .5 1" calcMode="spline"/>',
+                    '</feDisplacementMap>',
+
                       '<feComposite operator="in" in="floodResult" in2="displacementResult" result="compositeResult1" />',
 
                       '<feComposite operator="arithmetic" k1="1" k2="1" k3="1" k4="0.', (isFractalNoise ? '0' : '0' ), '" in="compositeResult1" in2="compositeResult1" result="compositeResult2" />',
