@@ -453,12 +453,12 @@ contract Fossil {
         }
 
         // generate random k4 value between 0.01 and 0.50
-        uint k4Uint = generateRandom(0, 76, seed - 2);
+        uint k4Uint = generateRandom(0, 51, seed - 2);
         string memory operator;
         string memory k4;
         if (generateRandom(0, 2, seed - 3) % 2 == 0) {
             operator = 'out';
-            k4 = string.concat('-0.', (25 + k4Uint).toString());
+            k4 = string.concat('-0.', (50 + k4Uint).toString());
         } else{
             operator = 'in';
             k4 = string.concat('0.', k4Uint.toString());
@@ -466,8 +466,8 @@ contract Fossil {
 
         // string memory k4 = string.concat('0.', );
         string memory feComposites = string.concat(
-            '<feComposite in="blurResult" in2="displacementResult" operator="', operator, '" result="compositeResult2"/>'
-            // '<feComposite in="compositeResult2" in2="compositeResult2" operator="arithmetic" k1="0" k2="1" k3="1" k4="', k4,'"/>'
+            '<feComposite in="blurResult" in2="displacementResult" operator="', operator, '" result="compositeResult2"/>',
+            (seed % 3 == 0) ? string.concat('<feComposite in="compositeResult2" in2="compositeResult2" operator="arithmetic" k1="0" k2="1" k3="1" k4="', k4,'"/>') : ''
         );
 
         // generate two random strings xChannelSelector and yChannelSelector
