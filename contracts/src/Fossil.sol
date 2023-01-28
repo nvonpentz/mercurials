@@ -85,7 +85,7 @@ contract Fossil {
         } else {
             // Turbulent noise
             // frequencyUint = generateRandom(1, 60, seed);
-            frequencyUint = generateRandom(10, 30, seed);
+            frequencyUint = generateRandom(1, 20, seed);
         }
 
         // convert to string
@@ -441,36 +441,76 @@ contract Fossil {
 
         // generate two random strings xChannelSelector and yChannelSelector
         // that are either R, G, B or ''
-        string memory xChannelSelector = generateChannelSelector(seed);
-        string memory yChannelSelector = generateChannelSelector(seed+1);
-
         return
             // prettier-ignore
             string.concat(
                 '<svg width="500" height="500" viewBox="0 0 500 500" version="1.1" xmlns="http://www.w3.org/2000/svg">',
-                  '<defs>',
-                    '<filter id="cracked-lava" color-interpolation-filters="sRGB">',
-                      '<feFlood flood-color="black" result="floodResult" />',
-                      '<feTurbulence baseFrequency="', frequency, '" type="', turbulenceType, '" numOctaves="', octaves,'" in="floodResult" result="turbulenceResult" />',
-                      '<feDisplacementMap xChannelSelector="', xChannelSelector, '" in="turbulenceResult" in2="turbulenceResult" yChannelSelector="', yChannelSelector,'" scale="', scale, '" result="displacementResult">',
-                        '<animate attributeName="scale" values="0;100;" dur="5s" duration="2" repeatCount="indefinite"  keyTimes="0;1" keySplines=".5 0 .5 1" calcMode="spline"/>',
-                    '</feDisplacementMap>',
+                    
+                    '<filter id="a">',
+                        // Blur for edges
+                        '<feGaussianBlur in="SourceGraphic" stdDeviation="10" result="blurResult"/>'
 
-                      '<feComposite operator="in" in="floodResult" in2="displacementResult" result="compositeResult1" />',
+                        // Core filter
+                        '<feTurbulence in="blurResult" baseFrequency="', frequency, '" numOctaves="', generateRandom(1, 3, seed+1).toString(), '"',
+                            'result="turbulenceResult"> </feTurbulence>',
 
-                      '<feComposite operator="arithmetic" k1="1" k2="1" k3="1" k4="0.', (isFractalNoise ? '0' : '0' ), '" in="compositeResult1" in2="compositeResult1" result="compositeResult2" />',
-                      '<feDiffuseLighting surfaceScale="',
-                            generateSurfaceScale(seed, isFractalNoise),'" diffuseConstant="', diffuseConstant,
-                            // '" lighting-color="', toString(colors[colors.length-1]),'" result="diffuseResult">',
-                            '" lighting-color="white" result="diffuseResult">',
-                        light,
-                      '</feDiffuseLighting>',
-                      feComponentTransfer,
+                        // For animation
+                        '<feColorMatrix type="hueRotate">',
+                          // '<animate attributeName="values" from="0" to="360"',
+                          //          'dur="60s" repeatCount="indefinite" result="colorMatrixResult"/>',
+                        '</feColorMatrix>',
+
+                        // For animation
+                        '<feColorMatrix type="matrix"',
+                           'values="0 0 0 0 0',
+                                   '0 0 0 0 0',
+                                   '0 0 0 0 0',
+                                   '1 0 0 0 0">',
+                        '</feColorMatrix>',
+
+                        // For scale effect
+                        '<feDisplacementMap scale="', generateRandom(0, 101, seed+2).toString(),'" result="displacementResult"> </feDisplacementMap>',
+
+                        // Add the flatness
+                        '<feComposite in="blurResult" in2="displacementResult" operator="in"', seed % 2 == 0 ? 'in' : 'out', '" result="compositeResult2"/>',
+                        // '<feComposite in="compositeResult2" in2="compositeResult2" operator="arithmetic" k1="1" k2="1" k3="1" k4="0.', generateRandom(0, 6, seed+3).toString(), '"/>',
+
+                        // Light
+                        '<feDiffuseLighting lighting-color="white" diffuseConstant="10"',
+                                           'result="diffuseResult" surfaceScale="-5">',
+                          '<feDistantLight elevation="', generateRandom(0, 5, seed+4).toString(),'">',
+                          '</feDistantLight>',
+                        '</feDiffuseLighting>',
+
+                        // Inverse the colors
+                        // '<feColorMatrix id="feColorMatrix1159" type="luminanceToAlpha" in="rct" />',
                     '</filter>',
                   '</defs>',
-                  // '<rect width="500" height="500" fill="url(#linearGradient14277)" filter="url(#cracked-lava)" style="filter:url(#cracked-lava)" />',
-                  '<rect width="500" height="500" fill="black" filter="url(#cracked-lava)" />',
-                  rects,
+                  '<rect width="1000" height="1000" filter="url(#a)"/>',
+
+                  // '<defs>',
+                  //   '<filter id="cracked-lava" color-interpolation-filters="sRGB">',
+                  //     '<feFlood flood-color="black" result="floodResult" />',
+                  //     '<feTurbulence baseFrequency="', frequency, '" type="', turbulenceType, '" numOctaves="', octaves,'" in="floodResult" result="turbulenceResult" />',
+                  //     '<feDisplacementMap xChannelSelector="', xChannelSelector, '" in="turbulenceResult" in2="turbulenceResult" yChannelSelector="', yChannelSelector,'" scale="', scale, '" result="displacementResult">',
+                  //       '<animate attributeName="scale" values="0;100;" dur="5s" duration="2" repeatCount="indefinite"  keyTimes="0;1" keySplines=".5 0 .5 1" calcMode="spline"/>',
+                  //   '</feDisplacementMap>',
+
+                  //     '<feComposite operator="in" in="floodResult" in2="displacementResult" result="compositeResult1" />',
+
+                  //     '<feComposite operator="arithmetic" k1="1" k2="1" k3="1" k4="0.', (isFractalNoise ? '0' : '0' ), '" in="compositeResult1" in2="compositeResult1" result="compositeResult2" />',
+                  //     '<feDiffuseLighting surfaceScale="',
+                  //           generateSurfaceScale(seed, isFractalNoise),'" diffuseConstant="', diffuseConstant,
+                  //           // '" lighting-color="', toString(colors[colors.length-1]),'" result="diffuseResult">',
+                  //           '" lighting-color="white" result="diffuseResult">',
+                  //       light,
+                  //     '</feDiffuseLighting>',
+                  //     feComponentTransfer,
+                  //   '</filter>',
+                  // '</defs>',
+                  // // '<rect width="500" height="500" fill="url(#linearGradient14277)" filter="url(#cracked-lava)" style="filter:url(#cracked-lava)" />',
+                  // '<rect width="500" height="500" fill="black" filter="url(#cracked-lava)" />',
+                  // rects,
                 '</svg>'
             );
     }
