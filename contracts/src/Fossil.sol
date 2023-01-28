@@ -439,7 +439,7 @@ contract Fossil {
             diffuseConstant = '4';
         }
 
-        uint frequency2 = generateRandom(30, 251, seed -1);
+        uint frequency2 = generateRandom(30, 301, seed -1);
         string memory frequency2Str; 
         if (frequency2 >= 0 && frequency2 < 10) {
             frequency2Str = string.concat('0.000', frequency2.toString()); // 0.0001 - 0.0010
@@ -453,17 +453,21 @@ contract Fossil {
         }
 
         // generate random k4 value between 0.01 and 0.50
-        string memory k4 = string.concat('0.', generateRandom(0, 51, seed - 2).toString());
+        uint k4Uint = generateRandom(0, 76, seed - 2);
         string memory operator;
+        string memory k4;
         if (generateRandom(0, 2, seed - 3) % 2 == 0) {
-            k4 = string.concat('-', k4);
             operator = 'out';
+            k4 = string.concat('-0.', (25 + k4Uint).toString());
         } else{
             operator = 'in';
+            k4 = string.concat('0.', k4Uint.toString());
         }
+
+        // string memory k4 = string.concat('0.', );
         string memory feComposites = string.concat(
-            '<feComposite in="blurResult" in2="displacementResult" operator="', operator, '" result="compositeResult2"/>',
-            '<feComposite in="compositeResult2" in2="compositeResult2" operator="arithmetic" k1="0" k2="1" k3="1" k4="', k4,'"/>'
+            '<feComposite in="blurResult" in2="displacementResult" operator="', operator, '" result="compositeResult2"/>'
+            // '<feComposite in="compositeResult2" in2="compositeResult2" operator="arithmetic" k1="0" k2="1" k3="1" k4="', k4,'"/>'
         );
 
         // generate two random strings xChannelSelector and yChannelSelector
@@ -478,7 +482,7 @@ contract Fossil {
                         '<feGaussianBlur in="SourceGraphic" stdDeviation="10" result="blurResult"/>'
 
                         // Core filter
-                        '<feTurbulence in="blurResult" baseFrequency="', frequency2Str, '" numOctaves="', generateRandom(1, 3, seed+1).toString(), '"',
+                        '<feTurbulence in="blurResult" baseFrequency="', frequency2Str, '" numOctaves="', generateRandom(1, 4, seed+1).toString(), '"',
                             'result="turbulenceResult"> </feTurbulence>',
 
                         // For animation
@@ -504,7 +508,7 @@ contract Fossil {
                         feComposites,
 
                         // Light
-                        '<feDiffuseLighting lighting-color="white" diffuseConstant="10"',
+                        '<feDiffuseLighting lighting-color="white" diffuseConstant="', generateRandom(1, 11, seed+6).toString(), '"',
                                            'result="diffuseResult" surfaceScale="-5">',
                           // '<feDistantLight elevation="', generateRandom(0, 5, seed+4).toString(),'">',
                           '<feDistantLight elevation="', generateRandom(0, 5, seed+4).toString(),'">',
