@@ -454,11 +454,17 @@ contract Fossil {
 
         // generate random k4 value between 0.01 and 0.50
         string memory k4 = string.concat('0.', generateRandom(0, 51, seed - 2).toString());
-        //  make half negative
-        // if (generateRandom(0, 2, seed - 3) % 2 == 0) {
-        //     k4 = string.concat('-', k4);
-        // }
-        console.log('k4: %s', k4);
+        string memory operator;
+        if (generateRandom(0, 2, seed - 3) % 2 == 0) {
+            k4 = string.concat('-', k4);
+            operator = 'out';
+        } else{
+            operator = 'in';
+        }
+        string memory feComposites = string.concat(
+            '<feComposite in="blurResult" in2="displacementResult" operator="', operator, '" result="compositeResult2"/>',
+            '<feComposite in="compositeResult2" in2="compositeResult2" operator="arithmetic" k1="0" k2="1" k3="1" k4="', k4,'"/>'
+        );
 
         // generate two random strings xChannelSelector and yChannelSelector
         // that are either R, G, B or ''
@@ -493,8 +499,9 @@ contract Fossil {
 
                         // Add the flatness
                         // '<feComposite in="blurResult" in2="displacementResult" operator="', (generateRandom(0, 2, seed +3) % 2) == 0 ? 'in' : 'out', '" result="compositeResult2"/>',
-                        '<feComposite in="blurResult" in2="displacementResult" operator="in" result="compositeResult2"/>',
-                        '<feComposite in="compositeResult2" in2="compositeResult2" operator="arithmetic" k1="0" k2="1" k3="1" k4="', k4,'"/>',
+                        // '<feComposite in="blurResult" in2="displacementResult" operator="in" result="compositeResult2"/>',
+                        // '<feComposite in="compositeResult2" in2="compositeResult2" operator="arithmetic" k1="0" k2="1" k3="1" k4="', k4,'"/>',
+                        feComposites,
 
                         // Light
                         '<feDiffuseLighting lighting-color="white" diffuseConstant="10"',
@@ -504,8 +511,8 @@ contract Fossil {
                           '</feDistantLight>',
                         '</feDiffuseLighting>',
 
-                        // Inverse the colors
-                        (generateRandom(0, 2, seed+5) % 2) == 0 ? '' : '<feColorMatrix type="luminanceToAlpha" />',
+                        // // Inverse the colors
+                        // (generateRandom(0, 2, seed+5) % 2) == 0 ? '' : '<feColorMatrix type="luminanceToAlpha" />',
                     '</filter>',
                   '</defs>',
                   '<rect width="1000" height="1000" filter="url(#a)"/>',
