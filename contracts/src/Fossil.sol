@@ -34,23 +34,15 @@ contract Fossil {
         }
 
         // feComposite k4="<>"
-        uint k4Uint = generateRandom(0, 76, seed - 2);
-        string memory operator;
+        uint k4Uint = generateRandom(0, 51, seed - 2); // 76
+        string memory k4Operator;
         string memory k4;
-        // if (generateRandom(0, 2, seed - 3) % 2 == 0) {
-        //     operator = 'out';
-        //     k4 = string.concat('-0.', (75 + k4Uint).toString());
-        // } else {
-        //     operator = 'in';
-        //     k4 = string.concat('0.', k4Uint.toString());
-        // }
-
         if (generateRandom(0, 2, seed - 3) % 2 == 0) {
-            operator = 'out';
+            k4Operator = 'out';
             k4 = string.concat('-0.', k4Uint.toString());
         } else {
-            // operator = 'in';
-            operator = 'out';
+            // k4Operator = 'in';
+            k4Operator = 'out';
             k4 = string.concat('0.', k4Uint.toString());
         }
 
@@ -58,8 +50,8 @@ contract Fossil {
             // '<feComposite in="blurResult" in2="displacementResult" operator="', operator, '" result="compositeResult2"/>',
             // (seed % 3 == 0) ? string.concat('<feComposite in="compositeResult2" in2="compositeResult2" operator="arithmetic" k1="0" k2="1" k3="1" k4="', k4,'"/>') : ''
 
-            '<feComposite in="rotateResult" in2="colorChannelResult" operator="', operator, '" result="compositeResult2"/>'
-            '<feComposite in="rotateResult" in2="colorChannelResult" operator="arithmetic" k1="0" k2="1" k3="1" k4="' , k4, '"/>'
+            '<feComposite in="rotateResult" in2="colorChannelResult" operator="', k4Operator, '" result="compositeResult2"/>',
+            '<feComposite in="compositeResult2" in2="compositeResult2" operator="arithmetic" k1="0" k2="1" k3="1" k4="' , k4, '"/>'
             // '<feComposite in="rotateResult" in2="colorChannelResult" operator="arithmetic" k1="0" k2="1" k3="1" k4="0"/>'
         );
 
