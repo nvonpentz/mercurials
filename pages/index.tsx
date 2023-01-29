@@ -45,7 +45,7 @@ const Home: NextPage = () => {
                       width={500}
                       height={500}
             />}
-          <button onClick={handleButtonClick}>Increment</button> // added a button to increment the value
+          <button onClick={handleButtonClick}>Increment</button>
         </main>
       </div>
     </div>

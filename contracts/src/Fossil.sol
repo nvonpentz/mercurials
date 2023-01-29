@@ -18,7 +18,6 @@ contract Fossil {
     }
 
     function generateSVG(uint seed) public view returns (string memory) {
-
         // feTurbulence baseFrequency
         uint baseFrequency = generateRandom(50, 251, seed -1);
         string memory baseFrequencyStr; 
@@ -83,12 +82,8 @@ contract Fossil {
         }
 
         string memory feComposites = string.concat(
-            // '<feComposite in="blurResult" in2="displacementResult" operator="', operator, '" result="compositeResult2"/>',
-            // (seed % 3 == 0) ? string.concat('<feComposite in="compositeResult2" in2="compositeResult2" operator="arithmetic" k1="0" k2="1" k3="1" k4="', k4,'"/>') : ''
-
             '<feComposite in="rotateResult" in2="colorChannelResult" operator="', k4Operator, '" result="compositeResult2"/>',
             '<feComposite in="compositeResult2" in2="compositeResult2" operator="arithmetic" k1="0" k2="1" k3="1" k4="' , k4, '"/>'
-            // '<feComposite in="rotateResult" in2="colorChannelResult" operator="arithmetic" k1="0" k2="1" k3="1" k4="0"/>'
         );
 
         uint scale = generateRandom(1, 201, seed+2);
