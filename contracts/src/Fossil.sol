@@ -17,10 +17,10 @@ contract Fossil {
         return rand % (max - min) + min;
     }
 
-    /* new */
     function generateSVG(uint seed) public view returns (string memory) {
-        /* Filter parameters */
-        uint baseFrequency = generateRandom(20, 251, seed -1);
+
+        // feTurbulence baseFrequency
+        uint baseFrequency = generateRandom(50, 251, seed -1);
         string memory baseFrequencyStr; 
         if (baseFrequency >= 0 && baseFrequency < 10) {
             baseFrequencyStr = string.concat('0.000', baseFrequency.toString()); // 0.0001 - 0.0010
@@ -33,25 +33,48 @@ contract Fossil {
             assert(false);
         }
 
-        // generate random k4 value between 0.01 and 0.50
+        // feComposite k4="<>"
         uint k4Uint = generateRandom(0, 76, seed - 2);
         string memory operator;
         string memory k4;
+        // if (generateRandom(0, 2, seed - 3) % 2 == 0) {
+        //     operator = 'out';
+        //     k4 = string.concat('-0.', (75 + k4Uint).toString());
+        // } else {
+        //     operator = 'in';
+        //     k4 = string.concat('0.', k4Uint.toString());
+        // }
+
         if (generateRandom(0, 2, seed - 3) % 2 == 0) {
             operator = 'out';
-            k4 = string.concat('-0.', (75 + k4Uint).toString());
-        } else{
-            operator = 'in';
+            k4 = string.concat('-0.', k4Uint.toString());
+        } else {
+            // operator = 'in';
+            operator = 'out';
             k4 = string.concat('0.', k4Uint.toString());
         }
 
-        // string memory k4 = string.concat('0.', );
         string memory feComposites = string.concat(
-            '<feComposite in="blurResult" in2="displacementResult" operator="', operator, '" result="compositeResult2"/>',
-            (seed % 3 == 0) ? string.concat('<feComposite in="compositeResult2" in2="compositeResult2" operator="arithmetic" k1="0" k2="1" k3="1" k4="', k4,'"/>') : ''
+            // '<feComposite in="blurResult" in2="displacementResult" operator="', operator, '" result="compositeResult2"/>',
+            // (seed % 3 == 0) ? string.concat('<feComposite in="compositeResult2" in2="compositeResult2" operator="arithmetic" k1="0" k2="1" k3="1" k4="', k4,'"/>') : ''
+
+            '<feComposite in="rotateResult" in2="colorChannelResult" operator="', operator, '" result="compositeResult2"/>'
+            '<feComposite in="rotateResult" in2="colorChannelResult" operator="arithmetic" k1="0" k2="1" k3="1" k4="' , k4, '"/>'
+            // '<feComposite in="rotateResult" in2="colorChannelResult" operator="arithmetic" k1="0" k2="1" k3="1" k4="0"/>'
         );
 
-        uint scale = generateRandom(0, 101, seed+2);
+        uint scale = generateRandom(1, 201, seed+2);
+
+        // randomly assign string variable to represent the animation length: 3s, 6s, 12s
+        string memory animationLength;
+        uint animationLengthUint = generateRandom(0, 3, seed+3);
+        if (animationLengthUint == 0) {
+            animationLength = '2s';
+        } else if (animationLengthUint == 1) {
+            animationLength = '5s';
+        } else {
+            animationLength = '10s';
+        }
 
         return
             // prettier-ignore
@@ -60,25 +83,11 @@ contract Fossil {
                     
                     '<filter id="a">',
                         // Blur for edges
-                        '<feGaussianBlur in="SourceGraphic" stdDeviation="10" result="blurResult"/>'
+                        // '<feGaussianBlur in="SourceGraphic" stdDeviation="10" result="blurResult"/>'
 
                         // Core filter
-                        '<feTurbulence in="blurResult" baseFrequency="', baseFrequencyStr, '" numOctaves="', generateRandom(1, 4, seed+1).toString(), '"',
+                        '<feTurbulence baseFrequency="', baseFrequencyStr, '" numOctaves="', generateRandom(1, 4, seed+1).toString(), '"',
                             'result="turbulenceResult"> </feTurbulence>',
-
-                        // For animation
-                        '<feColorMatrix type="hueRotate">',
-                          '<animate attributeName="values" from="0" to="360"',
-                                   'dur="3s" repeatCount="indefinite" result="colorMatrixResult"/>',
-                        '</feColorMatrix>',
-
-                        // For animation
-                        '<feColorMatrix type="matrix"',
-                           'values="0 0 0 0 0 ',
-                                   '0 0 0 0 0 ',
-                                   '0 0 0 0 0 ',
-                                   '1 0 0 0 0">',
-                        '</feColorMatrix>',
 
                         // For scale effect
                         '<feDisplacementMap scale="', scale.toString(),'" result="displacementResult">',
@@ -86,18 +95,33 @@ contract Fossil {
                             //          'dur="10s" repeatCount="indefinite" result="displacementResult"/>',
                         '</feDisplacementMap>',
 
+                        // For animation
+                        '<feColorMatrix type="hueRotate" result="rotateResult">',
+                          '<animate attributeName="values" from="0" to="360"',
+                                   'dur="', animationLength, '" repeatCount="indefinite" result="colorMatrixResult"/>',
+                        '</feColorMatrix>',
+
+                        // For animation
+                        '<feColorMatrix type="matrix" result="colorChannelResult" ',
+                           'values="0 0 0 0 0 ',
+                                   '0 0 0 0 0 ',
+                                   '0 0 0 0 0 ',
+                                   '1 0 0 0 0">',
+                        '</feColorMatrix>',
+
                         // Add the flatness
                         feComposites,
 
                         // Light
-                        '<feDiffuseLighting lighting-color="white" diffuseConstant="', generateRandom(1, 11, seed+6).toString(), '"',
-                                           'result="diffuseResult" surfaceScale="-5">',
-                          '<feDistantLight elevation="', generateRandom(0, 5, seed+4).toString(),'">',
+                        '<feDiffuseLighting lighting-color="white" diffuseConstant="', generateRandom(2, 3, seed+6).toString(), '"',
+                                           'result="diffuseResult" surfaceScale="', generateRandom(10, 30, seed+8).toString(),'">',
+                          '<feDistantLight elevation="', generateRandom(0, 30, seed+4).toString(),'">',
+                            // '<animate attributeName="azimuth" from="0" to="360"', 'dur="20s" repeatCount="indefinite"/>',
                           '</feDistantLight>',
                         '</feDiffuseLighting>',
 
-                        // // Inverse the colors
-                        // (generateRandom(0, 2, seed+5) % 2) == 0 ? '' : '<feColorMatrix type="luminanceToAlpha" />',
+                        // Invert the colors half the time
+                        (generateRandom(0, 2, seed+5) % 2) == 0 ? '' : '<feColorMatrix type="matrix" values="-1 0 0 0 1 0 -1 0 0 1 0 0 -1 0 1 0 0 0 1 0"/>',
                     '</filter>',
                   '</defs>',
                   '<rect width="1000" height="1000" filter="url(#a)"/>',
