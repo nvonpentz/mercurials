@@ -33,17 +33,53 @@ contract Fossil {
             assert(false);
         }
 
-        // feComposite k4="<>"
-        uint k4Uint = generateRandom(0, 51, seed - 2); // 76
+        // feComposites
         string memory k4Operator;
         string memory k4;
-        if (generateRandom(0, 2, seed - 3) % 2 == 0) {
+
+        // feComposite operator
+        if (generateRandom(0, 2, seed - 10) % 2 == 0) {
             k4Operator = 'out';
-            k4 = string.concat('-0.', k4Uint.toString());
         } else {
-            // k4Operator = 'in';
-            k4Operator = 'out';
+            k4Operator = 'in';
+        }
+
+        // feComposite k1, k2, k3
+        string memory k1; string memory k2; string memory k3;
+        // randomly choose which of k1, k2, or k3 to set to '1'
+        uint kIndex = generateRandom(1, 4, seed - 11);
+        if (kIndex == 1) {
+            k1 = '1';
+            k2 = generateRandom(0, 2, seed - 12) % 2 == 0 ? '0' : '1';
+            k3 = generateRandom(0, 2, seed - 13) % 2 == 0 ? '0' : '1';
+        } else if (kIndex == 2) {
+            k2 = '1';
+            k1 = generateRandom(0, 2, seed - 12) % 2 == 0 ? '0' : '1';
+            k3 = generateRandom(0, 2, seed - 13) % 2 == 0 ? '0' : '1';
+        } else if (kIndex == 3) {
+            k3 = '1';
+            k1 = generateRandom(0, 2, seed - 12) % 2 == 0 ? '0' : '1';
+            k2 = generateRandom(0, 2, seed - 13) % 2 == 0 ? '0' : '1';
+        } else {
+            console.log('should never happen');
+            assert(false);
+        }
+
+        // feComposite k4
+        uint k4Uint = generateRandom(0, 51, seed - 2);
+        if (k4Uint > 0 && k4Uint < 10) {
+            k4 = string.concat('0.0', k4Uint.toString());
+        } else if (k4Uint >= 10 && k4Uint < 100) {
             k4 = string.concat('0.', k4Uint.toString());
+        } else {
+            console.log('should never happen');
+            assert(false);
+        }
+
+        // randomly make k4 negative
+        if (generateRandom(0, 2, seed - 3) % 2 == 0) {
+            // k4Operator = 'out';
+            k4 = string.concat('-', k4);
         }
 
         string memory feComposites = string.concat(
