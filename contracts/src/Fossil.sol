@@ -71,7 +71,6 @@ contract Fossil is ERC721, LinearVRGDA {
         uint256 seed,
         uint256 nonce
     ) internal pure returns (string memory, uint) {
-
         // Randomly assign k1, k2, and k3 to '0' or '1'
         string memory k1;
         string memory k2;
@@ -311,39 +310,38 @@ contract Fossil is ERC721, LinearVRGDA {
         return
             string.concat(
                 '<svg width="500" height="500" viewBox="0 0 500 500" version="1.1" xmlns="http://www.w3.org/2000/svg">',
-                    '<filter id="a">',
-                        // Base turbulent noise
-                        feTurbulence,
-
-                        // For scale effect
-                        feDisplacementMap,
-
-                        // For 360 animation
-                        '<feColorMatrix type="hueRotate" result="rotateResult">',
-                          animationType == 1 ? string.concat(
-                              '<animate attributeName="values" from="0" to="360"',
-                                   'dur="', animationDuration, '" repeatCount="indefinite" result="colorMatrixResult"/>'
-                          ) : '',
-                        '</feColorMatrix>',
-                        '<feColorMatrix type="matrix" result="colorChannelResult" ',
-                           'values="0 0 0 0 0 ',
-                                   '0 0 0 0 0 ',
-                                   '0 0 0 0 0 ',
-                                   '1 0 0 0 0">',
-                        '</feColorMatrix>',
-
-                        // Add inside-out effect and flatness effect
-                        feComposites,
-
-                        // Light
-                        feDiffuseLighting,
-
-                        // Invert the colors half the time
-                        feColorMatrixForInversion,
-                    '</filter>',
-                  '</defs>',
-                  '<rect width="1000" height="1000" filter="url(#a)"/>',
-                '</svg>'
+                '<filter id="a">',
+                // Base turbulent noise
+                feTurbulence,
+                // For scale effect
+                feDisplacementMap,
+                // For 360 animation
+                '<feColorMatrix type="hueRotate" result="rotateResult">',
+                animationType == 1
+                    ? string.concat(
+                        '<animate attributeName="values" from="0" to="360"',
+                        'dur="',
+                        animationDuration,
+                        '" repeatCount="indefinite" result="colorMatrixResult"/>'
+                    )
+                    : "",
+                "</feColorMatrix>",
+                '<feColorMatrix type="matrix" result="colorChannelResult" ',
+                'values="0 0 0 0 0 ',
+                "0 0 0 0 0 ",
+                "0 0 0 0 0 ",
+                '1 0 0 0 0">',
+                "</feColorMatrix>",
+                // Add inside-out effect and flatness effect
+                feComposites,
+                // Light
+                feDiffuseLighting,
+                // Invert the colors half the time
+                feColorMatrixForInversion,
+                "</filter>",
+                "</defs>",
+                '<rect width="1000" height="1000" filter="url(#a)"/>',
+                "</svg>"
             );
     }
 }
