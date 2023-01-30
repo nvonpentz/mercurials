@@ -5,21 +5,45 @@ import {ERC721} from "openzeppelin-contracts/contracts/token/ERC721/ERC721.sol";
 import {Base64} from "openzeppelin-contracts/contracts/utils/Base64.sol";
 import {Strings} from "openzeppelin-contracts/contracts/utils/Strings.sol";
 import {console} from "forge-std/console.sol";
+import {LinearVRGDA} from "VRGDAs/LinearVRGDA.sol";
 
-contract Fossil {
+contract Fossil is ERC721, LinearVRGDA {
+    /*//////////////////////////////////////////////////////////////
+                              SALES STORAGE
+    //////////////////////////////////////////////////////////////*/
+
+    uint256 public totalSold; // The total number of tokens sold so far.
+
+    uint256 public immutable startTime = block.timestamp; // When VRGDA sales begun.
+
+    /*//////////////////////////////////////////////////////////////
+                               CONSTRUCTOR
+    //////////////////////////////////////////////////////////////*/
+
+    constructor()
+        ERC721(
+            "Example Linear NFT", // Name.
+            "LINEAR" // Symbol.
+        )
+        LinearVRGDA(
+            0.01e18, // Target price.
+            0.01e18, // Price decay percent.
+            48e18 // Per time unit.
+        )
+    {}
+
     using Strings for uint256;
 
-    function generateRandom(uint min, uint max, uint seed) public pure returns (uint) {
+    function generateRandom(uint min, uint max, uint seed, uint nonce) public pure returns (uint random, uint) {
         // safely generates a random uint between min and max using the seed
-        require(max > min, "max must be greater than min");
-        require(max != 0, "max must be greater than 0");
-        uint rand = uint(keccak256(abi.encodePacked(seed)));
-        return rand % (max - min) + min;
+        uint rand = uint(keccak256(abi.encodePacked(seed, nonce)));
+        nonce ++;
+        return (rand % (max - min) + min, nonce);
     }
 
-    function generateSVG(uint seed) public view returns (string memory) {
-        // feTurbulence baseFrequency
-        uint baseFrequency = generateRandom(50, 251, seed -1);
+    function generateBaseFrequency(uint256 seed, uint nonce) public pure returns (string memory, uint) {
+        uint baseFrequency;
+        (baseFrequency, nonce) = generateRandom(50, 251, seed, nonce);
         string memory baseFrequencyStr; 
         if (baseFrequency >= 0 && baseFrequency < 10) {
             baseFrequencyStr = string.concat('0.000', baseFrequency.toString()); // 0.0001 - 0.0010
@@ -28,76 +52,176 @@ contract Fossil {
         } else if (baseFrequency >= 100) {
             baseFrequencyStr = string.concat('0.0', baseFrequency.toString()); // 0.100 - 0.200
         } else {
-            console.log('should never happen');
             assert(false);
         }
 
-        // feComposites
-        string memory k4Operator;
-        string memory k4;
+        return (baseFrequencyStr, nonce);
+    }
 
+    function generateFeComposites(uint256 seed, uint nonce) public pure returns (string memory, uint) {
         // feComposite operator
-        if (generateRandom(0, 2, seed - 10) % 2 == 0) {
+        uint random;
+        (random, nonce) = generateRandom(0, 3, seed, nonce);
+        string memory k4Operator;
+        if (random % 2 == 0) {
             k4Operator = 'out';
         } else {
             k4Operator = 'in';
         }
 
-        // feComposite k1, k2, k3
-        string memory k1; string memory k2; string memory k3;
+        // feComposite
+        string memory k1;
+        string memory k2;
+        string memory k3;
+        string memory k4;
+
+        //  k1, k2, k3
+        (random, nonce) = generateRandom(0, 3, seed, nonce);
+        k1 = random % 2 == 0 ? '0' : '1';
+        (random, nonce) = generateRandom(0, 3, seed, nonce);
+        k2 = random % 2 == 0 ? '1' : '1';
+        (random, nonce) = generateRandom(0, 3, seed, nonce);
+        k3 = random % 2 == 0 ? '0' : '1';
+
         // randomly choose which of k1, k2, or k3 to set to '1'
-        uint kIndex = generateRandom(1, 4, seed - 11);
-        if (kIndex == 1) {
+        (random, nonce) = generateRandom(1, 4, seed, nonce);
+        if (random == 1) {
             k1 = '1';
-            k2 = generateRandom(0, 2, seed - 12) % 2 == 0 ? '0' : '1';
-            k3 = generateRandom(0, 2, seed - 13) % 2 == 0 ? '0' : '1';
-        } else if (kIndex == 2) {
+        } else if (random == 2) {
             k2 = '1';
-            k1 = generateRandom(0, 2, seed - 12) % 2 == 0 ? '0' : '1';
-            k3 = generateRandom(0, 2, seed - 13) % 2 == 0 ? '0' : '1';
-        } else if (kIndex == 3) {
+        } else if (random == 3) {
             k3 = '1';
-            k1 = generateRandom(0, 2, seed - 12) % 2 == 0 ? '0' : '1';
-            k2 = generateRandom(0, 2, seed - 13) % 2 == 0 ? '0' : '1';
         } else {
-            console.log('should never happen');
             assert(false);
         }
 
-        // feComposite k4
-        uint k4Uint = generateRandom(0, 51, seed - 2);
-        if (k4Uint > 0 && k4Uint < 10) {
-            k4 = string.concat('0.0', k4Uint.toString());
-        } else if (k4Uint >= 10 && k4Uint < 100) {
-            k4 = string.concat('0.', k4Uint.toString());
+        // k4
+        (random, nonce) = generateRandom(0, 51, seed, nonce);
+        if (random > 0 && random < 10) {
+            k4 = string.concat('0.0', random.toString());
+        } else if (random >= 10 && random < 100) {
+            k4 = string.concat('0.', random.toString());
         } else {
-            console.log('should never happen');
             assert(false);
         }
 
         // randomly make k4 negative
-        if (generateRandom(0, 2, seed - 3) % 2 == 0) {
-            // k4Operator = 'out';
+        uint k4NegativeRandom;
+        (k4NegativeRandom, nonce) = generateRandom(0, 2, seed, nonce);
+        if (k4NegativeRandom % 2 == 0) {
             k4 = string.concat('-', k4);
         }
 
         string memory feComposites = string.concat(
             '<feComposite in="rotateResult" in2="colorChannelResult" operator="', k4Operator, '" result="compositeResult2"/>',
-            '<feComposite in="compositeResult2" in2="compositeResult2" operator="arithmetic" k1="0" k2="1" k3="1" k4="' , k4, '"/>'
+            '<feComposite in="compositeResult2" in2="compositeResult2" operator="arithmetic" k1="', k1, '" k2="', k2, '" k3="', k3, '" k4="', k4, '"/>'
         );
 
-        uint scale = generateRandom(1, 201, seed+2);
+        return (feComposites, nonce);
+    }
+
+    function generateFeDisplacementMap(uint seed, uint nonce, bool animate, string memory animationDuration) public pure returns (string memory, uint) {
+        animationDuration;
+        uint scale;
+        (scale, nonce) = generateRandom(1, 201, seed, nonce);
+        return (
+            // prettier-ignore
+            string.concat(
+                '<feDisplacementMap scale="', scale.toString(),'" result="displacementResult">',
+                    animate ? string.concat('<animate attributeName="scale" from="-', scale.toString() ,'" to="', (scale+100).toString(), '"',
+                             'dur="', animationDuration, '" repeatCount="indefinite" result="displacementResult"/>') : '',
+                '</feDisplacementMap>'), nonce);
+    }
+
+    function generateAnimationDuration(uint seed, uint nonce) public pure returns (string memory, uint) {
+        uint animationDuration;
+        (animationDuration, nonce) = generateRandom(0, 3, seed, nonce);
+        string memory animationLengthStr;
+        if (animationDuration == 0) {
+            animationLengthStr = '3s';
+        } else if (animationDuration == 1) {
+            animationLengthStr = '6s';
+        } else if (animationDuration == 2) {
+            animationLengthStr = '12s';
+        } else {
+            assert(false);
+        }
+
+        return (animationLengthStr, nonce);
+    }
+
+    function generateFeTurbulence(uint seed, uint nonce) public pure returns (string memory, uint) {
+        string memory baseFrequencyStr;
+        (baseFrequencyStr, nonce) = generateBaseFrequency(seed, nonce);
+
+        uint numOctaves; 
+        (numOctaves, nonce) = generateRandom(1, 4, seed, 0);
+
+        return (
+            // prettier-ignore
+            string.concat(
+                '<feTurbulence baseFrequency="', baseFrequencyStr, '" numOctaves="', numOctaves.toString(), '"',
+                    'result="turbulenceResult"> </feTurbulence>'), nonce);
+
+    }
+
+    function generateFeDiffuseLighting(uint seed, uint nonce) public pure returns (string memory, uint) {
+        uint diffuseConstant;
+        (diffuseConstant, nonce) = generateRandom(2, 3, seed, nonce);
+
+        uint surfaceScale;
+        (surfaceScale, nonce) = generateRandom(10, 30, seed, nonce);
+
+        uint elevation;
+        (elevation, nonce) = generateRandom(0, 30, seed, nonce);
+        return (
+            // prettier-ignore
+            string.concat(
+                '<feDiffuseLighting lighting-color="white" diffuseConstant="', diffuseConstant.toString(), '"',
+                                   'result="diffuseResult" surfaceScale="', surfaceScale.toString(),'">',
+                  '<feDistantLight elevation="', elevation.toString(),'">'
+                    // '<animate attributeName="azimuth" from="0" to="360"', 'dur="20s" repeatCount="indefinite"/>',
+                  '</feDistantLight>',
+                '</feDiffuseLighting>'), nonce);
+    }
+
+    function generateFeColorMatrixForInversion(uint seed, uint nonce) public pure returns (string memory, uint) {
+        uint random;
+        (random, nonce) = generateRandom(0, 2, seed, nonce);
+        string memory feColorMatrixForInversion;
+        // apply inversion half the time
+        if (random == 0) {
+            feColorMatrixForInversion = '<feColorMatrix type="matrix" values="-1 0 0 0 1 0 -1 0 0 1 0 0 -1 0 1 0 0 0 1 0"/>';
+        }
+
+        return (feColorMatrixForInversion, nonce);
+    }
+
+    function generateSVG(uint seed) public pure returns (string memory) {
+        uint nonce = 0;
+
+        uint animationType;
+        (animationType, nonce) = generateRandom(0, 2, seed, nonce);
+
+        string memory animationDuration;
+        (animationDuration, nonce) = generateAnimationDuration(seed, nonce);
+
+        string memory feTurbulence;
+        (feTurbulence, nonce) = generateFeTurbulence(seed, nonce);
+
+        string memory feDisplacementMap;
+        (feDisplacementMap, nonce) = generateFeDisplacementMap(seed, nonce, animationType == 0, animationDuration);
+
+        string memory feComposites;
+        (feComposites, nonce) = generateFeComposites(seed, nonce);
+
+        string memory feDiffuseLighting;
+        (feDiffuseLighting, nonce) = generateFeDiffuseLighting(seed, nonce);
+
+        string memory feColorMatrixForInversion;
+        (feColorMatrixForInversion, nonce) = generateFeColorMatrixForInversion(seed, nonce);
 
         // randomly assign string variable to represent the animation length: 3s, 6s, 12s
-        string memory animationLength;
-        uint animationLengthUint = generateRandom(0, 3, seed+3);
-        if (animationLengthUint == 0) {
-            animationLength = '2s';
-        } else if (animationLengthUint == 1) {
-            animationLength = '5s';
-        } else {
-            animationLength = '10s';
-        }
 
         return
             // prettier-ignore
@@ -105,23 +229,18 @@ contract Fossil {
                 '<svg width="500" height="500" viewBox="0 0 500 500" version="1.1" xmlns="http://www.w3.org/2000/svg">',
                     
                     '<filter id="a">',
-                        // Blur for edges
-                        // '<feGaussianBlur in="SourceGraphic" stdDeviation="10" result="blurResult"/>'
-
                         // Core filter
-                        '<feTurbulence baseFrequency="', baseFrequencyStr, '" numOctaves="', generateRandom(1, 4, seed+1).toString(), '"',
-                            'result="turbulenceResult"> </feTurbulence>',
+                        feTurbulence,
 
                         // For scale effect
-                        '<feDisplacementMap scale="', scale.toString(),'" result="displacementResult">',
-                            // '<animate attributeName="scale" from="-', scale.toString() ,'" to="', (scale+100).toString(), '"',
-                            //          'dur="10s" repeatCount="indefinite" result="displacementResult"/>',
-                        '</feDisplacementMap>',
+                        feDisplacementMap,
 
                         // For animation
                         '<feColorMatrix type="hueRotate" result="rotateResult">',
-                          '<animate attributeName="values" from="0" to="360"',
-                                   'dur="', animationLength, '" repeatCount="indefinite" result="colorMatrixResult"/>',
+                          animationType == 1 ? string.concat(
+                              '<animate attributeName="values" from="0" to="360"',
+                                   'dur="', animationDuration, '" repeatCount="indefinite" result="colorMatrixResult"/>'
+                          ) : '',
                         '</feColorMatrix>',
 
                         // For animation
@@ -136,15 +255,10 @@ contract Fossil {
                         feComposites,
 
                         // Light
-                        '<feDiffuseLighting lighting-color="white" diffuseConstant="', generateRandom(2, 3, seed+6).toString(), '"',
-                                           'result="diffuseResult" surfaceScale="', generateRandom(10, 30, seed+8).toString(),'">',
-                          '<feDistantLight elevation="', generateRandom(0, 30, seed+4).toString(),'">',
-                            // '<animate attributeName="azimuth" from="0" to="360"', 'dur="20s" repeatCount="indefinite"/>',
-                          '</feDistantLight>',
-                        '</feDiffuseLighting>',
+                        feDiffuseLighting,
 
                         // Invert the colors half the time
-                        (generateRandom(0, 2, seed+5) % 2) == 0 ? '' : '<feColorMatrix type="matrix" values="-1 0 0 0 1 0 -1 0 0 1 0 0 -1 0 1 0 0 0 1 0"/>',
+                        feColorMatrixForInversion,
                     '</filter>',
                   '</defs>',
                   '<rect width="1000" height="1000" filter="url(#a)"/>',
