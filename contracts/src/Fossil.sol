@@ -121,15 +121,29 @@ contract Fossil is ERC721, LinearVRGDA {
     }
 
     function generateFeDisplacementMap(uint seed, uint nonce, bool animate, string memory animationDuration) public pure returns (string memory, uint) {
-        animationDuration;
         uint scale;
         (scale, nonce) = generateRandom(1, 201, seed, nonce);
+        string memory from;
+        string memory to;
+        from = scale.toString();
+        to = (scale+100).toString();
+        uint random;
+        (random, nonce) = generateRandom(0, 2, seed, nonce);
+        if (random % 2 == 0) {
+            (to, from) = (from, to);
+        }
+
         return (
             // prettier-ignore
             string.concat(
                 '<feDisplacementMap scale="', scale.toString(),'" result="displacementResult">',
-                    animate ? string.concat('<animate attributeName="scale" from="-', scale.toString() ,'" to="', (scale+100).toString(), '"',
-                             'dur="', animationDuration, '" repeatCount="indefinite" result="displacementResult"/>') : '',
+                    animate
+                        ? string.concat(
+                            '<animate attributeName="scale" from="', from,
+                                '" to="', to, '"',
+                                'dur="', animationDuration,
+                                '" repeatCount="indefinite" result="displacementResult"/>')
+                        : '',
                 '</feDisplacementMap>'), nonce);
     }
 
