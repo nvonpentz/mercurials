@@ -62,11 +62,11 @@ contract Fossil is ERC721, LinearVRGDA {
         // feComposite operator
         uint random;
         (random, nonce) = generateRandom(0, 3, seed, nonce);
-        string memory k4Operator;
+        string memory operator;
         if (random % 2 == 0) {
-            k4Operator = 'out';
+            operator = 'out';
         } else {
-            k4Operator = 'in';
+            operator = 'in';
         }
 
         // feComposite
@@ -108,12 +108,12 @@ contract Fossil is ERC721, LinearVRGDA {
         // randomly make k4 negative
         uint k4NegativeRandom;
         (k4NegativeRandom, nonce) = generateRandom(0, 2, seed, nonce);
-        if (k4NegativeRandom % 2 == 0) {
+        if ((k4NegativeRandom % 2 == 0) ) {
             k4 = string.concat('-', k4);
         }
 
         string memory feComposites = string.concat(
-            '<feComposite in="rotateResult" in2="colorChannelResult" operator="', k4Operator, '" result="compositeResult2"/>',
+            '<feComposite in="rotateResult" in2="colorChannelResult" operator="', operator, '" result="compositeResult2"/>',
             '<feComposite in="compositeResult2" in2="compositeResult2" operator="arithmetic" k1="', k1, '" k2="', k2, '" k3="', k3, '" k4="', k4, '"/>'
         );
 
