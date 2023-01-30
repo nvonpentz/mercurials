@@ -34,23 +34,31 @@ contract Fossil is ERC721, LinearVRGDA {
 
     using Strings for uint256;
 
-    function generateRandom(uint min, uint max, uint seed, uint nonce) public pure returns (uint random, uint) {
+    function generateRandom(
+        uint min,
+        uint max,
+        uint seed,
+        uint nonce
+    ) public pure returns (uint random, uint) {
         // safely generates a random uint between min and max using the seed
         uint rand = uint(keccak256(abi.encodePacked(seed, nonce)));
-        nonce ++;
-        return (rand % (max - min) + min, nonce);
+        nonce++;
+        return ((rand % (max - min)) + min, nonce);
     }
 
-    function generateBaseFrequency(uint256 seed, uint nonce) public pure returns (string memory, uint) {
+    function generateBaseFrequency(
+        uint256 seed,
+        uint nonce
+    ) public pure returns (string memory, uint) {
         uint baseFrequency;
         (baseFrequency, nonce) = generateRandom(50, 251, seed, nonce);
-        string memory baseFrequencyStr; 
+        string memory baseFrequencyStr;
         if (baseFrequency >= 0 && baseFrequency < 10) {
-            baseFrequencyStr = string.concat('0.000', baseFrequency.toString()); // 0.0001 - 0.0010
+            baseFrequencyStr = string.concat("0.000", baseFrequency.toString()); // 0.0001 - 0.0010
         } else if (baseFrequency >= 10 && baseFrequency < 100) {
-            baseFrequencyStr = string.concat('0.00', baseFrequency.toString()); // 0.010 - 0.100
+            baseFrequencyStr = string.concat("0.00", baseFrequency.toString()); // 0.010 - 0.100
         } else if (baseFrequency >= 100) {
-            baseFrequencyStr = string.concat('0.0', baseFrequency.toString()); // 0.100 - 0.200
+            baseFrequencyStr = string.concat("0.0", baseFrequency.toString()); // 0.100 - 0.200
         } else {
             assert(false);
         }
@@ -58,15 +66,18 @@ contract Fossil is ERC721, LinearVRGDA {
         return (baseFrequencyStr, nonce);
     }
 
-    function generateFeComposites(uint256 seed, uint nonce) public pure returns (string memory, uint) {
+    function generateFeComposites(
+        uint256 seed,
+        uint nonce
+    ) public pure returns (string memory, uint) {
         // feComposite operator
         uint random;
         (random, nonce) = generateRandom(0, 3, seed, nonce);
         string memory operator;
         if (random % 2 == 0) {
-            operator = 'out';
+            operator = "out";
         } else {
-            operator = 'in';
+            operator = "in";
         }
 
         // feComposite
@@ -77,20 +88,20 @@ contract Fossil is ERC721, LinearVRGDA {
 
         //  k1, k2, k3
         (random, nonce) = generateRandom(0, 3, seed, nonce);
-        k1 = random % 2 == 0 ? '0' : '1';
+        k1 = random % 2 == 0 ? "0" : "1";
         (random, nonce) = generateRandom(0, 3, seed, nonce);
-        k2 = random % 2 == 0 ? '1' : '1';
+        k2 = random % 2 == 0 ? "1" : "1";
         (random, nonce) = generateRandom(0, 3, seed, nonce);
-        k3 = random % 2 == 0 ? '0' : '1';
+        k3 = random % 2 == 0 ? "0" : "1";
 
         // randomly choose which of k1, k2, or k3 to set to '1'
         (random, nonce) = generateRandom(1, 4, seed, nonce);
         if (random == 1) {
-            k1 = '1';
+            k1 = "1";
         } else if (random == 2) {
-            k2 = '1';
+            k2 = "1";
         } else if (random == 3) {
-            k3 = '1';
+            k3 = "1";
         } else {
             assert(false);
         }
@@ -98,9 +109,9 @@ contract Fossil is ERC721, LinearVRGDA {
         // k4
         (random, nonce) = generateRandom(0, 51, seed, nonce);
         if (random > 0 && random < 10) {
-            k4 = string.concat('0.0', random.toString());
+            k4 = string.concat("0.0", random.toString());
         } else if (random >= 10 && random < 100) {
-            k4 = string.concat('0.', random.toString());
+            k4 = string.concat("0.", random.toString());
         } else {
             assert(false);
         }
@@ -108,25 +119,40 @@ contract Fossil is ERC721, LinearVRGDA {
         // randomly make k4 negative
         uint k4NegativeRandom;
         (k4NegativeRandom, nonce) = generateRandom(0, 2, seed, nonce);
-        if ((k4NegativeRandom % 2 == 0) ) {
-            k4 = string.concat('-', k4);
+        if ((k4NegativeRandom % 2 == 0)) {
+            k4 = string.concat("-", k4);
         }
 
         string memory feComposites = string.concat(
-            '<feComposite in="rotateResult" in2="colorChannelResult" operator="', operator, '" result="compositeResult2"/>',
-            '<feComposite in="compositeResult2" in2="compositeResult2" operator="arithmetic" k1="', k1, '" k2="', k2, '" k3="', k3, '" k4="', k4, '"/>'
+            '<feComposite in="rotateResult" in2="colorChannelResult" operator="',
+            operator,
+            '" result="compositeResult2"/>',
+            '<feComposite in="compositeResult2" in2="compositeResult2" operator="arithmetic" k1="',
+            k1,
+            '" k2="',
+            k2,
+            '" k3="',
+            k3,
+            '" k4="',
+            k4,
+            '"/>'
         );
 
         return (feComposites, nonce);
     }
 
-    function generateFeDisplacementMap(uint seed, uint nonce, bool animate, string memory animationDuration) public pure returns (string memory, uint) {
+    function generateFeDisplacementMap(
+        uint seed,
+        uint nonce,
+        bool animate,
+        string memory animationDuration
+    ) public pure returns (string memory, uint) {
         uint scale;
         (scale, nonce) = generateRandom(1, 201, seed, nonce);
         string memory from;
         string memory to;
         from = scale.toString();
-        to = (scale+100).toString();
+        to = (scale + 100).toString();
         uint random;
         (random, nonce) = generateRandom(0, 2, seed, nonce);
         if (random % 2 == 0) {
@@ -144,19 +170,24 @@ contract Fossil is ERC721, LinearVRGDA {
                                 'dur="', animationDuration,
                                 '" repeatCount="indefinite" result="displacementResult"/>')
                         : '',
-                '</feDisplacementMap>'), nonce);
+                '</feDisplacementMap>'),
+            nonce
+        );
     }
 
-    function generateAnimationDuration(uint seed, uint nonce) public pure returns (string memory, uint) {
+    function generateAnimationDuration(
+        uint seed,
+        uint nonce
+    ) public pure returns (string memory, uint) {
         uint animationDuration;
         (animationDuration, nonce) = generateRandom(0, 3, seed, nonce);
         string memory animationLengthStr;
         if (animationDuration == 0) {
-            animationLengthStr = '3s';
+            animationLengthStr = "3s";
         } else if (animationDuration == 1) {
-            animationLengthStr = '6s';
+            animationLengthStr = "6s";
         } else if (animationDuration == 2) {
-            animationLengthStr = '12s';
+            animationLengthStr = "12s";
         } else {
             assert(false);
         }
@@ -164,22 +195,29 @@ contract Fossil is ERC721, LinearVRGDA {
         return (animationLengthStr, nonce);
     }
 
-    function generateFeTurbulence(uint seed, uint nonce) public pure returns (string memory, uint) {
+    function generateFeTurbulence(
+        uint seed,
+        uint nonce
+    ) public pure returns (string memory, uint) {
         string memory baseFrequencyStr;
         (baseFrequencyStr, nonce) = generateBaseFrequency(seed, nonce);
 
-        uint numOctaves; 
+        uint numOctaves;
         (numOctaves, nonce) = generateRandom(1, 4, seed, 0);
 
         return (
             // prettier-ignore
             string.concat(
                 '<feTurbulence baseFrequency="', baseFrequencyStr, '" numOctaves="', numOctaves.toString(), '"',
-                    'result="turbulenceResult"> </feTurbulence>'), nonce);
-
+                    'result="turbulenceResult"> </feTurbulence>'),
+            nonce
+        );
     }
 
-    function generateFeDiffuseLighting(uint seed, uint nonce) public pure returns (string memory, uint) {
+    function generateFeDiffuseLighting(
+        uint seed,
+        uint nonce
+    ) public pure returns (string memory, uint) {
         uint diffuseConstant;
         (diffuseConstant, nonce) = generateRandom(2, 3, seed, nonce);
 
@@ -196,10 +234,15 @@ contract Fossil is ERC721, LinearVRGDA {
                   '<feDistantLight elevation="', elevation.toString(),'">'
                     // '<animate attributeName="azimuth" from="0" to="360"', 'dur="20s" repeatCount="indefinite"/>',
                   '</feDistantLight>',
-                '</feDiffuseLighting>'), nonce);
+                '</feDiffuseLighting>'),
+            nonce
+        );
     }
 
-    function generateFeColorMatrixForInversion(uint seed, uint nonce) public pure returns (string memory, uint) {
+    function generateFeColorMatrixForInversion(
+        uint seed,
+        uint nonce
+    ) public pure returns (string memory, uint) {
         uint random;
         (random, nonce) = generateRandom(0, 2, seed, nonce);
         string memory feColorMatrixForInversion;
@@ -224,7 +267,12 @@ contract Fossil is ERC721, LinearVRGDA {
         (feTurbulence, nonce) = generateFeTurbulence(seed, nonce);
 
         string memory feDisplacementMap;
-        (feDisplacementMap, nonce) = generateFeDisplacementMap(seed, nonce, animationType == 0, animationDuration);
+        (feDisplacementMap, nonce) = generateFeDisplacementMap(
+            seed,
+            nonce,
+            animationType == 0,
+            animationDuration
+        );
 
         string memory feComposites;
         (feComposites, nonce) = generateFeComposites(seed, nonce);
@@ -233,7 +281,10 @@ contract Fossil is ERC721, LinearVRGDA {
         (feDiffuseLighting, nonce) = generateFeDiffuseLighting(seed, nonce);
 
         string memory feColorMatrixForInversion;
-        (feColorMatrixForInversion, nonce) = generateFeColorMatrixForInversion(seed, nonce);
+        (feColorMatrixForInversion, nonce) = generateFeColorMatrixForInversion(
+            seed,
+            nonce
+        );
 
         // randomly assign string variable to represent the animation length: 3s, 6s, 12s
 
