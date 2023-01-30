@@ -6,16 +6,14 @@ import {Base64} from "openzeppelin-contracts/contracts/utils/Base64.sol";
 import {Strings} from "openzeppelin-contracts/contracts/utils/Strings.sol";
 import {console} from "forge-std/console.sol";
 import {LinearVRGDA} from "VRGDAs/LinearVRGDA.sol";
+import {toDaysWadUnsafe} from "solmate/utils/SignedWadMath.sol";
+import {SafeTransferLib} from "solmate/utils/SafeTransferLib.sol";
 
 contract Fossil is ERC721, LinearVRGDA {
     using Strings for uint256;
 
     uint256 public totalSold; // The total number of tokens sold so far.
     uint256 public immutable startTime = block.timestamp; // When VRGDA sales begun.
-
-    /*//////////////////////////////////////////////////////////////
-                               CONSTRUCTOR
-    //////////////////////////////////////////////////////////////*/
 
     constructor()
         ERC721(
@@ -28,6 +26,93 @@ contract Fossil is ERC721, LinearVRGDA {
             48e18 // Per time unit.
         )
     {}
+
+    function mint() external payable returns (uint256 mintedId) {
+        unchecked {
+            // Note: By using toDaysWadUnsafe(block.timestamp - startTime) we are establishing that 1 "unit of time" is 1 day.
+            uint256 price = getVRGDAPrice(toDaysWadUnsafe(block.timestamp - startTime), mintedId = totalSold++);
+
+            require(msg.value >= price, "UNDERPAID"); // Don't allow underpaying.
+
+            _mint(msg.sender, mintedId); // Mint the NFT using mintedId.
+
+            // Note: We do this at the end to avoid creating a reentrancy vector.
+            // Refund the user any ETH they spent over the current price of the NFT.
+            // Unchecked is safe here because we validate msg.value >= price above.
+            SafeTransferLib.safeTransferETH(msg.sender, msg.value - price);
+        }
+    }
+
+    /// @notice Generates the entire SVG
+    function generateSVG(uint256 seed) public pure returns (string memory) {
+        uint256 nonce = 0;
+
+        uint256 animationType;
+        (animationType, nonce) = generateRandom(0, 2, seed, nonce);
+
+        string memory animationDuration;
+        (animationDuration, nonce) = generateAnimationDuration(seed, nonce);
+
+        string memory feTurbulence;
+        (feTurbulence, nonce) = generateFeTurbulence(seed, nonce);
+
+        string memory feDisplacementMap;
+        (feDisplacementMap, nonce) = generateFeDisplacementMap(
+            seed,
+            nonce,
+            animationType == 0,
+            animationDuration
+        );
+
+        string memory feComposites;
+        (feComposites, nonce) = generateFeComposites(seed, nonce);
+
+        string memory feDiffuseLighting;
+        (feDiffuseLighting, nonce) = generateFeDiffuseLighting(seed, nonce);
+
+        string memory feColorMatrixForInversion;
+        (feColorMatrixForInversion, nonce) = generateFeColorMatrixForInversion(
+            seed,
+            nonce
+        );
+
+        return
+            string.concat(
+                '<svg width="500" height="500" viewBox="0 0 500 500" version="1.1" xmlns="http://www.w3.org/2000/svg">',
+                '<filter id="a">',
+                // Base turbulent noise
+                feTurbulence,
+                // For scale effect
+                feDisplacementMap,
+                // For 360 animation
+                '<feColorMatrix type="hueRotate" result="rotateResult">',
+                animationType == 1
+                    ? string.concat(
+                        '<animate attributeName="values" from="0" to="360"',
+                        'dur="',
+                        animationDuration,
+                        '" repeatCount="indefinite" result="colorMatrixResult"/>'
+                    )
+                    : "",
+                "</feColorMatrix>",
+                '<feColorMatrix type="matrix" result="colorChannelResult" ',
+                'values="0 0 0 0 0 ',
+                "0 0 0 0 0 ",
+                "0 0 0 0 0 ",
+                '1 0 0 0 0">',
+                "</feColorMatrix>",
+                // Add inside-out effect and flatness effect
+                feComposites,
+                // Light
+                feDiffuseLighting,
+                // Invert the colors half the time
+                feColorMatrixForInversion,
+                "</filter>",
+                "</defs>",
+                '<rect width="1000" height="1000" filter="url(#a)"/>',
+                "</svg>"
+            );
+    }
 
     /// @notice Generates a psuedo-random number from min (includsive) to max (exclusive)
     /// @param seed The seed to use for the random number (the same across multiple calls)
@@ -272,76 +357,5 @@ contract Fossil is ERC721, LinearVRGDA {
         }
 
         return (feColorMatrixForInversion, nonce);
-    }
-
-    // @notice Generates the entire SVG
-    function generateSVG(uint256 seed) public pure returns (string memory) {
-        uint256 nonce = 0;
-
-        uint256 animationType;
-        (animationType, nonce) = generateRandom(0, 2, seed, nonce);
-
-        string memory animationDuration;
-        (animationDuration, nonce) = generateAnimationDuration(seed, nonce);
-
-        string memory feTurbulence;
-        (feTurbulence, nonce) = generateFeTurbulence(seed, nonce);
-
-        string memory feDisplacementMap;
-        (feDisplacementMap, nonce) = generateFeDisplacementMap(
-            seed,
-            nonce,
-            animationType == 0,
-            animationDuration
-        );
-
-        string memory feComposites;
-        (feComposites, nonce) = generateFeComposites(seed, nonce);
-
-        string memory feDiffuseLighting;
-        (feDiffuseLighting, nonce) = generateFeDiffuseLighting(seed, nonce);
-
-        string memory feColorMatrixForInversion;
-        (feColorMatrixForInversion, nonce) = generateFeColorMatrixForInversion(
-            seed,
-            nonce
-        );
-
-        return
-            string.concat(
-                '<svg width="500" height="500" viewBox="0 0 500 500" version="1.1" xmlns="http://www.w3.org/2000/svg">',
-                '<filter id="a">',
-                // Base turbulent noise
-                feTurbulence,
-                // For scale effect
-                feDisplacementMap,
-                // For 360 animation
-                '<feColorMatrix type="hueRotate" result="rotateResult">',
-                animationType == 1
-                    ? string.concat(
-                        '<animate attributeName="values" from="0" to="360"',
-                        'dur="',
-                        animationDuration,
-                        '" repeatCount="indefinite" result="colorMatrixResult"/>'
-                    )
-                    : "",
-                "</feColorMatrix>",
-                '<feColorMatrix type="matrix" result="colorChannelResult" ',
-                'values="0 0 0 0 0 ',
-                "0 0 0 0 0 ",
-                "0 0 0 0 0 ",
-                '1 0 0 0 0">',
-                "</feColorMatrix>",
-                // Add inside-out effect and flatness effect
-                feComposites,
-                // Light
-                feDiffuseLighting,
-                // Invert the colors half the time
-                feColorMatrixForInversion,
-                "</filter>",
-                "</defs>",
-                '<rect width="1000" height="1000" filter="url(#a)"/>',
-                "</svg>"
-            );
     }
 }
