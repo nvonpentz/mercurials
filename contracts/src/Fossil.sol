@@ -160,17 +160,24 @@ contract Fossil is ERC721, LinearVRGDA {
         }
 
         return (
-            // prettier-ignore
             string.concat(
-                '<feDisplacementMap scale="', scale.toString(),'" result="displacementResult">',
-                    animate
-                        ? string.concat(
-                            '<animate attributeName="scale" from="', from,
-                                '" to="', to, '"',
-                                'dur="', animationDuration,
-                                '" repeatCount="indefinite" result="displacementResult"/>')
-                        : '',
-                '</feDisplacementMap>'),
+                '<feDisplacementMap scale="',
+                scale.toString(),
+                '" result="displacementResult">',
+                animate
+                    ? string.concat(
+                        '<animate attributeName="scale" from="',
+                        from,
+                        '" to="',
+                        to,
+                        '"',
+                        'dur="',
+                        animationDuration,
+                        '" repeatCount="indefinite" result="displacementResult"/>'
+                    )
+                    : "",
+                "</feDisplacementMap>"
+            ),
             nonce
         );
     }
@@ -206,10 +213,14 @@ contract Fossil is ERC721, LinearVRGDA {
         (numOctaves, nonce) = generateRandom(1, 4, seed, 0);
 
         return (
-            // prettier-ignore
             string.concat(
-                '<feTurbulence baseFrequency="', baseFrequencyStr, '" numOctaves="', numOctaves.toString(), '"',
-                    'result="turbulenceResult"> </feTurbulence>'),
+                '<feTurbulence baseFrequency="',
+                baseFrequencyStr,
+                '" numOctaves="',
+                numOctaves.toString(),
+                '"',
+                'result="turbulenceResult"> </feTurbulence>'
+            ),
             nonce
         );
     }
@@ -227,14 +238,15 @@ contract Fossil is ERC721, LinearVRGDA {
         uint elevation;
         (elevation, nonce) = generateRandom(0, 30, seed, nonce);
         return (
-            // prettier-ignore
             string.concat(
-                '<feDiffuseLighting lighting-color="white" diffuseConstant="', diffuseConstant.toString(), '"',
-                                   'result="diffuseResult" surfaceScale="', surfaceScale.toString(),'">',
-                  '<feDistantLight elevation="', elevation.toString(),'">'
-                    // '<animate attributeName="azimuth" from="0" to="360"', 'dur="20s" repeatCount="indefinite"/>',
-                  '</feDistantLight>',
-                '</feDiffuseLighting>'),
+                '<feDiffuseLighting lighting-color="white" diffuseConstant="',
+                diffuseConstant.toString(),
+                '"result="diffuseResult" surfaceScale="',
+                surfaceScale.toString(),
+                '"><feDistantLight elevation="',
+                elevation.toString(),
+                '"></feDistantLight></feDiffuseLighting>'
+            ),
             nonce
         );
     }
@@ -289,7 +301,6 @@ contract Fossil is ERC721, LinearVRGDA {
         // randomly assign string variable to represent the animation length: 3s, 6s, 12s
 
         return
-            // prettier-ignore
             string.concat(
                 '<svg width="500" height="500" viewBox="0 0 500 500" version="1.1" xmlns="http://www.w3.org/2000/svg">',
                     
