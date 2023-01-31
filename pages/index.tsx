@@ -4,7 +4,7 @@ import Head from 'next/head';
 import styles from '../styles/Home.module.css';
 import { address } from '../contracts/deploys/fossil.31337.address.json';
 import { abi } from '../contracts/deploys/fossil.31337.compilerOutput.json';
-import { useContractRead, useBlockNumber } from 'wagmi'
+import { useContractRead, useContractWrite } from 'wagmi'
 import Image from 'next/image'
 import { useState, useEffect } from 'react';
 
@@ -12,11 +12,19 @@ const maxImages = 3;
 
 const Home: NextPage = () => {
   const [blockNumber, setBlockNumber] = useState(0); // added state to keep track of the current value
+  // const { data, error, isError, isLoading, isFetched, isFetching } = useContractRead({
+  //   address: address,
+  //   abi: abi,
+  //   functionName: 'generateSVG',
+  //   args: [blockNumber] // use the current value of blockNumber
+  // });
+
   const { data, error, isError, isLoading, isFetched, isFetching } = useContractRead({
     address: address,
     abi: abi,
-    functionName: 'generateSVG',
-    args: [blockNumber] // use the current value of blockNumber
+    functionName: 'nextToken',
+    args: [],
+    watch: true
   });
 
   const handleButtonClick = () => {
@@ -38,14 +46,14 @@ const Home: NextPage = () => {
           <ConnectButton /> 
         </nav>}
           <main className={styles.main}>
-          {data && <div dangerouslySetInnerHTML={{ __html: data }} />}
+          {data && <div dangerouslySetInnerHTML={{ __html: data[1] }} />}
           {false && <Image
                       className={styles.display}
                       src={data}
                       width={500}
                       height={500}
             />}
-          <button onClick={handleButtonClick}>Increment</button>
+          { false && <button onClick={handleButtonClick}>Increment</button>}
         </main>
       </div>
     </div>
