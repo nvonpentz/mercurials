@@ -15,8 +15,7 @@ contract Fossil is ERC721, LinearVRGDA {
     uint256 public totalSold; // The total number of tokens sold so far.
     uint256 public immutable startTime = block.timestamp; // When VRGDA sales begun.
 
-    constructor(
-    )
+    constructor()
         ERC721(
             "Example Linear NFT", // Name.
             "LINEAR" // Symbol.
@@ -39,10 +38,7 @@ contract Fossil is ERC721, LinearVRGDA {
             expectedParentBlockhash == parentBlockhash,
             "Invalid or expired blockhash"
         );
-        require(
-            expectedTokenId == totalSold,
-            "Invalid or expired token ID"
-        );
+        require(expectedTokenId == totalSold, "Invalid or expired token ID");
 
         unchecked {
             // Validate the purchase request against the VRGDA rules.
@@ -61,16 +57,23 @@ contract Fossil is ERC721, LinearVRGDA {
 
     /// @dev This function should be called using the `pending` block tag.
     /// @dev The tokenId and hash should passed as arguments to the `mint` function.
-    function nextToken() external view returns (
-        uint256 tokenId,
-        string memory svg,
-        uint256 price,
-        bytes32 hash
-    ) {
+    function nextToken()
+        external
+        view
+        returns (
+            uint256 tokenId,
+            string memory svg,
+            uint256 price,
+            bytes32 hash
+        )
+    {
         tokenId = totalSold;
         uint seed = generateSeed(tokenId);
         svg = generateSVG(seed);
-        price = getVRGDAPrice(toDaysWadUnsafe(block.timestamp - startTime), tokenId);
+        price = getVRGDAPrice(
+            toDaysWadUnsafe(block.timestamp - startTime),
+            tokenId
+        );
         hash = blockhash(block.number - 1);
 
         return (tokenId, svg, price, hash);
@@ -78,13 +81,20 @@ contract Fossil is ERC721, LinearVRGDA {
 
     function getCurrentVRGDAPrice() public view returns (uint256) {
         // Note: By using toDaysWadUnsafe(block.timestamp - startTime) we are establishing that 1 "unit of time" is 1 day.
-        return getVRGDAPrice(toDaysWadUnsafe(block.timestamp - startTime), totalSold);
+        return
+            getVRGDAPrice(
+                toDaysWadUnsafe(block.timestamp - startTime),
+                totalSold
+            );
     }
 
     function generateSeed(uint256 tokenId) public view returns (uint) {
-        return uint256(
-            keccak256(abi.encodePacked(blockhash(block.number - 1), tokenId))
-        );
+        return
+            uint256(
+                keccak256(
+                    abi.encodePacked(blockhash(block.number - 1), tokenId)
+                )
+            );
     }
 
     /// @notice Generates the entire SVG

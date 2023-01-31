@@ -13,6 +13,7 @@ contract FossilTest is Test {
     function setUp() public {
         fossil = new Fossil();
     }
+
     receive() external payable {}
 
     // function testGenerateRandom2() public {
@@ -51,8 +52,7 @@ contract FossilTest is Test {
         assertEq(tokenId, 0); // tokenId should start at 0
         assertGt(bytes(svg).length, 0); // SVG should be non-empty
         assertGt(price, 0); // price should be greater than 0
-        assertEq(hash, blockhash(block.number-1)); // hash should be the previous blockhash
-
+        assertEq(hash, blockhash(block.number - 1)); // hash should be the previous blockhash
     }
 
     function testMint() public {
@@ -68,18 +68,18 @@ contract FossilTest is Test {
 
         // Attempt to mint with incorrect token ID
         vm.expectRevert("Invalid or expired token ID");
-        fossil.mint{value: price }(tokenId+1, hash);
+        fossil.mint{value: price}(tokenId + 1, hash);
 
         // Attempt to mint with incorrect hash
         vm.expectRevert("Invalid or expired blockhash");
-        fossil.mint{value: price }(tokenId, blockhash(block.number));
+        fossil.mint{value: price}(tokenId, blockhash(block.number));
 
         // Attempt to mint with too little ETH
         vm.expectRevert("Insufficient funds");
-        fossil.mint{value: price - 1 }(tokenId, hash);
+        fossil.mint{value: price - 1}(tokenId, hash);
 
         // Mint with correct values
-        fossil.mint{value: price }(tokenId, hash);
+        fossil.mint{value: price}(tokenId, hash);
         assertEq(fossil.balanceOf(address(this)), 1); // Token should be owned by this contract
         assertEq(address(this).balance, balanceBefore - price); // ETH should have gone to the token contract
         // assertEq(fossil.tokenURI(tokenId), TODO); // TODO
@@ -88,7 +88,7 @@ contract FossilTest is Test {
         // Mint with too much ETH
         balanceBefore = address(this).balance;
         (tokenId, svg, price, hash) = fossil.nextToken();
-        fossil.mint{value: price + 1 }(tokenId, hash);
+        fossil.mint{value: price + 1}(tokenId, hash);
         assertEq(address(this).balance, balanceBefore - price); // Extra ETH should have been refunded
     }
 }
