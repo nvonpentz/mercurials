@@ -14,7 +14,6 @@
   $ npm run dev
   ```
 
-
 https://yoksel.github.io/svg-gradient-map/#/
 
 color gen - http://devmag.org.za/2012/07/29/how-to-choose-colours-procedurally-algorithms/

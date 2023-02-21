@@ -4,11 +4,7 @@
   align-items: center;
   justify-content: center;
   min-height: 100vh;
-  /* background-color: #f0f0f0; */
   background-color: white;
-}
-
-.column {
 }
 
 .navbar {
@@ -22,35 +18,4 @@
   display: flex;
   flex-direction: column;
   align-items: center;
-}
-
-.display {
-  width: 100%;
-  height: 100%;
-
-  /* width: 80%; */
-  /* width: 100%; */
-  /* height: auto; */
-}
-
-.menu {
-  width: 20%;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-}
-
-.pastImages {
-  width: 100%;
-}
-
-.pastImagesGrid {
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: center;
-  width: 100%;
-}
-
-.pastImage {
-  width: 30%;
 }
