@@ -7,6 +7,7 @@ import { goerli, foundry } from 'wagmi/chains';
 import { alchemyProvider } from 'wagmi/providers/alchemy';
 import { jsonRpcProvider } from 'wagmi/providers/jsonRpc';
 import { publicProvider } from 'wagmi/providers/public';
+import { useEffect, useState } from 'react';
 
 const { chains, provider, webSocketProvider } = configureChains(
   [
@@ -39,19 +40,26 @@ const wagmiClient = createClient({
 });
 
 function MyApp({ Component, pageProps }: AppProps) {
+  const [ready, setReady] = useState(false);
+  useEffect(() => {
+    setReady(true);
+  }, []);
+
   return (
-    <WagmiConfig client={wagmiClient}>
-      <RainbowKitProvider
-        chains={chains}
-        theme={lightTheme({
-          accentColor: '#7b3fe4',
-          accentColorForeground: 'white',
-          borderRadius: 'medium',
-        })}
-      >
-        <Component {...pageProps} />
-      </RainbowKitProvider>
-    </WagmiConfig>
+    <>
+    { ready ? (<WagmiConfig client={wagmiClient}>
+                <RainbowKitProvider
+                  chains={chains}
+                  theme={lightTheme({
+                    accentColor: '#7b3fe4',
+                    accentColorForeground: 'white',
+                    borderRadius: 'medium',
+                  })}
+                >
+                  <Component {...pageProps} />
+                </RainbowKitProvider>
+              </WagmiConfig>) : null }
+    </>
   );
 }
 
