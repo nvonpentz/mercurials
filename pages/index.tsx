@@ -16,13 +16,13 @@ import { useState, useEffect } from 'react';
 import { ethers } from 'ethers';
 
 const Home: NextPage = () => {
+  const [transactionHash, setTransactionHash] = useState('');
   const { data: blockNumber } = useBlockNumber();
   const { data: nextToken, isFetching: readIsFetching } = useContractRead({
     address: address,
     abi: abi,
     functionName: 'nextToken',
     args: [],
-    blockTag: 'pending',
     overrides: {
       blockTag: 'pending',
     },
@@ -47,15 +47,15 @@ const Home: NextPage = () => {
     write,
   } = useContractWrite(config);
 
+  useEffect(() => {
+    if (writeData?.hash) {
+      setTransactionHash(writeData.hash);
+    }
+  }, [writeData?.hash]);
+
   const { data: receipt, error: waitForTransactionError, isFetching: waitIsFetching } = useWaitForTransaction({
     hash: writeData?.hash,
   })
-
-  console.log(
-    'receipt', receipt,
-    'waitForTransactionError', waitForTransactionError,
-    'waitIsFetching', waitIsFetching
-  )
 
   return (
     <div className={styles.container}>
@@ -84,14 +84,10 @@ const Home: NextPage = () => {
           <button disabled={ readIsFetching || !write || waitIsFetching } onClick={() => write()}>
             Mint
           </button>
-          <div>
-            {receipt &&
-            <div>
-                Congratulations! You have minted a Fossil!
-                <a href={`https://rinkeby.etherscan.io/tx/${receipt.transactionHash}`} target="_blank">View on Etherscan</a>
-            </div>}
-            {waitForTransactionError && <div>Uh oh, your mint was not successful.</div>}
-          </div>
+          <div> {transactionHash && <a href={`https://rinkeby.etherscan.io/tx/${transactionHash}`} target="_blank">View on Etherscan</a>}</div>
+          <div> {waitIsFetching && 'Waiting for transaction to be mined...'} </div>
+          <div> {receipt && <div> Success! </div>} </div>
+          <div> {waitForTransactionError && <div> Mint failed. </div>} </div>
         </main>
       </div>
     </div>
