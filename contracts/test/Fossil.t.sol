@@ -70,4 +70,44 @@ contract FossilTest is Test {
         fossil.mint{value: price + 1}(tokenId, hash);
         assertEq(address(this).balance, balanceBefore - price); // Extra ETH should have been refunded
     }
+
+    function testGenerateSeed() public {
+        uint256 seed1;
+        uint256 seed2;
+
+        // Token should be the same for intervals
+        uint expectedSeedFirstFiveBlocksTokenIdZero = 47325194593512000241468536448559833359437483699567969619987864577538981999987;
+        uint expectedSeedSecondFiveBlocksTokenIdZero = 62208203652098549000527465663463271618757119388598162355679688326988861894765;
+
+        vm.roll(1);
+        seed1 = fossil.generateSeed(0);
+        seed2 = fossil.generateSeed(1);
+        assertEq(seed1, expectedSeedFirstFiveBlocksTokenIdZero);
+        assertTrue(seed1 != seed2);
+
+        vm.roll(2);
+        seed1 = fossil.generateSeed(0);
+        assertEq(seed1, expectedSeedFirstFiveBlocksTokenIdZero);
+
+        vm.roll(3);
+        seed1 = fossil.generateSeed(0);
+        assertEq(seed1, expectedSeedFirstFiveBlocksTokenIdZero);
+
+        vm.roll(4);
+        seed1 = fossil.generateSeed(0);
+        assertEq(seed1, expectedSeedFirstFiveBlocksTokenIdZero);
+
+        vm.roll(5);
+        seed1 = fossil.generateSeed(0);
+        assertEq(seed1, expectedSeedFirstFiveBlocksTokenIdZero);
+
+        vm.roll(6);
+        seed1 = fossil.generateSeed(0);
+        assertTrue(seed1 != expectedSeedFirstFiveBlocksTokenIdZero);
+        assertEq(seed2, expectedSeedSecondFiveBlocksTokenIdZero);
+
+        vm.roll(7);
+        seed1 = fossil.generateSeed(0);
+        assertEq(seed2, expectedSeedSecondFiveBlocksTokenIdZero);
+    }
 }
