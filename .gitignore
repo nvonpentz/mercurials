@@ -49,8 +49,8 @@ outputs/
 # Compiler files
 contracts/cache/
 contracts/out/
-contracts/deploys/fossil.31337.address.json
-contracts/deploys/fossil.31337.compilerOutput.json
+contracts/deploys/mercurial.31337.address.json
+contracts/deploys/mercurial.31337.compilerOutput.json
 
 # Ignores development broadcast logs
 !contracts/broadcast

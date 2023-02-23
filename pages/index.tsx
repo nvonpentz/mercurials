@@ -2,8 +2,8 @@ import { ConnectButton } from '@rainbow-me/rainbowkit';
 import type { NextPage } from 'next';
 import Head from 'next/head';
 import styles from '../styles/Home.module.css';
-import { address } from '../contracts/deploys/fossil.31337.address.json';
-import { abi } from '../contracts/deploys/fossil.31337.compilerOutput.json';
+import { address } from '../contracts/deploys/mercurial.31337.address.json';
+import { abi } from '../contracts/deploys/mercurial.31337.compilerOutput.json';
 import {
   useBlockNumber,
   useContractRead,
@@ -61,7 +61,7 @@ const Home: NextPage = () => {
     <div className={styles.container}>
       <div className={styles.column}>
         <Head>
-          <title>Fossils - NFT</title>
+          <title>Mercurials - NFT</title>
           <meta name="description" content="TODO" />
           <meta name="viewport" content="width=device-width, initial-scale=1" />
           <link rel="icon" href="/favicon.ico" />
@@ -74,7 +74,7 @@ const Home: NextPage = () => {
           <ConnectButton /> 
       </nav>}
         <main className={styles.main}>
-          <h1>Fossils #{nextToken?.[0].toString()}</h1>
+          <h1>Mercurial #{nextToken?.[0].toString()}</h1>
           <div>
             {nextToken && <div dangerouslySetInnerHTML={{ __html: nextToken[1] }} />}
           </div>

@@ -2,22 +2,22 @@
 pragma solidity ^0.8.13;
 
 import "forge-std/Test.sol";
-import "../src/Fossil.sol";
+import "../src/Mercurial.sol";
 import {Counters} from "openzeppelin-contracts/contracts/utils/Counters.sol";
 import "openzeppelin-contracts/contracts/utils/Counters.sol";
 
-contract FossilTest is Test {
-    Fossil fossil;
+contract MercurialTest is Test {
+    Mercurial mercurial;
     using Counters for Counters.Counter;
 
     function setUp() public {
-        fossil = new Fossil();
+        mercurial = new Mercurial();
     }
 
     receive() external payable {}
 
     function testGenerateSVGOnce() public view {
-        fossil.generateSVG(0);
+        mercurial.generateSVG(0);
     }
 
     // Token tests
@@ -27,7 +27,7 @@ contract FossilTest is Test {
         uint256 price;
         bytes32 hash;
 
-        (tokenId, svg, price, hash) = fossil.nextToken();
+        (tokenId, svg, price, hash) = mercurial.nextToken();
         assertEq(tokenId, 0); // tokenId should start at 0
         assertGt(bytes(svg).length, 0); // SVG should be non-empty
         assertGt(price, 0); // price should be greater than 0
@@ -43,31 +43,31 @@ contract FossilTest is Test {
         uint balanceBefore = address(this).balance;
 
         // Get values for mint
-        (tokenId, svg, price, hash) = fossil.nextToken();
+        (tokenId, svg, price, hash) = mercurial.nextToken();
 
         // Attempt to mint with incorrect token ID
         vm.expectRevert("Invalid or expired token ID");
-        fossil.mint{value: price}(tokenId + 1, hash);
+        mercurial.mint{value: price}(tokenId + 1, hash);
 
         // Attempt to mint with incorrect hash
         vm.expectRevert("Invalid or expired blockhash");
-        fossil.mint{value: price}(tokenId, blockhash(block.number));
+        mercurial.mint{value: price}(tokenId, blockhash(block.number));
 
         // Attempt to mint with too little ETH
         vm.expectRevert("Insufficient funds");
-        fossil.mint{value: price - 1}(tokenId, hash);
+        mercurial.mint{value: price - 1}(tokenId, hash);
 
         // Mint with correct values
-        fossil.mint{value: price}(tokenId, hash);
-        assertEq(fossil.balanceOf(address(this)), 1); // Token should be owned by this contract
+        mercurial.mint{value: price}(tokenId, hash);
+        assertEq(mercurial.balanceOf(address(this)), 1); // Token should be owned by this contract
         assertEq(address(this).balance, balanceBefore - price); // ETH should have gone to the token contract
-        // assertEq(fossil.tokenURI(tokenId), TODO); // TODO
-        assertEq(fossil.totalSold(), 1); // Total supply should be 1
+        // assertEq(mercurial.tokenURI(tokenId), TODO); // TODO
+        assertEq(mercurial.totalSold(), 1); // Total supply should be 1
 
         // Mint with too much ETH
         balanceBefore = address(this).balance;
-        (tokenId, svg, price, hash) = fossil.nextToken();
-        fossil.mint{value: price + 1}(tokenId, hash);
+        (tokenId, svg, price, hash) = mercurial.nextToken();
+        mercurial.mint{value: price + 1}(tokenId, hash);
         assertEq(address(this).balance, balanceBefore - price); // Extra ETH should have been refunded
     }
 
@@ -80,34 +80,34 @@ contract FossilTest is Test {
         uint expectedSeedSecondFiveBlocksTokenIdZero = 62208203652098549000527465663463271618757119388598162355679688326988861894765;
 
         vm.roll(1);
-        seed1 = fossil.generateSeed(0);
-        seed2 = fossil.generateSeed(1);
+        seed1 = mercurial.generateSeed(0);
+        seed2 = mercurial.generateSeed(1);
         assertEq(seed1, expectedSeedFirstFiveBlocksTokenIdZero);
         assertTrue(seed1 != seed2);
 
         vm.roll(2);
-        seed1 = fossil.generateSeed(0);
+        seed1 = mercurial.generateSeed(0);
         assertEq(seed1, expectedSeedFirstFiveBlocksTokenIdZero);
 
         vm.roll(3);
-        seed1 = fossil.generateSeed(0);
+        seed1 = mercurial.generateSeed(0);
         assertEq(seed1, expectedSeedFirstFiveBlocksTokenIdZero);
 
         vm.roll(4);
-        seed1 = fossil.generateSeed(0);
+        seed1 = mercurial.generateSeed(0);
         assertEq(seed1, expectedSeedFirstFiveBlocksTokenIdZero);
 
         vm.roll(5);
-        seed1 = fossil.generateSeed(0);
+        seed1 = mercurial.generateSeed(0);
         assertEq(seed1, expectedSeedFirstFiveBlocksTokenIdZero);
 
         vm.roll(6);
-        seed1 = fossil.generateSeed(0);
+        seed1 = mercurial.generateSeed(0);
         assertTrue(seed1 != expectedSeedFirstFiveBlocksTokenIdZero);
         assertEq(seed2, expectedSeedSecondFiveBlocksTokenIdZero);
 
         vm.roll(7);
-        seed1 = fossil.generateSeed(0);
+        seed1 = mercurial.generateSeed(0);
         assertEq(seed2, expectedSeedSecondFiveBlocksTokenIdZero);
     }
 }

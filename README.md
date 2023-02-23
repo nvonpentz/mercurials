@@ -1,4 +1,4 @@
-# Fossils
+# Mercurials
 
 ## Development
 1. Start local test blockchain RPC node on http://localhost:8545 

@@ -9,7 +9,7 @@ import {LinearVRGDA} from "VRGDAs/LinearVRGDA.sol";
 import {toDaysWadUnsafe} from "solmate/utils/SignedWadMath.sol";
 import {SafeTransferLib} from "solmate/utils/SafeTransferLib.sol";
 
-contract Fossil is ERC721, LinearVRGDA {
+contract Mercurial is ERC721, LinearVRGDA {
     using Strings for uint256;
 
     uint256 public totalSold; // The total number of tokens sold so far.
@@ -103,7 +103,8 @@ contract Fossil is ERC721, LinearVRGDA {
         uint256 nonce = 0;
 
         uint256 animationType;
-        (animationType, nonce) = generateRandom(0, 2, seed, nonce);
+        // (animationType, nonce) = generateRandom(0, 2, seed, nonce);
+        animationType = 3; // Disable animation for now.
 
         string memory animationDuration;
         (animationDuration, nonce) = generateAnimationDuration(seed, nonce);
