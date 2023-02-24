@@ -16,29 +16,30 @@ import { useState, useEffect } from 'react';
 import { ethers } from 'ethers';
 
 const Home: NextPage = () => {
-  const [transactionHash, setTransactionHash] = useState('');
+  const [transactionHash, setTransactionHash] = useState("");
   const { data: blockNumber } = useBlockNumber();
   const { data: nextToken, isFetching: readIsFetching } = useContractRead({
     address: address,
     abi: abi,
-    functionName: 'nextToken',
+    functionName: "nextToken",
     args: [],
     overrides: {
-      blockTag: 'pending',
+      blockTag: "pending",
     },
-    watch: true
+    watch: true,
   });
 
   const { config, error: prepareWriteError } = usePrepareContractWrite({
     address: address,
-    abi: abi, args: [nextToken?.[0], nextToken?.[3]],
-    functionName: 'mint',
+    abi: abi,
+    args: [nextToken?.[0], nextToken?.[3]],
+    functionName: "mint",
     overrides: {
       gasLimit: 5000000,
-      value: nextToken?.[2]
-    }
+      value: nextToken?.[2],
+    },
   });
-  
+
   const {
     data: writeData,
     error: writeError,
@@ -47,15 +48,24 @@ const Home: NextPage = () => {
     write,
   } = useContractWrite(config);
 
-  useEffect(() => {
-    if (writeData?.hash) {
-      setTransactionHash(writeData.hash);
-    }
-  }, [writeData?.hash]);
-
   const { data: receipt, error: waitForTransactionError, isFetching: waitIsFetching } = useWaitForTransaction({
     hash: writeData?.hash,
-  })
+  });
+
+  // Countdown timer state and effect
+  const [seconds, setSeconds] = useState(12);
+
+  useEffect(() => {
+    // Reset the timer when the block number changes
+    setSeconds(12);
+  }, [blockNumber]);
+
+  useEffect(() => {
+    if (seconds > 0) {
+      const timer = setTimeout(() => setSeconds(seconds - 1), 1000);
+      return () => clearTimeout(timer);
+    }
+  }, [seconds]);
 
   return (
     <div className={styles.container}>
@@ -71,6 +81,8 @@ const Home: NextPage = () => {
         </Head>
         {<nav className={styles.navbar}>
           <span>Block #{blockNumber?.toString()}</span>
+          <span>Token changes in {nextToken?.[4]?.toString()} blocks.</span>
+          <span>Next block in {seconds} seconds.</span>
           <ConnectButton /> 
       </nav>}
         <main className={styles.main}>
