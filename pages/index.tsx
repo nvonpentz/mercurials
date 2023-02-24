@@ -14,6 +14,7 @@ import {
 import Image from 'next/image'
 import { useState, useEffect } from 'react';
 import { ethers } from 'ethers';
+import { Result } from 'ethers/lib/utils';
 
 const Home: NextPage = () => {
   const [transactionHash, setTransactionHash] = useState("");
@@ -27,7 +28,7 @@ const Home: NextPage = () => {
       blockTag: "pending",
     },
     watch: true,
-  });
+  }) as { data: Result, isFetching: boolean };
 
   const { config, error: prepareWriteError } = usePrepareContractWrite({
     address: address,
@@ -35,7 +36,7 @@ const Home: NextPage = () => {
     args: [nextToken?.[0], nextToken?.[3]],
     functionName: "mint",
     overrides: {
-      gasLimit: 5000000,
+      gasLimit: ethers.BigNumber.from(5000000),
       value: nextToken?.[2],
     },
   });
@@ -76,7 +77,7 @@ const Home: NextPage = () => {
           <meta name="viewport" content="width=device-width, initial-scale=1" />
           <link rel="icon" href="/favicon.ico" />
           <link rel="preconnect" href="https://fonts.googleapis.com"/>
-          <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+          <link rel="preconnect" href="https://fonts.gstatic.com"/>
           <link href="https://fonts.googleapis.com/css2?family=Lato&display=swap" rel="stylesheet"/>
         </Head>
         {<nav className={styles.navbar}>
@@ -93,10 +94,10 @@ const Home: NextPage = () => {
           <div>
             <strong>Ξ</strong> {nextToken && ethers.utils.formatEther(nextToken?.[2].toString())}
           </div>
-          <button disabled={ readIsFetching || !write || waitIsFetching } onClick={() => write()}>
+          <button disabled={ readIsFetching || !write || waitIsFetching } onClick={() => write?.()}>
             Mint
           </button>
-          <div> {transactionHash && <a href={`https://rinkeby.etherscan.io/tx/${transactionHash}`} target="_blank">View on Etherscan</a>}</div>
+          <div> {transactionHash && <a href={`https://rinkeby.etherscan.io/tx/${transactionHash}`}>View on Etherscan</a>}</div>
           <div> {waitIsFetching && 'Waiting for transaction to be mined...'} </div>
           <div> {receipt && <div> Success! </div>} </div>
           <div> {waitForTransactionError && <div> Mint failed. </div>} </div>
