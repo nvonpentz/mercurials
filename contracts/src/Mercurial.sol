@@ -64,11 +64,12 @@ contract Mercurial is ERC721, LinearVRGDA {
             uint256 tokenId,
             string memory svg,
             uint256 price,
-            bytes32 hash
+            bytes32 hash,
+            uint8 ttl
         )
     {
         tokenId = totalSold;
-        uint seed = generateSeed(tokenId);
+        (uint seed, uint8 ttl) = generateSeed(tokenId);
         svg = generateSVG(seed);
         price = getVRGDAPrice(
             toDaysWadUnsafe(block.timestamp - startTime),
@@ -76,7 +77,7 @@ contract Mercurial is ERC721, LinearVRGDA {
         );
         hash = blockhash(block.number - 1);
 
-        return (tokenId, svg, price, hash);
+        return (tokenId, svg, price, hash, ttl);
     }
 
     function getCurrentVRGDAPrice() public view returns (uint256) {
@@ -88,8 +89,9 @@ contract Mercurial is ERC721, LinearVRGDA {
             );
     }
 
-    function generateSeed(uint256 tokenId) public view returns (uint) {
-        return
+    function generateSeed(uint256 tokenId) public view returns (uint, uint8) {
+        uint8 ttl = 5 - uint8((block.number - 1) % 5);
+        return (
             uint256(
                 keccak256(
                     abi.encodePacked(
@@ -100,7 +102,9 @@ contract Mercurial is ERC721, LinearVRGDA {
                         tokenId
                     )
                 )
-            );
+            ),
+            ttl
+        );
     }
 
     /// @notice Generates the entire SVG

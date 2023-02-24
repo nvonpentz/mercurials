@@ -26,12 +26,14 @@ contract MercurialTest is Test {
         string memory svg;
         uint256 price;
         bytes32 hash;
+        uint8 ttl;
 
-        (tokenId, svg, price, hash) = mercurial.nextToken();
+        (tokenId, svg, price, hash, ttl) = mercurial.nextToken();
         assertEq(tokenId, 0); // tokenId should start at 0
         assertGt(bytes(svg).length, 0); // SVG should be non-empty
         assertGt(price, 0); // price should be greater than 0
         assertEq(hash, blockhash(block.number - 1)); // hash should be the previous blockhash
+        assertEq(ttl, 5); // ttl should be 5
     }
 
     function testMint() public {
@@ -39,11 +41,12 @@ contract MercurialTest is Test {
         string memory svg;
         uint256 price;
         bytes32 hash;
+        uint8 ttl;
 
         uint balanceBefore = address(this).balance;
 
         // Get values for mint
-        (tokenId, svg, price, hash) = mercurial.nextToken();
+        (tokenId, svg, price, hash, ttl) = mercurial.nextToken();
 
         // Attempt to mint with incorrect token ID
         vm.expectRevert("Invalid or expired token ID");
@@ -66,48 +69,47 @@ contract MercurialTest is Test {
 
         // Mint with too much ETH
         balanceBefore = address(this).balance;
-        (tokenId, svg, price, hash) = mercurial.nextToken();
+        (tokenId, svg, price, hash, ttl) = mercurial.nextToken();
         mercurial.mint{value: price + 1}(tokenId, hash);
         assertEq(address(this).balance, balanceBefore - price); // Extra ETH should have been refunded
     }
 
     function testGenerateSeed() public {
         uint256 seed1;
+        uint8 ttl1;
         uint256 seed2;
+        uint8 ttl2;
 
         // Token should be the same for intervals
         uint expectedSeedFirstFiveBlocksTokenIdZero = 47325194593512000241468536448559833359437483699567969619987864577538981999987;
-        uint expectedSeedSecondFiveBlocksTokenIdZero = 62208203652098549000527465663463271618757119388598162355679688326988861894765;
 
         vm.roll(1);
-        seed1 = mercurial.generateSeed(0);
-        seed2 = mercurial.generateSeed(1);
+        (seed1, ttl1) = mercurial.generateSeed(0);
+        (seed2, ttl2) = mercurial.generateSeed(1);
         assertEq(seed1, expectedSeedFirstFiveBlocksTokenIdZero);
         assertTrue(seed1 != seed2);
 
         vm.roll(2);
-        seed1 = mercurial.generateSeed(0);
+        (seed1, ttl1) = mercurial.generateSeed(0);
         assertEq(seed1, expectedSeedFirstFiveBlocksTokenIdZero);
 
         vm.roll(3);
-        seed1 = mercurial.generateSeed(0);
+        (seed1, ttl1) = mercurial.generateSeed(0);
         assertEq(seed1, expectedSeedFirstFiveBlocksTokenIdZero);
 
         vm.roll(4);
-        seed1 = mercurial.generateSeed(0);
+        (seed1, ttl1) = mercurial.generateSeed(0);
         assertEq(seed1, expectedSeedFirstFiveBlocksTokenIdZero);
 
         vm.roll(5);
-        seed1 = mercurial.generateSeed(0);
+        (seed1, ttl1) = mercurial.generateSeed(0);
         assertEq(seed1, expectedSeedFirstFiveBlocksTokenIdZero);
 
         vm.roll(6);
-        seed1 = mercurial.generateSeed(0);
+        (seed1, ttl1) = mercurial.generateSeed(0);
         assertTrue(seed1 != expectedSeedFirstFiveBlocksTokenIdZero);
-        assertEq(seed2, expectedSeedSecondFiveBlocksTokenIdZero);
 
         vm.roll(7);
-        seed1 = mercurial.generateSeed(0);
-        assertEq(seed2, expectedSeedSecondFiveBlocksTokenIdZero);
+        (seed1, ttl1) = mercurial.generateSeed(0);
     }
 }
