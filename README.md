@@ -21,3 +21,7 @@ color gen - http://devmag.org.za/2012/07/29/how-to-choose-colours-procedurally-a
 Each has multiple forms you can cycle it through
 
 If your transactions are not being processed by Anvil, try resetting the nonce used by your wallet.  They could be getting ignored by the local RPC node because of this.
+
+```
+$ cast nonce 0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266 --rpc-url localhost:8545
+```

@@ -92,8 +92,13 @@ contract Mercurial is ERC721, LinearVRGDA {
         return
             uint256(
                 keccak256(
-                    abi.encodePacked(blockhash(
-                        (block.number - 1) - ((block.number - 1) % 5)), tokenId)
+                    abi.encodePacked(
+                        blockhash(
+                            (block.number - 1) - ((block.number - 1) % 5)
+                            // block.number - 1
+                        ),
+                        tokenId
+                    )
                 )
             );
     }
