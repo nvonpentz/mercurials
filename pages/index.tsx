@@ -1,20 +1,20 @@
-import { ConnectButton } from '@rainbow-me/rainbowkit';
-import type { NextPage } from 'next';
-import Head from 'next/head';
-import styles from '../styles/Home.module.css';
-import { address } from '../contracts/deploys/mercurial.31337.address.json';
-import { abi } from '../contracts/deploys/mercurial.31337.compilerOutput.json';
+import { ConnectButton } from "@rainbow-me/rainbowkit";
+import type { NextPage } from "next";
+import Head from "next/head";
+import styles from "../styles/Home.module.css";
+import { address } from "../contracts/deploys/mercurial.31337.address.json";
+import { abi } from "../contracts/deploys/mercurial.31337.compilerOutput.json";
 import {
   useBlockNumber,
   useContractRead,
   usePrepareContractWrite,
   useContractWrite,
-  useWaitForTransaction
-} from 'wagmi'
-import Image from 'next/image'
-import { useState, useEffect } from 'react';
-import { ethers } from 'ethers';
-import { Result } from 'ethers/lib/utils';
+  useWaitForTransaction,
+} from "wagmi";
+import Image from "next/image";
+import { useState, useEffect } from "react";
+import { ethers } from "ethers";
+import { Result } from "ethers/lib/utils";
 
 const Home: NextPage = () => {
   const [transactionHash, setTransactionHash] = useState("");
@@ -28,7 +28,7 @@ const Home: NextPage = () => {
       blockTag: "pending",
     },
     watch: true,
-  }) as { data: Result, isFetching: boolean };
+  }) as { data: Result; isFetching: boolean };
 
   const { config, error: prepareWriteError } = usePrepareContractWrite({
     address: address,
@@ -45,9 +45,14 @@ const Home: NextPage = () => {
   const [ethPrice, setEthPrice] = useState(0);
   useEffect(() => {
     console.log("Fetching ETH price");
-    fetch('https://api.coingecko.com/api/v3/simple/price?ids=ethereum&vs_currencies=usd')
-      .then(res => res.json())
-      .then(data => {console.log(data); setEthPrice(data.ethereum.usd);});
+    fetch(
+      "https://api.coingecko.com/api/v3/simple/price?ids=ethereum&vs_currencies=usd"
+    )
+      .then((res) => res.json())
+      .then((data) => {
+        console.log(data);
+        setEthPrice(data.ethereum.usd);
+      });
   }, [blockNumber]);
 
   const {
@@ -58,7 +63,11 @@ const Home: NextPage = () => {
     write,
   } = useContractWrite(config);
 
-  const { data: receipt, error: waitForTransactionError, isFetching: waitIsFetching } = useWaitForTransaction({
+  const {
+    data: receipt,
+    error: waitForTransactionError,
+    isFetching: waitIsFetching,
+  } = useWaitForTransaction({
     hash: writeData?.hash,
   });
 
@@ -70,13 +79,18 @@ const Home: NextPage = () => {
           <meta name="description" content="TODO" />
           <meta name="viewport" content="width=device-width, initial-scale=1" />
           <link rel="icon" href="/favicon.ico" />
-          <link rel="preconnect" href="https://fonts.googleapis.com"/>
-          <link rel="preconnect" href="https://fonts.gstatic.com"/>
-          <link href="https://fonts.googleapis.com/css2?family=Lato&display=swap" rel="stylesheet"/>
+          <link rel="preconnect" href="https://fonts.googleapis.com" />
+          <link rel="preconnect" href="https://fonts.gstatic.com" />
+          <link
+            href="https://fonts.googleapis.com/css2?family=Lato&display=swap"
+            rel="stylesheet"
+          />
         </Head>
         <nav className={styles.navbar}>
           <ul>
-            <li><ConnectButton /></li>
+            <li>
+              <ConnectButton />
+            </li>
           </ul>
         </nav>
         <main className={styles.main}>
@@ -90,22 +104,54 @@ const Home: NextPage = () => {
             <div className={styles.tokenInfoColumn}>
               <div>{blockNumber?.toString()}</div>
               <div>{nextToken?.[4]?.toString()} blocks</div>
-              <div><strong>Ξ {nextToken && ethers.utils.formatEther(nextToken?.[2].toString())}</strong> <span>(${ethPrice && (ethPrice * parseFloat(ethers.utils.formatEther(nextToken?.[2].toString()))).toFixed(2)})</span></div>
+              <div>
+                <strong>
+                  Ξ{" "}
+                  {nextToken &&
+                    ethers.utils.formatEther(nextToken?.[2].toString())}
+                </strong>{" "}
+                <span>
+                  ($
+                  {ethPrice &&
+                    (
+                      ethPrice *
+                      parseFloat(
+                        ethers.utils.formatEther(nextToken?.[2].toString())
+                      )
+                    ).toFixed(2)}
+                  )
+                </span>
+              </div>
             </div>
           </div>
           <div className={styles.tokenImage}>
-            {nextToken && <div dangerouslySetInnerHTML={{ __html: nextToken[1] }} />}
+            {nextToken && (
+              <div dangerouslySetInnerHTML={{ __html: nextToken[1] }} />
+            )}
           </div>
-          <div>
-          </div>
+          <div></div>
           <div className={styles.buttonContainer}>
-            <button disabled={ readIsFetching || !write || waitIsFetching } onClick={() => write?.()} className={styles.mintButton}>
+            <button
+              disabled={readIsFetching || !write || waitIsFetching}
+              onClick={() => write?.()}
+              className={styles.mintButton}
+            >
               Mint
             </button>
           </div>
           <div className={styles.transactionInfo}>
-            <div> {transactionHash && <a href={`https://rinkeby.etherscan.io/tx/${transactionHash}`}>View on Etherscan</a>}</div>
-            <div> {waitIsFetching && 'Waiting for transaction to be mined...'} </div>
+            <div>
+              {" "}
+              {transactionHash && (
+                <a href={`https://rinkeby.etherscan.io/tx/${transactionHash}`}>
+                  View on Etherscan
+                </a>
+              )}
+            </div>
+            <div>
+              {" "}
+              {waitIsFetching && "Waiting for transaction to be mined..."}{" "}
+            </div>
             <div> {receipt && <div> Success! </div>} </div>
             <div> {waitForTransactionError && <div> Mint failed. </div>} </div>
           </div>
