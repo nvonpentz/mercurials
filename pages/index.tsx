@@ -106,8 +106,10 @@ const Home: NextPage = () => {
                 <strong>
                   Ξ{" "}
                   {nextToken &&
-                    ethers.utils.formatEther(nextToken?.[2].toString())}
-                </strong>{" "}
+                    parseFloat(
+                      ethers.utils.formatEther(nextToken?.[2].toString())
+                    ).toFixed(5)} 
+                </strong>
                 <span>
                   ($
                   {ethPrice &&
