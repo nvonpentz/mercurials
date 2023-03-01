@@ -41,6 +41,15 @@ const Home: NextPage = () => {
     },
   });
 
+  // Fetches USD price of ETH
+  const [ethPrice, setEthPrice] = useState(0);
+  useEffect(() => {
+    console.log("Fetching ETH price");
+    fetch('https://api.coingecko.com/api/v3/simple/price?ids=ethereum&vs_currencies=usd')
+      .then(res => res.json())
+      .then(data => {console.log(data); setEthPrice(data.ethereum.usd);});
+  }, [blockNumber]);
+
   const {
     data: writeData,
     error: writeError,
@@ -81,7 +90,7 @@ const Home: NextPage = () => {
             <div className={styles.tokenInfoColumn}>
               <div>{blockNumber?.toString()}</div>
               <div>{nextToken?.[4]?.toString()} blocks</div>
-              <strong>Ξ {nextToken && ethers.utils.formatEther(nextToken?.[2].toString())}</strong>
+              <div><strong>Ξ {nextToken && ethers.utils.formatEther(nextToken?.[2].toString())}</strong> <span>(${ethPrice && (ethPrice * parseFloat(ethers.utils.formatEther(nextToken?.[2].toString()))).toFixed(2)})</span></div>
             </div>
           </div>
           <div className={styles.tokenImage}>
