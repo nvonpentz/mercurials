@@ -44,13 +44,11 @@ const Home: NextPage = () => {
   // Fetches USD price of ETH
   const [ethPrice, setEthPrice] = useState(0);
   useEffect(() => {
-    console.log("Fetching ETH price");
     fetch(
       "https://api.coingecko.com/api/v3/simple/price?ids=ethereum&vs_currencies=usd"
     )
       .then((res) => res.json())
       .then((data) => {
-        console.log(data);
         setEthPrice(data.ethereum.usd);
       });
   }, [blockNumber]);
