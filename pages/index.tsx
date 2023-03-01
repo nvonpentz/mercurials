@@ -80,27 +80,41 @@ const Home: NextPage = () => {
           <link rel="preconnect" href="https://fonts.gstatic.com"/>
           <link href="https://fonts.googleapis.com/css2?family=Lato&display=swap" rel="stylesheet"/>
         </Head>
-        {<nav className={styles.navbar}>
-          <span>Block #{blockNumber?.toString()}</span>
-          <span>Token changes in {nextToken?.[4]?.toString()} blocks.</span>
-          <span>Next block in {seconds} seconds.</span>
-          <ConnectButton /> 
-      </nav>}
+        <nav className={styles.navbar}>
+          <ul>
+            <li><ConnectButton /></li>
+          </ul>
+        </nav>
         <main className={styles.main}>
           <h1>Mercurial #{nextToken?.[0].toString()}</h1>
-          <div>
+          <div className={styles.tokenInfo}>
+            <div className={styles.tokenInfoColumn}>
+              <div>Current block:</div>
+              <div>Expires in:</div>
+              <div>Current price:</div>
+            </div>
+            <div className={styles.tokenInfoColumn}>
+              <div>{blockNumber?.toString()}</div>
+              <div>{nextToken?.[4]?.toString()} blocks.</div>
+              <strong>Ξ {nextToken && ethers.utils.formatEther(nextToken?.[2].toString())}</strong>
+            </div>
+          </div>
+          <div className={styles.tokenImage}>
             {nextToken && <div dangerouslySetInnerHTML={{ __html: nextToken[1] }} />}
           </div>
           <div>
-            <strong>Ξ</strong> {nextToken && ethers.utils.formatEther(nextToken?.[2].toString())}
           </div>
-          <button disabled={ readIsFetching || !write || waitIsFetching } onClick={() => write?.()}>
-            Mint
-          </button>
-          <div> {transactionHash && <a href={`https://rinkeby.etherscan.io/tx/${transactionHash}`}>View on Etherscan</a>}</div>
-          <div> {waitIsFetching && 'Waiting for transaction to be mined...'} </div>
-          <div> {receipt && <div> Success! </div>} </div>
-          <div> {waitForTransactionError && <div> Mint failed. </div>} </div>
+          <div className={styles.buttonContainer}>
+            <button disabled={ readIsFetching || !write || waitIsFetching } onClick={() => write?.()} className={styles.mintButton}>
+              Mint
+            </button>
+          </div>
+          <div className={styles.transactionInfo}>
+            <div> {transactionHash && <a href={`https://rinkeby.etherscan.io/tx/${transactionHash}`}>View on Etherscan</a>}</div>
+            <div> {waitIsFetching && 'Waiting for transaction to be mined...'} </div>
+            <div> {receipt && <div> Success! </div>} </div>
+            <div> {waitForTransactionError && <div> Mint failed. </div>} </div>
+          </div>
         </main>
       </div>
     </div>
