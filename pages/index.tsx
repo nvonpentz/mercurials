@@ -53,21 +53,6 @@ const Home: NextPage = () => {
     hash: writeData?.hash,
   });
 
-  // Countdown timer state and effect
-  const [seconds, setSeconds] = useState(12);
-
-  useEffect(() => {
-    // Reset the timer when the block number changes
-    setSeconds(12);
-  }, [blockNumber]);
-
-  useEffect(() => {
-    if (seconds > 0) {
-      const timer = setTimeout(() => setSeconds(seconds - 1), 1000);
-      return () => clearTimeout(timer);
-    }
-  }, [seconds]);
-
   return (
     <div className={styles.container}>
       <div className={styles.column}>
