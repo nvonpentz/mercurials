@@ -80,7 +80,7 @@ const Home: NextPage = () => {
             </div>
             <div className={styles.tokenInfoColumn}>
               <div>{blockNumber?.toString()}</div>
-              <div>{nextToken?.[4]?.toString()} blocks.</div>
+              <div>{nextToken?.[4]?.toString()} blocks</div>
               <strong>Ξ {nextToken && ethers.utils.formatEther(nextToken?.[2].toString())}</strong>
             </div>
           </div>
