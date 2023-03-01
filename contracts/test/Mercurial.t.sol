@@ -80,7 +80,7 @@ contract MercurialTest is Test {
         uint256 seed2;
         uint8 ttl2;
 
-        // Token should be the same for intervals
+        // Token should be the same within one interval (5 blocks)
         uint expectedSeedFirstFiveBlocksTokenIdZero = 47325194593512000241468536448559833359437483699567969619987864577538981999987;
 
         vm.roll(1);
