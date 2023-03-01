@@ -3,23 +3,17 @@
 ## Development
 1. Start local test blockchain RPC node on http://localhost:8545 
   ```
-  $ anvil
+  $ anvil --block-time 12
   ```
-1. Watch Solidity contract files and automatically deploy them when modified and saved
+1. Deploy the contracts
   ```
-  $ npm run watch
+  $ forge script script/Deploy.sol --rpc-url http://localhost:8545 --broadcast --private-key 0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80
   ```
-1. Start the Next.js server
+1. Start the Next.js server frontend
   ```
   $ npm run dev
+
   ```
-
-https://yoksel.github.io/svg-gradient-map/#/
-
-color gen - http://devmag.org.za/2012/07/29/how-to-choose-colours-procedurally-algorithms/
-
-Each has multiple forms you can cycle it through
-
 If your transactions are not being processed by Anvil, try resetting the nonce used by your wallet.  They could be getting ignored by the local RPC node because of this.
 
 ```
