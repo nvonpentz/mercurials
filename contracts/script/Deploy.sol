@@ -18,11 +18,20 @@ contract Deploy is Script {
 
         // Deploy Mercurial contract
         mercurial = new Mercurial();
-        console.log('address', address(mercurial));
+        console.log("address", address(mercurial));
 
         // Fetch ABI output from /out, and write to /deploys folder
-        string memory compilerOutput = vm.readFile("out/Mercurial.sol/Mercurial.json");
-        vm.writeFile(string.concat("deploys/mercurial.", block.chainid.toString(), ".compilerOutput.json"), compilerOutput);
+        string memory compilerOutput = vm.readFile(
+            "out/Mercurial.sol/Mercurial.json"
+        );
+        vm.writeFile(
+            string.concat(
+                "deploys/mercurial.",
+                block.chainid.toString(),
+                ".compilerOutput.json"
+            ),
+            compilerOutput
+        );
 
         // Write address JSON to /deploys folder
         string memory addressJson = string.concat(
@@ -33,10 +42,17 @@ contract Deploy is Script {
             "}"
         );
 
-        vm.writeFile(string.concat("deploys/mercurial.", block.chainid.toString(), ".address.json"), addressJson);
+        vm.writeFile(
+            string.concat(
+                "deploys/mercurial.",
+                block.chainid.toString(),
+                ".address.json"
+            ),
+            addressJson
+        );
 
         // Finish deployment
         vm.stopBroadcast();
-        console.log('Deploy done...');
+        console.log("Deploy done...");
     }
 }

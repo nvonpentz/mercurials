@@ -16,6 +16,11 @@
   ```
 If your transactions are not being processed by Anvil, try resetting the nonce used by your wallet.  They could be getting ignored by the local RPC node because of this.
 
+### Lint
+```
+$ prettier --write pages/*.tsx contracts/src/*.sol contracts/script/Deploy.sol contracts/test/*.sol
+```
+
 ```
 $ cast nonce 0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266 --rpc-url localhost:8545
 ```
