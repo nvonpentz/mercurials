@@ -29,13 +29,15 @@
 
 .tokenImage svg {
   max-width: 100%;
+  max-height: calc(100vh - (250px));
+  width: auto;
   height: auto;
-}
 
-.tokenImage {
-  display: flex;
   padding: 16px 16px 0 16px; /* top right bottom left */
 }
+
+/* .tokenImage { */
+/* } */
 
 .transactionInfo {
   display: flex;
