@@ -17,8 +17,8 @@ contract Mercurial is ERC721, LinearVRGDA {
 
     constructor()
         ERC721(
-            "Example Linear NFT", // Name.
-            "LINEAR" // Symbol.
+            "Mercurial", // Name.
+            "MERC" // Symbol.
         )
         LinearVRGDA(
             0.01e18, // Target price.
@@ -416,7 +416,7 @@ contract Mercurial is ERC721, LinearVRGDA {
         uint256 random;
         (random, nonce) = generateRandom(0, 2, seed, nonce);
         string memory feColorMatrixForInversion;
-        // apply inversion half the time
+        // Apply the inversion half the time
         if (random == 0) {
             feColorMatrixForInversion = '<feColorMatrix type="matrix" values="-1 0 0 0 1 0 -1 0 0 1 0 0 -1 0 1 0 0 0 1 0"/>';
         }
