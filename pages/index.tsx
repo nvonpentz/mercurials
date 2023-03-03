@@ -2,22 +2,29 @@ import { ConnectButton } from "@rainbow-me/rainbowkit";
 import type { NextPage } from "next";
 import Head from "next/head";
 import styles from "../styles/Home.module.css";
-import { address } from "../contracts/deploys/mercurial.31337.address.json";
-import { abi } from "../contracts/deploys/mercurial.31337.compilerOutput.json";
 import {
   useBlockNumber,
   useContractRead,
   usePrepareContractWrite,
   useContractWrite,
   useWaitForTransaction,
+  useNetwork,
 } from "wagmi";
 import Image from "next/image";
 import { useState, useEffect } from "react";
 import { ethers } from "ethers";
 import { Result } from "ethers/lib/utils";
+import { deployments } from "../utils/config";
 
 const Home: NextPage = () => {
-  const [transactionHash, setTransactionHash] = useState("");
+  const { chain } = useNetwork();
+  const [address, setAddress] = useState(deployments[chain.id].address);
+  const [abi, setAbi] = useState(deployments[chain.id].abi);
+  useEffect(() => {
+    setAddress(deployments[chain.id].address);
+    setAbi(deployments[chain.id].abi);
+  }, [chain]);
+
   const { data: blockNumber } = useBlockNumber();
   const { data: nextToken, isFetching: readIsFetching } = useContractRead({
     address: address,
@@ -108,7 +115,7 @@ const Home: NextPage = () => {
                   {nextToken &&
                     parseFloat(
                       ethers.utils.formatEther(nextToken?.[2].toString())
-                    ).toFixed(5)} 
+                    ).toFixed(5)}
                 </strong>
                 <span>
                   ($
@@ -140,14 +147,6 @@ const Home: NextPage = () => {
             </button>
           </div>
           <div className={styles.transactionInfo}>
-            <div>
-              {" "}
-              {transactionHash && (
-                <a href={`https://rinkeby.etherscan.io/tx/${transactionHash}`}>
-                  View on Etherscan
-                </a>
-              )}
-            </div>
             <div>
               {" "}
               {waitIsFetching && "Waiting for transaction to be mined..."}{" "}
