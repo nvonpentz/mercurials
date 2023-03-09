@@ -3,12 +3,11 @@ pragma solidity ^0.8.13;
 
 import "forge-std/Test.sol";
 import "../src/Mercurial.sol";
-import {Counters} from "openzeppelin-contracts/contracts/utils/Counters.sol";
-import "openzeppelin-contracts/contracts/utils/Counters.sol";
+import {Base64} from "openzeppelin-contracts/contracts/utils/Base64.sol";
 
 contract MercurialTest is Test {
     Mercurial mercurial;
-    using Counters for Counters.Counter;
+    using Strings for uint256;
 
     function setUp() public {
         mercurial = new Mercurial();
@@ -64,7 +63,6 @@ contract MercurialTest is Test {
         mercurial.mint{value: price}(tokenId, hash);
         assertEq(mercurial.balanceOf(address(this)), 1); // Token should be owned by this contract
         assertEq(address(this).balance, balanceBefore - price); // ETH should have gone to the token contract
-        // assertEq(mercurial.tokenURI(tokenId), TODO); // TODO
         assertEq(mercurial.totalSold(), 1); // Total supply should be 1
 
         // Mint with too much ETH
@@ -111,5 +109,45 @@ contract MercurialTest is Test {
 
         vm.roll(7);
         (seed1, ttl1) = mercurial.generateSeed(0);
+    }
+
+    function testTokenURI() public {
+        uint256 tokenId;
+        string memory svg;
+        uint256 price;
+        bytes32 hash;
+        uint8 ttl;
+
+        // Get values for mint
+        (tokenId, svg, price, hash, ttl) = mercurial.nextToken();
+
+        // Mint with correct values
+        mercurial.mint{value: price}(tokenId, hash);
+
+        // Check token URI
+        string memory tokenURI = mercurial.tokenURI(tokenId);
+        string memory expectedMetadataJson = Base64.encode(
+            bytes(
+                string(
+                    abi.encodePacked(
+                        '{"name": "Mercurial #',
+                        tokenId.toString(),
+                        '", "description": "On chain generative art project.", "image": "data:image/svg+xml;base64,',
+                        Base64.encode(bytes(svg)),
+                        '"}'
+                    )
+                )
+            )
+        );
+
+        assertEq(
+            tokenURI,
+            string(
+                abi.encodePacked(
+                    "data:application/json;base64,",
+                    expectedMetadataJson
+                )
+            )
+        );
     }
 }

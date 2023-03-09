@@ -14,6 +14,7 @@ contract Mercurial is ERC721, LinearVRGDA {
 
     uint256 public totalSold; // The total number of tokens sold so far.
     uint256 public immutable startTime = block.timestamp; // When VRGDA sales begun.
+    mapping(uint256 => uint256) public seeds;
 
     constructor()
         ERC721(
@@ -53,6 +54,8 @@ contract Mercurial is ERC721, LinearVRGDA {
             // Unchecked is safe here because we validate msg.value >= price above.
             SafeTransferLib.safeTransferETH(msg.sender, msg.value - price);
         }
+        (uint seed, ) = generateSeed(expectedTokenId);
+        seeds[expectedTokenId] = seed;
     }
 
     /// @dev This function should be called using the `pending` block tag.
@@ -97,7 +100,6 @@ contract Mercurial is ERC721, LinearVRGDA {
                     abi.encodePacked(
                         blockhash(
                             (block.number - 1) - ((block.number - 1) % 5)
-                            // block.number - 1
                         ),
                         tokenId
                     )
@@ -176,6 +178,35 @@ contract Mercurial is ERC721, LinearVRGDA {
                 "</defs>",
                 '<rect width="1000" height="1000" filter="url(#a)"/>',
                 "</svg>"
+            );
+    }
+
+    function tokenURI(
+        uint256 tokenId
+    ) public view override returns (string memory) {
+        require(
+            _exists(tokenId),
+            "ERC721Metadata: URI query for nonexistent token"
+        );
+        uint256 seed = seeds[tokenId];
+        string memory svg = generateSVG(seed);
+        string memory metadataJson = Base64.encode(
+            bytes(
+                string(
+                    abi.encodePacked(
+                        '{"name": "Mercurial #',
+                        tokenId.toString(),
+                        '", "description": "On chain generative art project.", "image": "data:image/svg+xml;base64,',
+                        Base64.encode(bytes(svg)),
+                        '"}'
+                    )
+                )
+            )
+        );
+
+        return
+            string(
+                abi.encodePacked("data:application/json;base64,", metadataJson)
             );
     }
 

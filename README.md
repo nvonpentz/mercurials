@@ -12,7 +12,6 @@
 1. Start the Next.js server frontend
   ```
   $ npm run dev
-
   ```
 If your transactions are not being processed by Anvil, try resetting the nonce used by your wallet.  They could be getting ignored by the local RPC node because of this.
 
