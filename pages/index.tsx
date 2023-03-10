@@ -120,6 +120,7 @@ const Home: NextPage = () => {
                 <span>
                   ($
                   {ethPrice &&
+                    nextToken &&
                     (
                       ethPrice *
                       parseFloat(

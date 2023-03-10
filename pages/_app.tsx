@@ -14,10 +14,7 @@ import { publicProvider } from "wagmi/providers/public";
 import { useEffect, useState } from "react";
 
 const { chains, provider, webSocketProvider } = configureChains(
-  [
-    // goerli,
-    foundry,
-  ],
+  [goerli, foundry],
   [
     alchemyProvider({
       apiKey: process.env.NEXT_PUBLIC_ALCHEMY_API_KEY ?? "",

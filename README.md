@@ -15,6 +15,12 @@
   ```
 If your transactions are not being processed by Anvil, try resetting the nonce used by your wallet.  They could be getting ignored by the local RPC node because of this.
 
+## Goerli deploy
+
+```
+$ forge script script/Deploy.sol --rpc-url https://endpoints.omniatech.io/v1/eth/goerli/public --broadcast --interactive
+```
+
 ### Lint
 ```
 $ prettier --write pages/*.tsx contracts/src/*.sol contracts/script/Deploy.sol contracts/test/*.sol
