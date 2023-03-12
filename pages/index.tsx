@@ -17,12 +17,12 @@ import { Result } from "ethers/lib/utils";
 import { deployments } from "../utils/config";
 
 const Home: NextPage = () => {
-  const { chain } = useNetwork();
-  const [address, setAddress] = useState(deployments[chain.id].address);
-  const [abi, setAbi] = useState(deployments[chain.id].abi);
+  const { chain = { id: 31337 } } = useNetwork();
+  const [address, setAddress] = useState(deployments[chain?.id]?.address);
+  const [abi, setAbi] = useState(deployments[chain?.id]?.abi);
   useEffect(() => {
-    setAddress(deployments[chain.id].address);
-    setAbi(deployments[chain.id].abi);
+    setAddress(deployments[chain?.id]?.address);
+    setAbi(deployments[chain?.id]?.abi);
   }, [chain]);
 
   const { data: blockNumber } = useBlockNumber();
