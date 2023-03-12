@@ -1,7 +1,15 @@
-import { address as foundryAddress } from "../contracts/deploys/mercurial.31337.address.json";
-import { abi as foundryAbi } from "../contracts/deploys/mercurial.31337.compilerOutput.json";
-import { address as goerliAddress } from "../contracts/deploys/mercurial.5.address.json";
-import { abi as goerliAbi } from "../contracts/deploys/mercurial.5.compilerOutput.json";
+const goerliAddress = require("../contracts/deploys/mercurial.5.address.json").address;
+const goerliAbi = require("../contracts/deploys/mercurial.5.compilerOutput.json").abi;
+
+let foundryAddress;
+let foundryAbi;
+
+// 31337 chain ID deployments are only supported in development
+// because the configs are not tracked by git
+if (process.env.NEXT_PUBLIC_ENV === "development") {
+  foundryAddress = require("../contracts/deploys/mercurial.31337.address.json").address;
+  foundryAbi = require("../contracts/deploys/mercurial.31337.compilerOutput.json").abi;
+}
 
 interface Deployments {
   [chainId: string]: {
@@ -20,4 +28,3 @@ export const deployments: Deployments = {
     abi: goerliAbi,
   }
 };
-

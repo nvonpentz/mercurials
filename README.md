@@ -5,11 +5,11 @@
   ```
   $ anvil --block-time 12
   ```
-1. Deploy the contracts
+2. Deploy the contracts
   ```
   $ forge script script/Deploy.sol --rpc-url http://localhost:8545 --broadcast --private-key 0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80
   ```
-1. Start the Next.js server frontend
+3. Start the Next.js server frontend
   ```
   $ npm run dev
   ```
@@ -26,6 +26,7 @@ $ forge script script/Deploy.sol --rpc-url https://endpoints.omniatech.io/v1/eth
 $ prettier --write pages/*.tsx contracts/src/*.sol contracts/script/Deploy.sol contracts/test/*.sol
 ```
 
+### Check nonce
 ```
 $ cast nonce 0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266 --rpc-url localhost:8545
 ```
