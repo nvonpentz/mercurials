@@ -15,8 +15,15 @@ import { useState, useEffect } from "react";
 import { ethers } from "ethers";
 import { Result } from "ethers/lib/utils";
 import { deployments } from "../utils/config";
+import ExpiresIn from "../components/ExpiresIn/ExpiresIn";
 
 const Home: NextPage = () => {
+  // UI Helpers
+  const numberWithCommas = (x: string | undefined) => {
+    return x?.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+  };
+
+  // Hooks
   const { chain = { id: 5 } } = useNetwork();
   const [address, setAddress] = useState(deployments[chain?.id]?.address);
   const [abi, setAbi] = useState(deployments[chain?.id]?.abi);
@@ -106,8 +113,10 @@ const Home: NextPage = () => {
               <div>Current price:</div>
             </div>
             <div className={styles.tokenInfoColumn}>
-              <div>{blockNumber?.toString()}</div>
-              <div>{nextToken?.[4]?.toString()} blocks</div>
+              <div>{numberWithCommas(blockNumber?.toString())}</div>
+              <div>
+                <ExpiresIn blocks={nextToken?.[4]?.toString()} />
+              </div>
               <div>
                 <strong>
                   Ξ{" "}
@@ -136,7 +145,7 @@ const Home: NextPage = () => {
               <div dangerouslySetInnerHTML={{ __html: nextToken[1] }} />
             )}
           </div>
-          <div></div>
+          <div></div>{" "}
           <div className={styles.buttonContainer}>
             <button
               disabled={readIsFetching || !write || waitIsFetching}
