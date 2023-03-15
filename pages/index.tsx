@@ -3,6 +3,7 @@ import type { NextPage } from "next";
 import Head from "next/head";
 import styles from "../styles/Home.module.css";
 import {
+  useAccount,
   useBlockNumber,
   useContractRead,
   usePrepareContractWrite,
@@ -23,7 +24,15 @@ const Home: NextPage = () => {
     return x?.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
   };
 
+  const mintButtonText = (isConnected: boolean) => {
+    if (!isConnected) {
+      return "Connect Wallet to Mint";
+    }
+    return "Mint";
+  };
+
   // Hooks
+  const { isConnected } = useAccount();
   const { chain = { id: 5 } } = useNetwork();
   const [address, setAddress] = useState(deployments[chain?.id]?.address);
   const [abi, setAbi] = useState(deployments[chain?.id]?.abi);
@@ -55,15 +64,20 @@ const Home: NextPage = () => {
   });
 
   // Fetches USD price of ETH
-  const [ethPrice, setEthPrice] = useState(0);
+  const [ethPrice, setEthPrice] = useState();
   useEffect(() => {
-    fetch(
-      "https://api.coingecko.com/api/v3/simple/price?ids=ethereum&vs_currencies=usd"
-    )
-      .then((res) => res.json())
-      .then((data) => {
+    const fetchData = async () => {
+      try {
+        const response = await fetch(
+          "https://api.coingecko.com/api/v3/simple/price?ids=ethereum&vs_currencies=usd"
+        );
+        const data = await response.json();
         setEthPrice(data.ethereum.usd);
-      });
+      } catch (error) {
+        console.error(error);
+      }
+    };
+    fetchData();
   }, [blockNumber]);
 
   const {
@@ -152,7 +166,7 @@ const Home: NextPage = () => {
               onClick={() => write?.()}
               className={styles.mintButton}
             >
-              Mint
+              {mintButtonText(isConnected)}
             </button>
           </div>
           <div className={styles.transactionInfo}>
