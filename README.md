@@ -30,3 +30,8 @@ $ prettier --write pages/*.tsx contracts/src/*.sol contracts/script/Deploy.sol c
 ```
 $ cast nonce 0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266 --rpc-url localhost:8545
 ```
+
+### Etherscan verify
+```
+$ forge verify-contract 0x618c0126ad50969dd39bfa310a554a7c086eecb0 src/Mercurial.sol:Mercurial --chain 5
+```
