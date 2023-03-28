@@ -1,4 +1,3 @@
-import { ConnectButton } from "@rainbow-me/rainbowkit";
 import type { NextPage } from "next";
 import Head from "next/head";
 import styles from "../styles/Home.module.css";
@@ -17,6 +16,7 @@ import { ethers } from "ethers";
 import { Result } from "ethers/lib/utils";
 import { deployments } from "../utils/config";
 import ExpiresIn from "../components/ExpiresIn/ExpiresIn";
+import Navbar from "../components/Navbar/Navbar";
 
 const Home: NextPage = () => {
   // UI Helpers
@@ -111,13 +111,7 @@ const Home: NextPage = () => {
             rel="stylesheet"
           />
         </Head>
-        <nav className={styles.navbar}>
-          <ul>
-            <li>
-              <ConnectButton />
-            </li>
-          </ul>
-        </nav>
+        <Navbar />
         <main className={styles.main}>
           <h1>Mercurial #{nextToken?.[0].toString()}</h1>
           <div className={styles.tokenInfo}>
