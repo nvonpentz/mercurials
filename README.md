@@ -18,7 +18,7 @@ If your transactions are not being processed by Anvil, try resetting the nonce u
 ## Goerli deploy
 
 ```
-$ forge script script/Deploy.sol --rpc-url https://endpoints.omniatech.io/v1/eth/goerli/public --broadcast --interactive
+$ forge script script/Deploy.sol --rpc-url https://endpoints.omniatech.io/v1/eth/goerli/public --broadcast --interactives 1 --sender 0x595a0583621FDe81A935021707e81343f75F9324
 ```
 
 ### Lint
