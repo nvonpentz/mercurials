@@ -11,7 +11,7 @@ const ExpiresIn: React.FC<Props> = ({ blocks }) => {
     setTimeRemaining(blocks * 12);
 
     const countdown = setInterval(() => {
-      setTimeRemaining((prevTime) => prevTime - 1);
+      setTimeRemaining((prevTime) => Math.max(prevTime - 1, (blocks-1) * 12));
     }, 1000);
 
     // Cleanup interval when the component unmounts or blocks prop changes

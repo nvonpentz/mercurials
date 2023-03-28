@@ -128,9 +128,7 @@ const Home: NextPage = () => {
             </div>
             <div className={styles.tokenInfoColumn}>
               <div>{numberWithCommas(blockNumber?.toString())}</div>
-              <div>
-                <ExpiresIn blocks={nextToken?.[4]?.toString()} />
-              </div>
+              <ExpiresIn blocks={nextToken?.[4]?.toString()} />
               <div>
                 <strong>
                   Ξ{" "}
