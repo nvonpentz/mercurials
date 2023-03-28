@@ -6,7 +6,7 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint",
+    "lint": "prettier --write pages/*.tsx contracts/src/*.sol contracts/script/Deploy.sol contracts/test/*.sol && next lint",
     "watch": "cd contracts && node ../scripts/watch.js" 
   },
   "dependencies": {
