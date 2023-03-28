@@ -25,13 +25,6 @@ const Home: NextPage = () => {
     return x?.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
   };
 
-  const mintButtonText = (isConnected: boolean) => {
-    if (!isConnected) {
-      return "Connect Wallet to Mint";
-    }
-    return "Mint";
-  };
-
   // Hooks
   const { isConnected } = useAccount();
   const { chain = { id: 5 } } = useNetwork();
