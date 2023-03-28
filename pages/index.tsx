@@ -17,6 +17,7 @@ import { Result } from "ethers/lib/utils";
 import { deployments } from "../utils/config";
 import ExpiresIn from "../components/ExpiresIn/ExpiresIn";
 import Navbar from "../components/Navbar/Navbar";
+import MintButton from "../components/MintButton/MintButton";
 
 const Home: NextPage = () => {
   // UI Helpers
@@ -153,13 +154,12 @@ const Home: NextPage = () => {
           </div>
           <div></div>{" "}
           <div className={styles.buttonContainer}>
-            <button
-              disabled={readIsFetching || !write || waitIsFetching}
-              onClick={() => write?.()}
-              className={styles.mintButton}
-            >
-              {mintButtonText(isConnected)}
-            </button>
+            <MintButton
+              isConnected={isConnected}
+              readIsFetching={readIsFetching}
+              write={write}
+              waitIsFetching={waitIsFetching}
+            />
           </div>
           <div className={styles.transactionInfo}>
             <div>

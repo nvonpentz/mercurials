@@ -27,9 +27,6 @@
   padding: 16px 16px 0 16px; /* top right bottom left */
 }
 
-/* .tokenImage { */
-/* } */
-
 .transactionInfo {
   display: flex;
   justify-content: center;
@@ -43,37 +40,3 @@
   margin-top: 16px;
 }
 
-.mintButton {
-  background-image: linear-gradient(#f7f8fa ,#e7e9ec);
-  border-color: #adb1b8 #a2a6ac #8d9096;
-  border-style: solid;
-  border-width: 1px;
-  border-radius: 3px;
-  box-shadow: rgba(255,255,255,.6) 0 1px 0 inset;
-  box-sizing: border-box;
-  cursor: pointer;
-  font-family: 'Lato', sans-serif;
-  font-size: 1rem;
-  height: 36px;
-  outline: 0;
-  overflow: hidden;
-  padding: 0 16px;
-}
-
-.mintButton:active {
-  border-bottom-color: #a2a6ac;
-}
-
-.mintButton:active:hover {
-  border-bottom-color: #a2a6ac;
-}
-
-.mintButton:hover {
-  border-color: #a2a6ac #979aa1 #82858a;
-}
-
-.mintButton:focus {
-  border-color: #66afe9;
-  box-shadow: 0 0 3px 2px rgba(102,175,233,.5);
-  outline: 0;
-}
