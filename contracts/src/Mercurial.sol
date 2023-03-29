@@ -18,7 +18,7 @@ contract Mercurial is ERC721, LinearVRGDA {
 
     constructor()
         ERC721(
-            "Mercurial", // Name.
+            "Mercurials", // Name.
             "MERC" // Symbol.
         )
         LinearVRGDA(
