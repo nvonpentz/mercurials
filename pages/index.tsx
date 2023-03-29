@@ -99,7 +99,7 @@ const Home: NextPage = () => {
           <meta name="viewport" content="width=device-width, initial-scale=1" />
           <link rel="icon" href="/favicon.ico" />
         </Head>
-        <Navbar />
+        <Navbar chainId={chain.id} address={address}/>
         <main className={styles.main}>
           <h1>Mercurial #{nextToken?.[0].toString()}</h1>
           <div className={styles.tokenInfo}>
