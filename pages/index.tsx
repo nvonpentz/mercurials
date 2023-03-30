@@ -20,15 +20,18 @@ import Navbar from "../components/Navbar/Navbar";
 import MintButton from "../components/MintButton/MintButton";
 import TokenInfo from "../components/TokenInfo/TokenInfo";
 import TransactionInfo from "../components/TransactionInfo/TransactionInfo";
+import { MintAttempt } from "../utils/types";
 
 const Home: NextPage = () => {
+  const { chain = { id: 5 } } = useNetwork();
+
   // State
   const [address, setAddress] = useState(deployments[chain?.id]?.address);
   const [abi, setAbi] = useState(deployments[chain?.id]?.abi);
+  const [mintAttempt, setMintAttempt] = useState<MintAttempt>();
 
   // Hooks
   const { isConnected } = useAccount();
-  const { chain = { id: 5 } } = useNetwork();
   useEffect(() => {
     setAddress(deployments[chain?.id]?.address);
     setAbi(deployments[chain?.id]?.abi);
@@ -44,31 +47,13 @@ const Home: NextPage = () => {
     },
     watch: true,
   }) as { data: Result; isFetching: boolean };
-  const { config, error: prepareWriteError } = usePrepareContractWrite({
-    address: address,
-    abi: abi,
-    args: [nextToken?.[0], nextToken?.[3]],
-    functionName: "mint",
-    overrides: {
-      gasLimit: ethers.BigNumber.from(5000000),
-      value: nextToken?.[2],
-    },
-  });
-
-  const {
-    data: writeData,
-    error: writeError,
-    isError: isWriteError,
-    isLoading: isWriteLoading,
-    write,
-  } = useContractWrite(config);
 
   const {
     data: receipt,
     error: waitForTransactionError,
     isFetching: waitIsFetching,
   } = useWaitForTransaction({
-    hash: writeData?.hash,
+    hash: mintAttempt?.transactionHash,
   });
 
   return (
@@ -94,14 +79,18 @@ const Home: NextPage = () => {
             <MintButton
               isConnected={isConnected}
               readIsFetching={readIsFetching}
-              write={write}
               waitIsFetching={waitIsFetching}
+              address={address}
+              abi={abi}
+              nextToken={nextToken}
+              setMintAttempt={setMintAttempt}
             />
           </div>
           <TransactionInfo
             waitIsFetching={waitIsFetching}
             receipt={receipt}
             waitForTransactionError={waitForTransactionError}
+            mintAttempt={mintAttempt}
           />
         </main>
       </div>
