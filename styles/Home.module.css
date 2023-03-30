@@ -3,21 +3,6 @@
   justify-content: center;
 }
 
-.tokenInfo {
-  display: flex;
-  flex-direction: row;
-}
-
-.tokenInfoColumn {
-  display: flex;
-  flex-direction: column;
-  margin-right: 5px;
-}
-
-.tokenInfoColumn div span {
-  padding-left: 5px;
-}
-
 .tokenImage svg {
   max-width: 100%;
   max-height: calc(100vh - (250px));
@@ -25,12 +10,6 @@
   height: auto;
 
   padding: 16px 16px 0 16px; /* top right bottom left */
-}
-
-.transactionInfo {
-  display: flex;
-  justify-content: center;
-  margin: 16px;
 }
 
 .buttonContainer {

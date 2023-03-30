@@ -18,18 +18,17 @@ import { deployments } from "../utils/config";
 import ExpiresIn from "../components/ExpiresIn/ExpiresIn";
 import Navbar from "../components/Navbar/Navbar";
 import MintButton from "../components/MintButton/MintButton";
+import TokenInfo from "../components/TokenInfo/TokenInfo";
+import TransactionInfo from "../components/TransactionInfo/TransactionInfo";
 
 const Home: NextPage = () => {
-  // UI Helpers
-  const numberWithCommas = (x: string | undefined) => {
-    return x?.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
-  };
+  // State
+  const [address, setAddress] = useState(deployments[chain?.id]?.address);
+  const [abi, setAbi] = useState(deployments[chain?.id]?.abi);
 
   // Hooks
   const { isConnected } = useAccount();
   const { chain = { id: 5 } } = useNetwork();
-  const [address, setAddress] = useState(deployments[chain?.id]?.address);
-  const [abi, setAbi] = useState(deployments[chain?.id]?.abi);
   useEffect(() => {
     setAddress(deployments[chain?.id]?.address);
     setAbi(deployments[chain?.id]?.abi);
@@ -45,7 +44,6 @@ const Home: NextPage = () => {
     },
     watch: true,
   }) as { data: Result; isFetching: boolean };
-
   const { config, error: prepareWriteError } = usePrepareContractWrite({
     address: address,
     abi: abi,
@@ -56,23 +54,6 @@ const Home: NextPage = () => {
       value: nextToken?.[2],
     },
   });
-
-  // Fetches USD price of ETH
-  const [ethPrice, setEthPrice] = useState();
-  useEffect(() => {
-    const fetchData = async () => {
-      try {
-        const response = await fetch(
-          "https://api.coingecko.com/api/v3/simple/price?ids=ethereum&vs_currencies=usd"
-        );
-        const data = await response.json();
-        setEthPrice(data.ethereum.usd);
-      } catch (error) {
-        console.error(error);
-      }
-    };
-    fetchData();
-  }, [blockNumber]);
 
   const {
     data: writeData,
@@ -99,41 +80,10 @@ const Home: NextPage = () => {
           <meta name="viewport" content="width=device-width, initial-scale=1" />
           <link rel="icon" href="/favicon.ico" />
         </Head>
-        <Navbar chainId={chain.id} address={address}/>
+        <Navbar chainId={chain.id} address={address} />
         <main className={styles.main}>
           <h1>Mercurial #{nextToken?.[0].toString()}</h1>
-          <div className={styles.tokenInfo}>
-            <div className={styles.tokenInfoColumn}>
-              <div>Current block:</div>
-              <div>Expires in:</div>
-              <div>Current price:</div>
-            </div>
-            <div className={styles.tokenInfoColumn}>
-              <div>{numberWithCommas(blockNumber?.toString())}</div>
-              <ExpiresIn blocks={nextToken?.[4]?.toString()} />
-              <div>
-                <strong>
-                  Ξ{" "}
-                  {nextToken &&
-                    parseFloat(
-                      ethers.utils.formatEther(nextToken?.[2].toString())
-                    ).toFixed(5)}
-                </strong>
-                <span>
-                  ($
-                  {ethPrice &&
-                    nextToken &&
-                    (
-                      ethPrice *
-                      parseFloat(
-                        ethers.utils.formatEther(nextToken?.[2].toString())
-                      )
-                    ).toFixed(2)}
-                  )
-                </span>
-              </div>
-            </div>
-          </div>
+          <TokenInfo blockNumber={blockNumber} nextToken={nextToken} />
           <div className={styles.tokenImage}>
             {nextToken && (
               <div dangerouslySetInnerHTML={{ __html: nextToken[1] }} />
@@ -148,14 +98,11 @@ const Home: NextPage = () => {
               waitIsFetching={waitIsFetching}
             />
           </div>
-          <div className={styles.transactionInfo}>
-            <div>
-              {" "}
-              {waitIsFetching && "Waiting for transaction to be mined..."}{" "}
-            </div>
-            <div> {receipt && <div> Success! </div>} </div>
-            <div> {waitForTransactionError && <div> Mint failed. </div>} </div>
-          </div>
+          <TransactionInfo
+            waitIsFetching={waitIsFetching}
+            receipt={receipt}
+            waitForTransactionError={waitForTransactionError}
+          />
         </main>
       </div>
     </div>
