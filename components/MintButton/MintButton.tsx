@@ -14,6 +14,7 @@ interface MintButtonProps {
   address: string;
   abi: any;
   nextToken: any;
+  mintAttempt: MintAttempt | undefined;
   setMintAttempt: (mintAttempt: MintAttempt) => void;
 }
 
@@ -24,6 +25,7 @@ const MintButton: React.FC<MintButtonProps> = ({
   address,
   abi,
   nextToken,
+  mintAttempt,
   setMintAttempt,
 }) => {
   // UI logic
@@ -61,21 +63,28 @@ const MintButton: React.FC<MintButtonProps> = ({
         tokenId: nextToken?.[0].toString(),
         svg: nextToken[1],
         transactionHash: undefined,
-      });
+      } as MintAttempt);
     }
   };
 
   useEffect(() => {
     if (writeData?.hash) {
-      setMintAttempt((prevMintAttempt) => {
-        if (!prevMintAttempt.transactionHash) {
-          return {
-            ...prevMintAttempt,
-            transactionHash: writeData.hash,
-          };
-        }
-        return prevMintAttempt;
-      });
+      if (mintAttempt?.transactionHash === undefined) {
+        setMintAttempt({
+          tokenId: mintAttempt?.tokenId,
+          svg: mintAttempt?.svg,
+          transactionHash: writeData.hash,
+        } as MintAttempt);
+      }
+      // setMintAttempt((prevMintAttempt) => {
+      //   if (!prevMintAttempt.transactionHash) {
+      //     return {
+      //       ...prevMintAttempt,
+      //       transactionHash: writeData.hash,
+      //     };
+      //   }
+      //   return prevMintAttempt;
+      // });
     }
   }, [writeData?.hash, setMintAttempt]);
 

@@ -83,6 +83,7 @@ const Home: NextPage = () => {
               address={address}
               abi={abi}
               nextToken={nextToken}
+              mintAttempt={mintAttempt}
               setMintAttempt={setMintAttempt}
             />
           </div>
@@ -91,6 +92,7 @@ const Home: NextPage = () => {
             receipt={receipt}
             waitForTransactionError={waitForTransactionError}
             mintAttempt={mintAttempt}
+            address={address}
           />
         </main>
       </div>
