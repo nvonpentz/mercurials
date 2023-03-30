@@ -3,13 +3,17 @@
   justify-content: center;
 }
 
+.tokenImage {
+  max-width: 100%;
+  padding: 16px 16px 0 16px; /* top right bottom left */
+  box-sizing: border-box; /* to include padding in max-width */
+}
+
 .tokenImage svg {
   max-width: 100%;
   max-height: calc(100vh - (250px));
   width: auto;
   height: auto;
-
-  padding: 16px 16px 0 16px; /* top right bottom left */
 }
 
 .buttonContainer {
@@ -18,4 +22,3 @@
   align-items: center;
   margin-top: 16px;
 }
-
