@@ -22,11 +22,6 @@ const Navbar: React.FC<NavbarProps> = ({ chainId, address }) => {
     <nav className={styles.navbar}>
       <ul>
         <li>
-          <Link href="/">
-            <a>Home</a>
-          </Link>
-        </li>
-        <li>
           <a href="https://example.com" target="_blank" rel="noopener noreferrer">About</a>
         </li>
         <li>

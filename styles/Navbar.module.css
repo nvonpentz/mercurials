@@ -1,7 +1,3 @@
-.navbar {
-  /* padding: 1rem; */
-}
-
 .navbar ul {
   display: flex;
   justify-content: flex-start; /* Aligns items to the left */
