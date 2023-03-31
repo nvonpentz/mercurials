@@ -12,3 +12,7 @@
 .tokenInfoColumn div span {
   padding-left: 5px;
 }
+
+.tokenPrice {
+  font-size: large;
+}

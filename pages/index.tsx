@@ -67,7 +67,9 @@ const Home: NextPage = () => {
         </Head>
         <Navbar chainId={chain.id} address={address} />
         <main className={styles.main}>
-          <h1>Mercurial #{nextToken?.[0].toString()}</h1>
+          <h1 className={styles.header}>
+            Mercurial #{nextToken?.[0].toString()}
+          </h1>
           <TokenInfo blockNumber={blockNumber} nextToken={nextToken} />
           <div className={styles.tokenImage}>
             {nextToken && (

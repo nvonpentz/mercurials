@@ -22,7 +22,15 @@ const ExpiresIn: React.FC<Props> = ({ blocks }) => {
 
   return (
     <div>
-      <strong>{blocks} block{blocks !== 1 && 's'}</strong> (~{timeRemaining} second{timeRemaining !== 1 && 's'})
+      {blocks.toString() === "1" ? (
+        <>
+          Expires <strong>this block</strong> (~{timeRemaining} second{timeRemaining !== 1 && 's'}).
+        </>
+      ) : (
+        <>
+          Expires in <strong>{blocks} block{blocks !== 1 && 's'}</strong> (~{timeRemaining} second{timeRemaining !== 1 && 's'}).
+        </>
+      )}
     </div>
   );
 };

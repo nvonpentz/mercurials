@@ -38,14 +38,7 @@ const TokenInfo: React.FC<TokenInfoProps> = ({
   return (
     <div className={styles.tokenInfo}>
       <div className={styles.tokenInfoColumn}>
-        <div>Current block:</div>
-        <div>Expires in:</div>
-        <div>Current price:</div>
-      </div>
-      <div className={styles.tokenInfoColumn}>
-        <div>{numberWithCommas(blockNumber?.toString())}</div>
-        <ExpiresIn blocks={nextToken?.[4]?.toString()} />
-        <div>
+        <div className={styles.tokenPrice}>
           <strong>
             Ξ{" "}
             {nextToken &&
@@ -66,10 +59,10 @@ const TokenInfo: React.FC<TokenInfoProps> = ({
             )
           </span>
         </div>
+        <ExpiresIn blocks={nextToken?.[4]?.toString()} />
       </div>
     </div>
   );
 };
 
 export default TokenInfo;
-
