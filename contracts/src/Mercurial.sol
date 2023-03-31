@@ -109,16 +109,33 @@ contract Mercurial is ERC721, LinearVRGDA {
         );
     }
 
+    // function generateSeed(uint256 tokenId) public view returns (uint, uint8) {
+    //     uint8 ttl = 1 - uint8((block.number - 1) % 1);
+    //     return (
+    //         uint256(
+    //             keccak256(
+    //                 abi.encodePacked(
+    //                     blockhash(
+    //                         (block.number - 1) - ((block.number - 1) % 1)
+    //                     ),
+    //                     tokenId
+    //                 )
+    //             )
+    //         ),
+    //         ttl
+    //     );
+    // }
+
     /// @notice Generates the entire SVG
     function generateSVG(uint256 seed) public pure returns (string memory) {
         uint256 nonce = 0;
 
         uint256 animationType;
         // (animationType, nonce) = generateRandom(0, 2, seed, nonce);
-        animationType = 3; // Disable animation for now.
+        animationType = 0; // Disable animation for now.
 
         string memory animationDuration;
-        (animationDuration, nonce) = generateAnimationDuration(seed, nonce);
+        (animationDuration, nonce) = generateAnimationDuration(animationType, seed, nonce);
 
         string memory feTurbulence;
         (feTurbulence, nonce) = generateFeTurbulence(seed, nonce);
@@ -323,6 +340,50 @@ contract Mercurial is ERC721, LinearVRGDA {
         return (feComposites, nonce);
     }
 
+    // /// @notice Generates feDisplacementMap SVG element
+    // function generateFeDisplacementMap(
+    //     uint256 seed,
+    //     uint256 nonce,
+    //     bool animate,
+    //     string memory animationDuration
+    // ) internal pure returns (string memory, uint) {
+    //     uint256 scale;
+    //     (scale, nonce) = generateRandom(1, 100, seed, nonce);
+    //     string memory from;
+    //     string memory to;
+    //     from = scale.toString();
+    //     uint delta;
+    //     (delta, nonce) = generateRandom(75, 200, seed, nonce);
+    //     to = (scale + delta).toString();
+    //     uint256 random;
+    //     (random, nonce) = generateRandom(0, 2, seed, nonce);
+    //     if (random % 2 == 0) {
+    //         (to, from) = (from, to);
+    //     }
+
+    //     return (
+    //         string.concat(
+    //             '<feDisplacementMap scale="',
+    //             scale.toString(),
+    //             '" result="displacementResult">',
+    //             animate
+    //                 ? string.concat(
+    //                     '<animate attributeName="scale" from="',
+    //                     from,
+    //                     '" to="',
+    //                     to,
+    //                     '"',
+    //                     'dur="',
+    //                     animationDuration,
+    //                     '" repeatCount="indefinite" result="displacementResult"/>'
+    //                 )
+    //                 : "",
+    //             "</feDisplacementMap>"
+    //         ),
+    //         nonce
+    //     );
+    // }
+
     /// @notice Generates feDisplacementMap SVG element
     function generateFeDisplacementMap(
         uint256 seed,
@@ -330,33 +391,63 @@ contract Mercurial is ERC721, LinearVRGDA {
         bool animate,
         string memory animationDuration
     ) internal pure returns (string memory, uint) {
-        uint256 scale;
-        (scale, nonce) = generateRandom(1, 201, seed, nonce);
-        string memory from;
-        string memory to;
-        from = scale.toString();
-        to = (scale + 100).toString();
-        uint256 random;
-        (random, nonce) = generateRandom(0, 2, seed, nonce);
-        if (random % 2 == 0) {
-            (to, from) = (from, to);
+        // generate a random start value from 0 to 150
+        uint256 start;
+        (start, nonce) = generateRandom(0, 150, seed, nonce);
+        // generate a random start is negative or positive from 0 to 1
+        uint256 startNegativeIfZero;
+        (startNegativeIfZero, nonce) = generateRandom(0, 1, seed, nonce);
+
+        // generate a random delta value from 0 to 150
+        uint256 delta;
+        (delta, nonce) = generateRandom(0, 150, seed, nonce);
+        // generate a random delta is negative or positive from 0 to 1
+        uint256 deltaNegativeIfZero;
+        (deltaNegativeIfZero, nonce) = generateRandom(0, 1, seed, nonce);
+
+        // convert startS to string, append "-" if startNegativeIfZero is 0
+        string memory startString;
+        if (startNegativeIfZero == 0) {
+            startString = string.concat("-", start.toString());
+        } else {
+            startString = start.toString();
         }
+
+        // calculate end value considering start and delta values
+        string memory endString;
+        if (startNegativeIfZero == deltaNegativeIfZero) {
+            // if start and delta are both negative or both positive
+            // add delta to start
+            endString = (start + delta).toString();
+        } else {
+            // if start and delta are different signs
+            // subtract delta from start
+            endString = (start - delta).toString();
+        }
+
+        string memory valuesString = string.concat(
+            'values="',
+            startString,
+            ";",
+            endString,
+            ";",
+            startString,
+            ';"'
+        );
 
         return (
             string.concat(
                 '<feDisplacementMap scale="',
-                scale.toString(),
+                startString,
                 '" result="displacementResult">',
                 animate
                     ? string.concat(
-                        '<animate attributeName="scale" from="',
-                        from,
-                        '" to="',
-                        to,
-                        '"',
-                        'dur="',
+                        '<animate attributeName="scale" ',
+                        valuesString,
+                        ' keyTimes="0; 0.5; 1" dur="',
                         animationDuration,
-                        '" repeatCount="indefinite" result="displacementResult"/>'
+                        '" repeatCount="indefinite" result="displacementResult"',
+                        ' calcMode="spline" keySplines="0.3 0 0.7 1; 0.3 0 0.7 1"/>'
                     )
                     : "",
                 "</feDisplacementMap>"
@@ -367,21 +458,28 @@ contract Mercurial is ERC721, LinearVRGDA {
 
     /// @notice Generates the duration value for the animations
     function generateAnimationDuration(
+        uint256 animationType,
         uint256 seed,
         uint256 nonce
     ) internal pure returns (string memory, uint) {
         uint256 animationDuration;
-        (animationDuration, nonce) = generateRandom(0, 3, seed, nonce);
         string memory animationLengthStr;
-        if (animationDuration == 0) {
-            animationLengthStr = "3s";
-        } else if (animationDuration == 1) {
-            animationLengthStr = "6s";
-        } else if (animationDuration == 2) {
-            animationLengthStr = "12s";
+        if (animationType == 0) {
+            // scale
+            animationLengthStr = "40s";
         } else {
-            require(false, "Invalid animation duration");
-            assert(false);
+            // hue rotate
+            (animationDuration, nonce) = generateRandom(0, 3, seed, nonce);
+            if (animationDuration == 0) {
+                animationLengthStr = "3s";
+            } else if (animationDuration == 1) {
+                animationLengthStr = "6s";
+            } else if (animationDuration == 2) {
+                animationLengthStr = "12s";
+            } else {
+                require(false, "Invalid animation duration"); // TODO remove
+                assert(false);
+            }
         }
 
         return (animationLengthStr, nonce);
