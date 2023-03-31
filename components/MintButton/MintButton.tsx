@@ -76,15 +76,6 @@ const MintButton: React.FC<MintButtonProps> = ({
           transactionHash: writeData.hash,
         } as MintAttempt);
       }
-      // setMintAttempt((prevMintAttempt) => {
-      //   if (!prevMintAttempt.transactionHash) {
-      //     return {
-      //       ...prevMintAttempt,
-      //       transactionHash: writeData.hash,
-      //     };
-      //   }
-      //   return prevMintAttempt;
-      // });
     }
   }, [writeData?.hash, setMintAttempt]);
 
