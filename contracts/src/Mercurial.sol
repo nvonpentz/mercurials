@@ -430,41 +430,43 @@ contract Mercurial is ERC721, LinearVRGDA {
             endString = end.toString();
         }
 
-        startString = string.concat(
-            startString,
-            ";",
-            endString,
-            ";",
-            startString,
-            ";"
-        );
 
-        return (
-            string.concat(
-                animate
-                    ? "<feDisplacementMap "
-                    : string.concat(
-                        '<feDisplacementMap scale="',
-                        startString,
-                        '" '
-                    ),
-                // startString,
-                '" result="displacementResult">',
-                animate
-                    ? string.concat(
-                        '<animate attributeName="scale" ',
-                        'values="',
-                        startString,
-                        '" keyTimes="0; 0.5; 1" dur="',
-                        animationDuration,
-                        '" repeatCount="indefinite" result="displacementResult" calcMode="spline" keySplines="0.3 0 0.7 1; 0.3 0 0.7 1"/>'
-                    )
-                    : "",
-                "</feDisplacementMap>"
-            ),
-            startString,
-            nonce
-        );
+        if (animate) {
+            startString = string.concat(
+                startString,
+                ";",
+                endString,
+                ";",
+                startString,
+                ";"
+            );
+
+            return (
+                string.concat(
+                    '<feDisplacementMap result="displacementResult">',
+                    '<animate attributeName="scale" ',
+                    'values="',
+                    startString,
+                    '" keyTimes="0; 0.5; 1" dur="',
+                    animationDuration,
+                    '" repeatCount="indefinite" result="displacementResult" calcMode="spline" keySplines="0.3 0 0.7 1; 0.3 0 0.7 1"/>',
+                    "</feDisplacementMap>"
+                ),
+                startString,
+                nonce
+            );
+        } else {
+            return (
+                string.concat(
+                    '<feDisplacementMap scale="',
+                    startString,
+                    '" result="displacementResult">',
+                    "</feDisplacementMap>"
+                ),
+                startString,
+                nonce
+            );
+        }
     }
 
     /// @notice Generates the duration value for the animations
