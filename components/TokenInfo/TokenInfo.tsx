@@ -39,8 +39,8 @@ const TokenInfo: React.FC<TokenInfoProps> = ({
     <div className={styles.tokenInfo}>
       <div className={styles.tokenInfoColumn}>
         <div className={styles.tokenPrice}>
+          Ξ{" "}
           <strong>
-            Ξ{" "}
             {nextToken &&
               parseFloat(
                 ethers.utils.formatEther(nextToken?.[2].toString())
@@ -59,6 +59,7 @@ const TokenInfo: React.FC<TokenInfoProps> = ({
             )
           </span>
         </div>
+
         <ExpiresIn blocks={nextToken?.[4]?.toString()} />
       </div>
     </div>

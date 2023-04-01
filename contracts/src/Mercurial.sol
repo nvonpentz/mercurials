@@ -23,9 +23,9 @@ contract Mercurial is ERC721, LinearVRGDA {
             "MERC" // Symbol.
         )
         LinearVRGDA(
-            0.01e18, // Target price.
+            0.001e18, // Target price. TODO change
             0.01e18, // Price decay percent.
-            48e18 // Per time unit.
+            24 * 30e18 // Per time unit.
         )
     {}
 
@@ -60,28 +60,26 @@ contract Mercurial is ERC721, LinearVRGDA {
     }
 
     /// @dev This function should be called using the `pending` block tag.
-    /// @dev The tokenId and hash should passed as arguments to the `mint` function.
+    /// @dev The id and hash should passed as arguments to the `mint` function.
     function nextToken()
         external
         view
         returns (
-            uint256 tokenId,
-            string memory svg,
+            uint256 id,
+            string memory uri,
             uint256 price,
             bytes32 hash,
             uint8 ttl
         )
     {
-        tokenId = totalSold;
-        (uint seed, uint8 ttl) = generateSeed(tokenId);
-        svg = generateSVG(seed);
-        price = getVRGDAPrice(
-            toDaysWadUnsafe(block.timestamp - startTime),
-            tokenId
-        );
+        id = totalSold;
+        uint seed;
+        (seed, ttl) = generateSeed(id);
+        uri = generateTokenUri(seed, id); // TODO use tokenURI
+        price = getVRGDAPrice(toDaysWadUnsafe(block.timestamp - startTime), id);
         hash = blockhash(block.number - 1);
 
-        return (tokenId, svg, price, hash, ttl);
+        return (id, uri, price, hash, ttl);
     }
 
     function getCurrentVRGDAPrice() public view returns (uint256) {
@@ -94,13 +92,13 @@ contract Mercurial is ERC721, LinearVRGDA {
     }
 
     function generateSeed(uint256 tokenId) public view returns (uint, uint8) {
-        uint8 ttl = 2 - uint8((block.number - 1) % 2);
+        uint8 ttl = 5 - uint8((block.number - 1) % 5);
         return (
             uint256(
                 keccak256(
                     abi.encodePacked(
                         blockhash(
-                            (block.number - 1) - ((block.number - 1) % 2)
+                            (block.number - 1) - ((block.number - 1) % 5)
                         ),
                         tokenId
                     )
@@ -110,39 +108,36 @@ contract Mercurial is ERC721, LinearVRGDA {
         );
     }
 
-    // function generateSeed(uint256 tokenId) public view returns (uint, uint8) {
-    //     uint8 ttl = 5 - uint8((block.number - 1) % 5);
-    //     return (
-    //         uint256(
-    //             keccak256(
-    //                 abi.encodePacked(
-    //                     blockhash(
-    //                         (block.number - 1) - ((block.number - 1) % 5)
-    //                     ),
-    //                     tokenId
-    //                 )
-    //             )
-    //         ),
-    //         ttl
-    //     );
-    // }
-
     /// @notice Generates the entire SVG
-    function generateSVG(uint256 seed) public pure returns (string memory) {
+    function generateSVG(
+        uint256 seed
+    ) public pure returns (string memory svg, string memory attributes) {
         uint256 nonce = 0;
 
-        uint256 animationType;
-        // (animationType, nonce) = generateRandom(0, 2, seed, nonce);
-        animationType = 0; // Disable animation for now.
+        // Generate SVG elements SVG animation type
+        uint256 animationType; // either 0=scale, 1=huerotate
+        (animationType, nonce) = generateRandom(0, 2, seed, nonce);
 
         string memory animationDuration;
-        (animationDuration, nonce) = generateAnimationDuration(animationType, seed, nonce);
+        (animationDuration, nonce) = generateAnimationDuration(
+            animationType,
+            seed,
+            nonce
+        );
 
         string memory feTurbulence;
-        (feTurbulence, nonce) = generateFeTurbulence(seed, nonce);
+        string memory numOctaves;
+        string memory baseFrequencyStr;
+        (
+            feTurbulence,
+            numOctaves,
+            baseFrequencyStr,
+            nonce
+        ) = generateFeTurbulence(seed, nonce);
 
         string memory feDisplacementMap;
-        (feDisplacementMap, nonce) = generateFeDisplacementMap(
+        string memory scale;
+        (feDisplacementMap, scale, nonce) = generateFeDisplacementMap(
             seed,
             nonce,
             animationType == 0,
@@ -161,7 +156,25 @@ contract Mercurial is ERC721, LinearVRGDA {
             nonce
         );
 
-        return
+        attributes = string.concat(
+            '{ "trait_type": "Base Frequency", "value": "',
+            baseFrequencyStr,
+            '" },',
+            '{ "trait_type": "Animation Type", "value": "',
+            animationType == 0 ? "Scale" : "Hue Rotate",
+            '" },',
+            '{ "trait_type": "Animation Speed", "value": "',
+            animationDuration,
+            '" },',
+            '{ "trait_type": "Scale", "value": "',
+            scale,
+            '" },',
+            '{ "trait_type": "Octaves", "value": "',
+            numOctaves,
+            '" }'
+        );
+
+        return (
             string.concat(
                 '<svg width="500" height="500" viewBox="0 0 500 500" version="1.1" xmlns="http://www.w3.org/2000/svg">',
                 '<filter id="a">',
@@ -195,6 +208,39 @@ contract Mercurial is ERC721, LinearVRGDA {
                 "</filter>",
                 '<rect width="1000" height="1000" filter="url(#a)"/>',
                 "</svg>"
+            ),
+            attributes
+        );
+    }
+
+    function generateTokenUri(
+        uint seed,
+        uint tokenId
+    ) internal pure returns (string memory) {
+        string memory attributes;
+        string memory svg;
+        (svg, attributes) = generateSVG(seed);
+        attributes = string.concat('"attributes": [ ', attributes, "]");
+
+        string memory metadataJson = Base64.encode(
+            bytes(
+                string(
+                    // prettier-ignore
+                    abi.encodePacked(
+                        '{ "name": "Mercurial #', tokenId.toString(), '", ',
+                            '"description": "On chain generative art project.", ',
+                            '"image": "data:image/svg+xml;base64,', Base64.encode(bytes(svg)), '", ',
+                            '"animation_url": "data:image/svg+xml;base64,', Base64.encode(bytes(svg)), '", ',
+                            attributes,
+                        '}'
+                    )
+                )
+            )
+        );
+
+        return
+            string(
+                abi.encodePacked("data:application/json;base64,", metadataJson)
             );
     }
 
@@ -206,25 +252,7 @@ contract Mercurial is ERC721, LinearVRGDA {
             "ERC721Metadata: URI query for nonexistent token"
         );
         uint256 seed = seeds[tokenId];
-        string memory svg = generateSVG(seed);
-        string memory metadataJson = Base64.encode(
-            bytes(
-                string(
-                    abi.encodePacked(
-                        '{"name": "Mercurial #',
-                        tokenId.toString(),
-                        '", "description": "On chain generative art project.", "image": "data:image/svg+xml;base64,',
-                        Base64.encode(bytes(svg)),
-                        '"}'
-                    )
-                )
-            )
-        );
-
-        return
-            string(
-                abi.encodePacked("data:application/json;base64,", metadataJson)
-            );
+        return generateTokenUri(seed, tokenId);
     }
 
     /// @notice Generates a psuedo-random number from min (includsive) to max (exclusive)
@@ -341,57 +369,13 @@ contract Mercurial is ERC721, LinearVRGDA {
         return (feComposites, nonce);
     }
 
-    // /// @notice Generates feDisplacementMap SVG element
-    // function generateFeDisplacementMap(
-    //     uint256 seed,
-    //     uint256 nonce,
-    //     bool animate,
-    //     string memory animationDuration
-    // ) internal pure returns (string memory, uint) {
-    //     uint256 scale;
-    //     (scale, nonce) = generateRandom(1, 100, seed, nonce);
-    //     string memory from;
-    //     string memory to;
-    //     from = scale.toString();
-    //     uint delta;
-    //     (delta, nonce) = generateRandom(75, 200, seed, nonce);
-    //     to = (scale + delta).toString();
-    //     uint256 random;
-    //     (random, nonce) = generateRandom(0, 2, seed, nonce);
-    //     if (random % 2 == 0) {
-    //         (to, from) = (from, to);
-    //     }
-
-    //     return (
-    //         string.concat(
-    //             '<feDisplacementMap scale="',
-    //             scale.toString(),
-    //             '" result="displacementResult">',
-    //             animate
-    //                 ? string.concat(
-    //                     '<animate attributeName="scale" from="',
-    //                     from,
-    //                     '" to="',
-    //                     to,
-    //                     '"',
-    //                     'dur="',
-    //                     animationDuration,
-    //                     '" repeatCount="indefinite" result="displacementResult"/>'
-    //                 )
-    //                 : "",
-    //             "</feDisplacementMap>"
-    //         ),
-    //         nonce
-    //     );
-    // }
-
     /// @notice Generates feDisplacementMap SVG element
     function generateFeDisplacementMap(
         uint256 seed,
         uint256 nonce,
         bool animate,
         string memory animationDuration
-    ) internal pure returns (string memory, uint) {
+    ) internal pure returns (string memory, string memory, uint) {
         // generate a random start value from 0 to 150
         uint256 start;
         (start, nonce) = generateRandom(0, 151, seed, nonce);
@@ -400,7 +384,7 @@ contract Mercurial is ERC721, LinearVRGDA {
 
         // generate a random delta value from 75 to 150
         uint256 delta;
-        (delta, nonce) = generateRandom(75, 300, seed, nonce);
+        (delta, nonce) = generateRandom(75, 250, seed, nonce);
         uint256 deltaNegativeIfZero;
         (deltaNegativeIfZero, nonce) = generateRandom(0, 2, seed, nonce);
 
@@ -438,13 +422,12 @@ contract Mercurial is ERC721, LinearVRGDA {
         }
 
         string memory valuesString = string.concat(
-            'values="',
             startString,
             ";",
             endString,
             ";",
             startString,
-            ';"'
+            ";"
         );
 
         return (
@@ -455,8 +438,10 @@ contract Mercurial is ERC721, LinearVRGDA {
                 animate
                     ? string.concat(
                         '<animate attributeName="scale" ',
+                        'values="',
                         valuesString,
-                        ' keyTimes="0; 0.5; 1" dur="',
+                        '" ',
+                        'keyTimes="0; 0.5; 1" dur="',
                         animationDuration,
                         '" repeatCount="indefinite" result="displacementResult"',
                         ' calcMode="spline" keySplines="0.3 0 0.7 1; 0.3 0 0.7 1"/>'
@@ -464,6 +449,7 @@ contract Mercurial is ERC721, LinearVRGDA {
                     : "",
                 "</feDisplacementMap>"
             ),
+            animate ? valuesString : startString,
             nonce
         );
     }
@@ -485,17 +471,11 @@ contract Mercurial is ERC721, LinearVRGDA {
             );
         } else {
             // hue rotate
-            (animationDuration, nonce) = generateRandom(0, 3, seed, nonce);
-            if (animationDuration == 0) {
-                animationLengthStr = "3s";
-            } else if (animationDuration == 1) {
-                animationLengthStr = "6s";
-            } else if (animationDuration == 2) {
-                animationLengthStr = "12s";
-            } else {
-                require(false, "Invalid animation duration"); // TODO remove
-                assert(false);
-            }
+            (animationDuration, nonce) = generateRandom(1, 30, seed, nonce);
+            animationLengthStr = string.concat(
+                animationDuration.toString(),
+                "s"
+            );
         }
 
         return (animationLengthStr, nonce);
@@ -505,7 +485,11 @@ contract Mercurial is ERC721, LinearVRGDA {
     function generateFeTurbulence(
         uint256 seed,
         uint256 nonce
-    ) internal pure returns (string memory, uint) {
+    )
+        internal
+        pure
+        returns (string memory, string memory, string memory, uint)
+    {
         string memory baseFrequencyStr;
         (baseFrequencyStr, nonce) = generateBaseFrequency(seed, nonce);
 
@@ -521,6 +505,8 @@ contract Mercurial is ERC721, LinearVRGDA {
                 '"',
                 ' result="turbulenceResult"> </feTurbulence>'
             ),
+            numOctaves.toString(),
+            baseFrequencyStr,
             nonce
         );
     }
@@ -531,7 +517,7 @@ contract Mercurial is ERC721, LinearVRGDA {
         uint256 nonce
     ) internal pure returns (string memory, uint) {
         uint256 diffuseConstant;
-        (diffuseConstant, nonce) = generateRandom(2, 3, seed, nonce);
+        (diffuseConstant, nonce) = generateRandom(2, 4, seed, nonce);
 
         uint256 surfaceScale;
         (surfaceScale, nonce) = generateRandom(10, 30, seed, nonce);

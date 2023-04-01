@@ -15,7 +15,6 @@ import { useState, useEffect } from "react";
 import { ethers } from "ethers";
 import { Result } from "ethers/lib/utils";
 import { deployments } from "../utils/config";
-import ExpiresIn from "../components/ExpiresIn/ExpiresIn";
 import Navbar from "../components/Navbar/Navbar";
 import MintButton from "../components/MintButton/MintButton";
 import TokenInfo from "../components/TokenInfo/TokenInfo";
@@ -26,8 +25,8 @@ const Home: NextPage = () => {
   const { chain = { id: 5 } } = useNetwork();
 
   // State
-  // const [address, setAddress] = useState(deployments[chain?.id]?.address);
-  const [address, setAddress] = useState(deployments[5]?.address);
+  const [address, setAddress] = useState(deployments[chain?.id]?.address);
+  // const [address, setAddress] = useState(deployments[5]?.address);
   console.log("address", address);
   const [abi, setAbi] = useState(deployments[chain?.id]?.abi);
   // const [abi, setAbi] = useState(deployments[5]?.abi);
@@ -52,6 +51,27 @@ const Home: NextPage = () => {
     },
     watch: true,
   }) as { data: Result; isFetching: boolean };
+
+  const encodedMetadata = nextToken?.[1];
+  const extractMetdataFromTokenURI = (tokenURI: string) => {
+    return JSON.parse(atob(tokenURI.split(",")[1]));
+  };
+
+  const extractSVGFromTokenURI = (tokenURI: string) => {
+    const metadata = extractMetdataFromTokenURI(tokenURI);
+    if (!metadata.animation_url) {
+      return "";
+    }
+
+    return atob(metadata.animation_url.split(",")[1]);
+  };
+
+  if (nextToken?.[1]) {
+    const { animation_url, image, ...selectedMetadataFields } =
+      extractMetdataFromTokenURI(nextToken?.[1] || "");
+    const metadataString = JSON.stringify(selectedMetadataFields, null, 2);
+    console.log("metadataString", metadataString);
+  }
 
   const {
     data: receipt,
@@ -78,7 +98,11 @@ const Home: NextPage = () => {
           <TokenInfo blockNumber={blockNumber} nextToken={nextToken} />
           <div className={styles.tokenImage}>
             {nextToken && (
-              <div dangerouslySetInnerHTML={{ __html: nextToken[1] }} />
+              <div
+                dangerouslySetInnerHTML={{
+                  __html: extractSVGFromTokenURI(nextToken[1]),
+                }}
+              />
             )}
           </div>
           <div></div>{" "}

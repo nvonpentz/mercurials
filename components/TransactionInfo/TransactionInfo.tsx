@@ -39,13 +39,13 @@ const TransactionInfo: React.FC<TransactionInfoProps> = ({
       <div>
         {waitForTransactionError && (
           <div>
-            Mint failed. View the transaction on{" "}
+            Mint failed. View the {" "}
             <a
               href={`https://etherscan.io/tx/${mintAttempt?.transactionHash}`}
               target="_blank"
               rel="noreferrer"
             >
-              Etherscan
+              transaction on Etherscan
             </a>
             .
           </div>
