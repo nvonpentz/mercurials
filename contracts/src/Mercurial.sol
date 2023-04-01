@@ -186,7 +186,7 @@ contract Mercurial is ERC721, LinearVRGDA {
                 '<feColorMatrix type="hueRotate" result="rotateResult">',
                 animationType == 1
                     ? string.concat(
-                        '<animate attributeName="values" from="0" to="360"',
+                        '<animate attributeName="values" from="0" to="360" ',
                         'dur="',
                         animationDuration,
                         '" repeatCount="indefinite" result="colorMatrixResult"/>'
