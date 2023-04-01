@@ -11,6 +11,7 @@ import {SafeTransferLib} from "solmate/utils/SafeTransferLib.sol";
 
 contract Mercurial is ERC721, LinearVRGDA {
     using Strings for uint256;
+    using Strings for int256;
 
     uint256 public totalSold; // The total number of tokens sold so far.
     uint256 public immutable startTime = block.timestamp; // When VRGDA sales begun.
@@ -93,13 +94,13 @@ contract Mercurial is ERC721, LinearVRGDA {
     }
 
     function generateSeed(uint256 tokenId) public view returns (uint, uint8) {
-        uint8 ttl = 5 - uint8((block.number - 1) % 5);
+        uint8 ttl = 2 - uint8((block.number - 1) % 2);
         return (
             uint256(
                 keccak256(
                     abi.encodePacked(
                         blockhash(
-                            (block.number - 1) - ((block.number - 1) % 5)
+                            (block.number - 1) - ((block.number - 1) % 2)
                         ),
                         tokenId
                     )
@@ -110,13 +111,13 @@ contract Mercurial is ERC721, LinearVRGDA {
     }
 
     // function generateSeed(uint256 tokenId) public view returns (uint, uint8) {
-    //     uint8 ttl = 1 - uint8((block.number - 1) % 1);
+    //     uint8 ttl = 5 - uint8((block.number - 1) % 5);
     //     return (
     //         uint256(
     //             keccak256(
     //                 abi.encodePacked(
     //                     blockhash(
-    //                         (block.number - 1) - ((block.number - 1) % 1)
+    //                         (block.number - 1) - ((block.number - 1) % 5)
     //                     ),
     //                     tokenId
     //                 )
@@ -393,19 +394,34 @@ contract Mercurial is ERC721, LinearVRGDA {
     ) internal pure returns (string memory, uint) {
         // generate a random start value from 0 to 150
         uint256 start;
-        (start, nonce) = generateRandom(0, 150, seed, nonce);
-        // generate a random start is negative or positive from 0 to 1
+        (start, nonce) = generateRandom(0, 151, seed, nonce);
         uint256 startNegativeIfZero;
-        (startNegativeIfZero, nonce) = generateRandom(0, 1, seed, nonce);
+        (startNegativeIfZero, nonce) = generateRandom(0, 2, seed, nonce);
 
-        // generate a random delta value from 0 to 150
+        // generate a random delta value from 75 to 150
         uint256 delta;
-        (delta, nonce) = generateRandom(0, 150, seed, nonce);
-        // generate a random delta is negative or positive from 0 to 1
+        (delta, nonce) = generateRandom(75, 300, seed, nonce);
         uint256 deltaNegativeIfZero;
-        (deltaNegativeIfZero, nonce) = generateRandom(0, 1, seed, nonce);
+        (deltaNegativeIfZero, nonce) = generateRandom(0, 2, seed, nonce);
 
-        // convert startS to string, append "-" if startNegativeIfZero is 0
+        uint endNegativeIfZero;
+        uint end;
+
+        if (startNegativeIfZero == deltaNegativeIfZero) {
+            // if the start and delta are both positive or both negative, then the end will be the same
+            end = start + delta;
+            endNegativeIfZero = startNegativeIfZero;
+        } else {
+            if (start > delta) {
+                end = start - delta;
+                endNegativeIfZero = startNegativeIfZero;
+            } else {
+                end = delta - start;
+                endNegativeIfZero = deltaNegativeIfZero;
+            }
+        }
+
+        // convert start value to string and apply the sign if needed
         string memory startString;
         if (startNegativeIfZero == 0) {
             startString = string.concat("-", start.toString());
@@ -413,16 +429,12 @@ contract Mercurial is ERC721, LinearVRGDA {
             startString = start.toString();
         }
 
-        // calculate end value considering start and delta values
+        // convert end value to string and apply the sign if needed
         string memory endString;
-        if (startNegativeIfZero == deltaNegativeIfZero) {
-            // if start and delta are both negative or both positive
-            // add delta to start
-            endString = (start + delta).toString();
+        if (endNegativeIfZero == 0) {
+            endString = string.concat("-", end.toString());
         } else {
-            // if start and delta are different signs
-            // subtract delta from start
-            endString = (start - delta).toString();
+            endString = end.toString();
         }
 
         string memory valuesString = string.concat(
@@ -466,7 +478,11 @@ contract Mercurial is ERC721, LinearVRGDA {
         string memory animationLengthStr;
         if (animationType == 0) {
             // scale
-            animationLengthStr = "40s";
+            (animationDuration, nonce) = generateRandom(1, 60, seed, nonce);
+            animationLengthStr = string.concat(
+                animationDuration.toString(),
+                "s"
+            );
         } else {
             // hue rotate
             (animationDuration, nonce) = generateRandom(0, 3, seed, nonce);
