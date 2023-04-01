@@ -112,7 +112,7 @@ contract Mercurial is ERC721, LinearVRGDA {
     function generateSVG(
         uint256 seed
     ) public pure returns (string memory svg, string memory attributes) {
-        uint256 nonce = 0;
+        uint256 nonce;
 
         // Generate SVG elements SVG animation type
         uint256 animationType; // either 0=scale, 1=huerotate
@@ -270,6 +270,15 @@ contract Mercurial is ERC721, LinearVRGDA {
         return ((rand % (max - min)) + min, nonce);
     }
 
+    function generateRandomBool(
+        uint256 seed,
+        uint256 nonce
+    ) internal pure returns (bool, uint) {
+        uint256 rand = uint(keccak256(abi.encodePacked(seed, nonce)));
+        nonce++;
+        return (rand % 2 == 0, nonce);
+    }
+
     /// @notice Generates a baseFrequency string for a feTurbulence element
     function generateBaseFrequency(
         uint256 seed,
@@ -376,52 +385,52 @@ contract Mercurial is ERC721, LinearVRGDA {
         bool animate,
         string memory animationDuration
     ) internal pure returns (string memory, string memory, uint) {
-        // generate a random start value from 0 to 150
+        // Generate a random start value from 0 to 150
         uint256 start;
         (start, nonce) = generateRandom(0, 151, seed, nonce);
-        uint256 startNegativeIfZero;
-        (startNegativeIfZero, nonce) = generateRandom(0, 2, seed, nonce);
+        bool startNegative;
+        (startNegative, nonce) = generateRandomBool(seed, nonce);
 
-        // generate a random delta value from 75 to 150
+        // Generate a random delta value from 75 to 150
         uint256 delta;
         (delta, nonce) = generateRandom(75, 250, seed, nonce);
-        uint256 deltaNegativeIfZero;
-        (deltaNegativeIfZero, nonce) = generateRandom(0, 2, seed, nonce);
+        bool deltaNegative;
+        (deltaNegative, nonce) = generateRandomBool(seed, nonce);
 
-        uint endNegativeIfZero;
         uint end;
+        bool endNegative;
 
-        if (startNegativeIfZero == deltaNegativeIfZero) {
-            // if the start and delta are both positive or both negative, then the end will be the same
+        if (startNegative == deltaNegative) {
+            // If the start and delta are both positive or both negative, then the end will be the same
             end = start + delta;
-            endNegativeIfZero = startNegativeIfZero;
+            endNegative = startNegative;
         } else {
             if (start > delta) {
                 end = start - delta;
-                endNegativeIfZero = startNegativeIfZero;
+                endNegative = startNegative;
             } else {
                 end = delta - start;
-                endNegativeIfZero = deltaNegativeIfZero;
+                endNegative = deltaNegative;
             }
         }
 
-        // convert start value to string and apply the sign if needed
+        // Convert start value to string and apply the sign if needed
         string memory startString;
-        if (startNegativeIfZero == 0) {
+        if (startNegative) {
             startString = string.concat("-", start.toString());
         } else {
             startString = start.toString();
         }
 
-        // convert end value to string and apply the sign if needed
+        // Convert end value to string and apply the sign if needed
         string memory endString;
-        if (endNegativeIfZero == 0) {
+        if (endNegative) {
             endString = string.concat("-", end.toString());
         } else {
             endString = end.toString();
         }
 
-        string memory valuesString = string.concat(
+        startString = string.concat(
             startString,
             ";",
             endString,
@@ -432,24 +441,28 @@ contract Mercurial is ERC721, LinearVRGDA {
 
         return (
             string.concat(
-                '<feDisplacementMap scale="',
-                startString,
+                animate
+                    ? "<feDisplacementMap "
+                    : string.concat(
+                        '<feDisplacementMap scale="',
+                        startString,
+                        '" '
+                    ),
+                // startString,
                 '" result="displacementResult">',
                 animate
                     ? string.concat(
                         '<animate attributeName="scale" ',
                         'values="',
-                        valuesString,
-                        '" ',
-                        'keyTimes="0; 0.5; 1" dur="',
+                        startString,
+                        '" keyTimes="0; 0.5; 1" dur="',
                         animationDuration,
-                        '" repeatCount="indefinite" result="displacementResult"',
-                        ' calcMode="spline" keySplines="0.3 0 0.7 1; 0.3 0 0.7 1"/>'
+                        '" repeatCount="indefinite" result="displacementResult" calcMode="spline" keySplines="0.3 0 0.7 1; 0.3 0 0.7 1"/>'
                     )
                     : "",
                 "</feDisplacementMap>"
             ),
-            animate ? valuesString : startString,
+            startString,
             nonce
         );
     }
@@ -543,11 +556,11 @@ contract Mercurial is ERC721, LinearVRGDA {
         uint256 seed,
         uint256 nonce
     ) internal pure returns (string memory, uint) {
-        uint256 random;
-        (random, nonce) = generateRandom(0, 2, seed, nonce);
+        bool random;
+        (random, nonce) = generateRandomBool(seed, nonce);
         string memory feColorMatrixForInversion;
         // Apply the inversion half the time
-        if (random == 0) {
+        if (random) {
             feColorMatrixForInversion = '<feColorMatrix type="matrix" values="-1 0 0 0 1 0 -1 0 0 1 0 0 -1 0 1 0 0 0 1 0"/>';
         }
 
