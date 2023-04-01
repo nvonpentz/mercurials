@@ -111,6 +111,7 @@ contract MercurialTest is Test {
         (seed1, ttl1) = mercurial.generateSeed(0);
     }
 
+    // TODO fixme
     // function testTokenURI() public {
     //     uint256 tokenId;
     //     string memory svg;
