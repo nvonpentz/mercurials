@@ -176,7 +176,7 @@ contract Mercurial is ERC721, LinearVRGDA {
 
         return (
             string.concat(
-                '<svg width="500" height="500" viewBox="0 0 500 500" version="1.1" xmlns="http://www.w3.org/2000/svg">',
+                '<svg width="350" height="350" version="1.1" xmlns="http://www.w3.org/2000/svg">',
                 '<filter id="a">',
                 // Base turbulent noise
                 feTurbulence,
@@ -206,7 +206,7 @@ contract Mercurial is ERC721, LinearVRGDA {
                 // Invert the colors half the time
                 feColorMatrixForInversion,
                 "</filter>",
-                '<rect width="1000" height="1000" filter="url(#a)"/>',
+                '<rect width="350" height="350" filter="url(#a)"/>',
                 "</svg>"
             ),
             attributes
@@ -429,7 +429,6 @@ contract Mercurial is ERC721, LinearVRGDA {
         } else {
             endString = end.toString();
         }
-
 
         if (animate) {
             startString = string.concat(
