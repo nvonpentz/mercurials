@@ -32,3 +32,7 @@
   box-shadow: 0 0 3px 2px rgba(102,175,233,.5);
   outline: 0;
 }
+
+.mintButton:disabled {
+  cursor: not-allowed;
+}

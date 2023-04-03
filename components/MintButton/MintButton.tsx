@@ -30,10 +30,10 @@ const MintButton: React.FC<MintButtonProps> = ({
 }) => {
   // UI logic
   const mintButtonText = (isConnected: boolean) => {
-    if (!isConnected) {
-      return "Connect Wallet to Mint";
-    }
-    return "Mint";
+    // if (!isConnected) {
+    //   return "Connect Wallet to Mint";
+    // }
+    return "Burn and Mint";
   };
 
   // Hooks
