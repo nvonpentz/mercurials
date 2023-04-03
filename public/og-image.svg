@@ -1,0 +1,17 @@
+<?xml version="1.0"?>
+<svg xmlns="http://www.w3.org/2000/svg" width="350" height="350" version="1.1">
+  <filter id="a">
+    <feTurbulence baseFrequency="0.0183" numOctaves="1" result="turbulenceResult"> </feTurbulence>
+    <feDisplacementMap result="displacementResult">
+      <!-- <animate attributeName="scale" values="-11;202;-11;" keyTimes="0; 0.5; 1" dur="23s" repeatCount="indefinite" result="displacementResult" calcMode="spline" keySplines="0.3 0 0.7 1; 0.3 0 0.7 1"/> -->
+    </feDisplacementMap>
+    <feColorMatrix type="hueRotate" result="rotateResult"/>
+    <feColorMatrix type="matrix" result="colorChannelResult" values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 1 0 0 0 0"/>
+    <feComposite in="rotateResult" in2="colorChannelResult" operator="out" result="compositeResult2"/>
+    <feComposite in="compositeResult2" in2="compositeResult2" operator="arithmetic" k1="1" k2="1" k3="1" k4="-0.46"/>
+    <feDiffuseLighting lighting-color="white" diffuseConstant="2" result="diffuseResult" surfaceScale="26">
+      <feDistantLight elevation="16"/>
+    </feDiffuseLighting>
+  </filter>
+  <rect width="350" height="350" filter="url(#a)"/>
+</svg>

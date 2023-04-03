@@ -81,9 +81,6 @@ const Home: NextPage = () => {
       <div className={styles.column}>
         <Head>
           <title>Mercurials - NFT</title>
-          <meta name="description" content="TODO" />
-          <meta name="viewport" content="width=device-width, initial-scale=1" />
-          <link rel="icon" href="/favicon.ico" />
         </Head>
         <Navbar chainId={chain.id} address={address} />
         <main className={styles.main}>
