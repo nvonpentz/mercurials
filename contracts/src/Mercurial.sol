@@ -516,8 +516,9 @@ contract Mercurial is ERC721, LinearVRGDA {
                 baseFrequencyStr,
                 '" numOctaves="',
                 numOctaves.toString(),
-                '"',
-                ' result="turbulenceResult"> </feTurbulence>'
+                '" seed="',
+                seed.toString(),
+                '" result="turbulenceResult"/> '
             ),
             numOctaves.toString(),
             baseFrequencyStr,
