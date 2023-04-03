@@ -25,15 +25,19 @@ const Home: NextPage = () => {
   const { chain = { id: 5 } } = useNetwork();
 
   // State
-  const [address, setAddress] = useState(deployments[5]?.address);
-  const [abi, setAbi] = useState(deployments[5]?.abi);
+  // TODO use a fixed chain id so it works even if they're connected to a diff network
+  const [address, setAddress] = useState(deployments[chain.id].address);
+  const [abi, setAbi] = useState(deployments[chain.id].abi);
   const [mintAttempt, setMintAttempt] = useState<MintAttempt>();
+
+  console.log("address", address);
 
   // Hooks
   const { isConnected } = useAccount();
   useEffect(() => {
-    setAddress(deployments[5]?.address);
-    setAbi(deployments[5]?.abi);
+    // TODO use a fixed chain id so it works even if they're connected to a diff network
+    setAddress(deployments[chain.id].address);
+    setAbi(deployments[chain.id].abi);
   }, [chain]);
   const { data: blockNumber } = useBlockNumber();
   const { data: nextToken, isFetching: readIsFetching } = useContractRead({
