@@ -108,6 +108,60 @@ contract Mercurial is ERC721, LinearVRGDA {
         );
     }
 
+    function composeSVGsFromParts(
+        string memory feTurbulence,
+        string memory staticFeDisplacementMap,
+        string memory animatedFeDisplacementMap,
+        string memory animatedFeColorMatrix,
+        string memory feComposites,
+        string memory feDiffuseLighting,
+        string memory feColorMatrixForInversion
+    ) public pure returns (string memory svgImage, string memory svgAnimated) {
+        string memory firstPart = string.concat(
+            '<svg width="350" height="350" version="1.1" xmlns="http://www.w3.org/2000/svg">',
+            '<filter id="a">',
+            feTurbulence
+        );
+
+        string memory bottomPart = string.concat(
+            '<feColorMatrix type="matrix" result="colorChannelResult" ',
+            'values="0 0 0 0 0 ',
+            "0 0 0 0 0 ",
+            "0 0 0 0 0 ",
+            '1 0 0 0 0">',
+            "</feColorMatrix>",
+            // Add inside-out effect and flatness effect
+            feComposites,
+            // Light
+            feDiffuseLighting,
+            // Invert the colors half the time
+            feColorMatrixForInversion,
+            "</filter>",
+            '<rect width="350" height="350" filter="url(#a)"/>',
+            "</svg>"
+        );
+
+
+        svgImage = string.concat(
+            firstPart,
+            staticFeDisplacementMap,
+            '<feColorMatrix type="hueRotate" result="rotateResult">',
+            "</feColorMatrix>",
+            bottomPart
+        );
+
+        svgAnimated = string.concat(
+            firstPart,
+            animatedFeDisplacementMap,
+            '<feColorMatrix type="hueRotate" result="rotateResult">',
+            animatedFeColorMatrix,
+            "</feColorMatrix>",
+            bottomPart
+        );
+
+        return (svgImage, svgAnimated);
+    }
+
     /// @notice Generates the entire SVG
     function generateSVG(
         uint256 seed
@@ -173,7 +227,6 @@ contract Mercurial is ERC721, LinearVRGDA {
             numOctaves,
             '" }'
         );
-
         string memory animatedFeColorMatrix = string.concat(
             '<animate attributeName="values" from="0" to="360" ',
             'dur="',
@@ -181,37 +234,17 @@ contract Mercurial is ERC721, LinearVRGDA {
             '" repeatCount="indefinite" result="colorMatrixResult"/>'
         );
 
-        return (
-            "TODO - static svg",
-            string.concat(
-                '<svg width="350" height="350" version="1.1" xmlns="http://www.w3.org/2000/svg">',
-                '<filter id="a">',
-                // Base turbulent noise
-                feTurbulence,
-                // For scale effect
-                animatedFeDisplacementMap,
-                // For 360 animation
-                '<feColorMatrix type="hueRotate" result="rotateResult">',
-                animatedFeColorMatrix,
-                "</feColorMatrix>",
-                '<feColorMatrix type="matrix" result="colorChannelResult" ',
-                'values="0 0 0 0 0 ',
-                "0 0 0 0 0 ",
-                "0 0 0 0 0 ",
-                '1 0 0 0 0">',
-                "</feColorMatrix>",
-                // Add inside-out effect and flatness effect
-                feComposites,
-                // Light
-                feDiffuseLighting,
-                // Invert the colors half the time
-                feColorMatrixForInversion,
-                "</filter>",
-                '<rect width="350" height="350" filter="url(#a)"/>',
-                "</svg>"
-            ),
-            attributes
+        (svgImage, svgAnimation) = composeSVGsFromParts(
+            feTurbulence,
+            staticFeDisplacementMap,
+            animatedFeDisplacementMap,
+            animatedFeColorMatrix,
+            feComposites,
+            feDiffuseLighting,
+            feColorMatrixForInversion
         );
+
+        return (svgImage, svgAnimation, attributes);
     }
 
     function generateTokenUri(
