@@ -92,15 +92,6 @@ const Home: NextPage = () => {
             Mercurial #{nextToken?.[0].toString()}
           </h1>
           <TokenInfo blockNumber={blockNumber} nextToken={nextToken} />
-          <div className={styles.tokenImage}>
-            {nextToken && (
-              <div
-                dangerouslySetInnerHTML={{
-                  __html: extractSVGFromTokenURI(nextToken[1]),
-                }}
-              />
-            )}
-          </div>
           <div></div>{" "}
           <div className={styles.buttonContainer}>
             <MintButton
@@ -121,6 +112,7 @@ const Home: NextPage = () => {
             mintAttempt={mintAttempt}
             address={address}
           />
+          <svg width="350" height="350" version="1.1" xmlns="http://www.w3.org/2000/svg"><filter id="a"><feTurbulence baseFrequency="0.0224" numOctaves="3" seed="1048190368018563782577291834817411692731655502293696614349791765894307356740" result="turbulenceResult"></feTurbulence> <feDisplacementMap result="displacementResult"><animate attributeName="scale" values="32;128;32;" keyTimes="0; 0.5; 1" dur="8s" repeatCount="indefinite" result="displacementResult" calcMode="spline" keySplines="0.3 0 0.7 1; 0.3 0 0.7 1"></animate></feDisplacementMap><feColorMatrix type="hueRotate" result="rotateResult"><animate attributeName="values" from="0" to="360" dur="2s" repeatCount="indefinite" result="colorMatrixResult"></animate></feColorMatrix><feColorMatrix type="matrix" result="colorChannelResult" values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 1 0 0 0 0"></feColorMatrix><feComposite in="rotateResult" in2="colorChannelResult" operator="out" result="compositeResult2"></feComposite><feComposite in="compositeResult2" in2="compositeResult2" operator="arithmetic" k1="1" k2="1" k3="0" k4="-0.38"></feComposite><feDiffuseLighting lighting-color="white" diffuseConstant="2" result="diffuseResult" surfaceScale="16"><feDistantLight elevation="3"></feDistantLight></feDiffuseLighting><feColorMatrix type="matrix" values="-1 0 0 0 1 0 -1 0 0 1 0 0 -1 0 1 0 0 0 1 0"></feColorMatrix></filter><rect width="350" height="350" filter="url(#a)"></rect></svg>
         </main>
       </div>
     </div>
