@@ -91,15 +91,29 @@ contract Mercurial is ERC721, LinearVRGDA {
             );
     }
 
+    // function generateSeed(uint256 tokenId) public view returns (uint, uint8) {
+    //     uint8 ttl = 5 - uint8((block.number - 1) % 5);
+    //     return (
+    //         uint256(
+    //             keccak256(
+    //                 abi.encodePacked(
+    //                     blockhash(
+    //                         (block.number - 1) - ((block.number - 1) % 5)
+    //                     ),
+    //                     tokenId
+    //                 )
+    //             )
+    //         ),
+    //         ttl
+    //     );
+    // }
     function generateSeed(uint256 tokenId) public view returns (uint, uint8) {
-        uint8 ttl = 5 - uint8((block.number - 1) % 5);
+        uint8 ttl = 1;
         return (
             uint256(
                 keccak256(
                     abi.encodePacked(
-                        blockhash(
-                            (block.number - 1) - ((block.number - 1) % 5)
-                        ),
+                        blockhash(block.number - 1),
                         tokenId
                     )
                 )
@@ -387,9 +401,11 @@ contract Mercurial is ERC721, LinearVRGDA {
         uint256 nonce
     ) internal pure returns (string memory, uint) {
         uint256 baseFrequency;
-        (baseFrequency, nonce) = generateRandom(30, 251, seed, nonce);
+        // (baseFrequency, nonce) = generateRandom(30, 251, seed, nonce);
+        (baseFrequency, nonce) = generateRandom(50, 301, seed, nonce);
         string memory baseFrequencyStr;
         if (baseFrequency >= 0 && baseFrequency < 10) {
+            // TODO remove this case, never hits
             baseFrequencyStr = string.concat("0.000", baseFrequency.toString()); // 0.0001 - 0.0010
         } else if (baseFrequency >= 10 && baseFrequency < 100) {
             baseFrequencyStr = string.concat("0.00", baseFrequency.toString()); // 0.010 - 0.100
@@ -655,10 +671,13 @@ contract Mercurial is ERC721, LinearVRGDA {
         (diffuseConstant, nonce) = generateRandom(2, 4, seed, nonce);
 
         uint256 surfaceScale;
-        (surfaceScale, nonce) = generateRandom(10, 30, seed, nonce);
+        // (surfaceScale, nonce) = generateRandom(10, 30, seed, nonce); TODO
+
+        (surfaceScale, nonce) = generateRandom(5, 11, seed, nonce);
 
         uint256 elevation;
-        (elevation, nonce) = generateRandom(0, 30, seed, nonce);
+        // (elevation, nonce) = generateRandom(0, 30, seed, nonce);
+        (elevation, nonce) = generateRandom(0, 25, seed, nonce);
         return (
             string.concat(
                 '<feDiffuseLighting lighting-color="white" diffuseConstant="',
