@@ -199,21 +199,6 @@ contract Mercurial is ERC721, LinearVRGDA {
         string memory,
         uint256
     ) {
-        // string memory staticFeDisplacementMap;
-        // string memory animatedFeDisplacementMap;
-        // string memory scaleStart;
-        // string memory animationSpeedFeDisplacementMap;
-        // (
-        //     scaleStart,
-        //     staticFeDisplacementMap,
-        //     animatedFeDisplacementMap,
-        //     animationSpeedFeDisplacementMap,
-        //     nonce
-        // ) = generateFeDisplacementMap(
-        //     seed,
-        //     nonce
-        // );
-
         string memory feComposites;
         (feComposites, nonce) = generateFeComposites(seed, nonce);
 
@@ -243,15 +228,6 @@ contract Mercurial is ERC721, LinearVRGDA {
             "</svg>"
         );
 
-        // attributes = string.concat(
-        //     attributes,
-        //     '{ "trait_type": "Animation Type", "value": "',
-        //     // animationType == 0 ? "Scale" : "Hue Rotate",
-        //     '" },',
-        //     '{ "trait_type": "Animation Speed", "value": "',
-        //     // animationSpeedFeDisplacementMap, ' ', animationSpeedHueRotate.toString(), TODO
-        //     '" },'
-        // );
         return (partTwo, attributes, nonce);
     }
 
