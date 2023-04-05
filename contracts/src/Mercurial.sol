@@ -184,8 +184,8 @@ contract Mercurial is ERC721, LinearVRGDA {
         );
 
         attributes = string.concat(
-            '{ "trait_type": "Base Frequency", "value": "', baseFrequencyStr, '" },',
-            '{ "trait_type": "Octaves", "value": "', numOctaves, '" },');
+            '{ "trait_type": "Base Frequency", "value": "', baseFrequencyStr, '" }, ',
+            '{ "trait_type": "Octaves", "value": "', numOctaves, '" }, ');
 
         return (partOne, attributes, nonce);
     }
@@ -243,15 +243,15 @@ contract Mercurial is ERC721, LinearVRGDA {
             "</svg>"
         );
 
-//         attributes = string.concat(
-//             attributes,
-//             '{ "trait_type": "Animation Type", "value": "',
-//             // animationType == 0 ? "Scale" : "Hue Rotate",
-//             '" },',
-//             '{ "trait_type": "Animation Speed", "value": "',
-//             // animationSpeedFeDisplacementMap, ' ', animationSpeedHueRotate.toString(), TODO
-//             '" },'
-//         );
+        // attributes = string.concat(
+        //     attributes,
+        //     '{ "trait_type": "Animation Type", "value": "',
+        //     // animationType == 0 ? "Scale" : "Hue Rotate",
+        //     '" },',
+        //     '{ "trait_type": "Animation Speed", "value": "',
+        //     // animationSpeedFeDisplacementMap, ' ', animationSpeedHueRotate.toString(), TODO
+        //     '" },'
+        // );
         return (partTwo, attributes, nonce);
     }
 
@@ -272,10 +272,10 @@ contract Mercurial is ERC721, LinearVRGDA {
 
         string memory staticFeDisplacementMap;
         string memory animatedFeDisplacementMap;
-        string memory scaleStart;
+        string memory scale;
         string memory animationSpeedFeDisplacementMap;
         (
-            scaleStart,
+            scale,
             staticFeDisplacementMap,
             animatedFeDisplacementMap,
             animationSpeedFeDisplacementMap,
@@ -285,12 +285,12 @@ contract Mercurial is ERC721, LinearVRGDA {
             nonce
         );
 
-        // attributes = string.concat(
-        //     attributes,
-        //     '{ "trait_type": "Scale", "value": "', scaleStart, '" },',
-        //     '{ "trait_type": "Scale Animation", "value": "', animationSpeedFeDisplacementMap, 's" },',
-        //     '{ "trait_type": "Hue Rotate Animation", "value": "', animationSpeedHueRotate.toString(), 's" }'
-        // );
+        attributes = string.concat(
+            attributes,
+            '{ "trait_type": "Scale", "value": "', scale, '" }, ',
+            '{ "trait_type": "Scale Animation", "value": "', animationSpeedFeDisplacementMap, '" }, ',
+            '{ "trait_type": "Hue Rotate Animation", "value": "', animationSpeedHueRotate.toString(), 's" }'
+        );
 
         string memory animatedFeColorMatrix = string.concat(
             '<animate attributeName="values" from="0" to="360" ',

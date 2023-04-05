@@ -55,6 +55,7 @@ const Home: NextPage = () => {
 
   const encodedMetadata = nextToken?.[1];
   const extractMetadataFromTokenURI = (tokenURI: string) => {
+    console.log("tokenURI", tokenURI);
     return JSON.parse(atob(tokenURI.split(",")[1]));
   };
 
