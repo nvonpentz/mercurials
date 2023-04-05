@@ -244,17 +244,17 @@ contract Mercurial is ERC721, LinearVRGDA {
         string memory partTwo;
         (partOne, attributes, nonce) = generateSVGPartOne(seed);
         (partTwo, attributes, nonce) = generateSVGPartTwo(seed, nonce, attributes);
-        (uint animationSpeedHueRotate,) = generateRandom(1, 30, seed, nonce);
+        (uint animationDurationHueRotate,) = generateRandom(1, 30, seed, nonce);
 
         string memory staticFeDisplacementMap;
         string memory animatedFeDisplacementMap;
         string memory scale;
-        string memory animationSpeedFeDisplacementMap;
+        string memory animationDurationFeDisplacementMap;
         (
             scale,
             staticFeDisplacementMap,
             animatedFeDisplacementMap,
-            animationSpeedFeDisplacementMap,
+            animationDurationFeDisplacementMap,
             nonce
         ) = generateFeDisplacementMap(
             seed,
@@ -264,13 +264,13 @@ contract Mercurial is ERC721, LinearVRGDA {
         attributes = string.concat(
             attributes,
             '{ "trait_type": "Scale", "value": "', scale, '" }, ',
-            '{ "trait_type": "Scale Animation", "value": "', animationSpeedFeDisplacementMap, '" }, ',
-            '{ "trait_type": "Hue Rotate Animation", "value": "', animationSpeedHueRotate.toString(), 's" }'
+            '{ "trait_type": "Scale Animation", "value": "', animationDurationFeDisplacementMap, '" }, ',
+            '{ "trait_type": "Hue Rotate Animation", "value": "', animationDurationHueRotate.toString(), 's" }'
         );
 
         string memory animatedFeColorMatrix = string.concat(
             '<animate attributeName="values" from="0" to="360" ',
-            'dur="', animationSpeedHueRotate.toString(), 's" ',
+            'dur="', animationDurationHueRotate.toString(), 's" ',
             'repeatCount="indefinite" result="colorMatrixResult"/>'
         );
 
@@ -460,16 +460,22 @@ contract Mercurial is ERC721, LinearVRGDA {
         return (feComposites, nonce);
     }
 
-    function _getStartAndEndValues(
+    function generateScale(
         uint256 seed,
         uint256 nonce
     ) internal pure returns (
-        uint start,
-        bool startNegative,
-        uint end,
-        bool endNegative,
+        string memory scaleStart,
+        string memory scaleValues,
+        // uint start,
+        // bool startNegative,
+        // uint end,
+        // bool endNegative,
         uint256
     ) {
+        uint start;
+        bool startNegative;
+        uint end;
+        bool endNegative;
         (start, nonce) = generateRandom(0, 151, seed, nonce);
         (startNegative, nonce) = generateRandomBool(seed, nonce);
 
@@ -490,11 +496,20 @@ contract Mercurial is ERC721, LinearVRGDA {
                 endNegative = deltaNegative;
             }
         }
+        scaleStart = convertSignedUintToString(start, startNegative);
+        scaleValues = string.concat(
+            scaleStart,
+            ";",
+            convertSignedUintToString(end, endNegative),
+            ";",
+            scaleStart,
+            ";"
+        );
 
-        return (start, startNegative, end, endNegative, nonce);
+        return (scaleStart, scaleValues, nonce);
     }
 
-    function _convertValueToString(
+    function convertSignedUintToString(
         uint value,
         bool isNegative
     ) internal pure returns (string memory valueString) {
@@ -514,58 +529,28 @@ contract Mercurial is ERC721, LinearVRGDA {
         string memory scaleStart,
         string memory staticFeDisplacementMap,
         string memory animatedFeDisplacementMap,
-        string memory animationSpeedFeDisplacementMap,
+        string memory animationDurationFeDisplacementMap,
         uint256
     ) {
-        uint start;
-        bool startNegative;
-        uint end;
-        bool endNegative;
+        // Generate initial scale value (scaleStart) for static image and animation,
+        // and start and end values for animated image (scaleValues)
+        string memory scaleValues;
+        (scaleStart, scaleValues, nonce) = generateScale(seed, nonce);
 
-        (start, startNegative, end, endNegative, nonce) = _getStartAndEndValues(seed, nonce);
-        scaleStart = _convertValueToString(start, startNegative);
-        string memory scaleEnd = _convertValueToString(end, endNegative);
+        // Generate an animation duration for the scale effect
+        uint256 animationDurationFeDisplacementMapUint;
+        (animationDurationFeDisplacementMapUint, nonce) = generateRandom(1, 61, seed, nonce);
+        animationDurationFeDisplacementMap = string.concat(
+            animationDurationFeDisplacementMapUint.toString(), "s");
 
-        uint256 animationSpeedFeDisplacementMapUint;
-        (animationSpeedFeDisplacementMapUint, nonce) = generateRandom(1, 61, seed, nonce);
-        animationSpeedFeDisplacementMap = string.concat(
-            animationSpeedFeDisplacementMapUint.toString(), "s");
-        (staticFeDisplacementMap, animatedFeDisplacementMap) = _createElementStrings(
-            scaleStart,
-            scaleEnd,
-            animationSpeedFeDisplacementMap
-        );
-
-        return (
-            scaleStart,
-            staticFeDisplacementMap,
-            animatedFeDisplacementMap,
-            animationSpeedFeDisplacementMap,
-            nonce
-        );
-    }
-
-    function _createElementStrings(
-        string memory scaleStart,
-        string memory scaleEnd,
-        string memory animationDuration
-    ) internal pure returns (
-        string memory staticFeDisplacementMap,
-        string memory animatedFeDisplacementMap
-    ) {
-        string memory values = string.concat(
-            scaleStart,
-            ";",
-            scaleEnd,
-            ";",
-            scaleStart,
-            ";"
-        );
-
+        // Create the static and animated feDisplacementMap elements
         animatedFeDisplacementMap = string.concat(
             // prettier-ignore
             '<feDisplacementMap result="displacementResult">',
-                '<animate attributeName="scale" ', 'values="', values, '" keyTimes="0; 0.5; 1" dur="', animationDuration, '" repeatCount="indefinite" result="displacementResult" calcMode="spline" keySplines="0.3 0 0.7 1; 0.3 0 0.7 1"/>',
+                '<animate attributeName="scale" ', 
+                          'values="', scaleValues,
+                          '" keyTimes="0; 0.5; 1" dur="', animationDurationFeDisplacementMap,
+                          '" repeatCount="indefinite" result="displacementResult" calcMode="spline" keySplines="0.3 0 0.7 1; 0.3 0 0.7 1"/>',
             "</feDisplacementMap>"
         );
 
@@ -574,7 +559,13 @@ contract Mercurial is ERC721, LinearVRGDA {
             '</feDisplacementMap>'
         );
 
-        return (staticFeDisplacementMap, animatedFeDisplacementMap);
+        return (
+            scaleStart,
+            staticFeDisplacementMap,
+            animatedFeDisplacementMap,
+            animationDurationFeDisplacementMap,
+            nonce
+        );
     }
 
     /// @notice Generates the feTurbulence SVG element
