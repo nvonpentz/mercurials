@@ -116,7 +116,7 @@ contract Mercurial is ERC721, LinearVRGDA {
         string memory feComposites,
         string memory feDiffuseLighting,
         string memory feColorMatrixForInversion
-    ) public pure returns (string memory svgImage, string memory svgAnimated) {
+    ) public pure returns (string memory svgImage, string memory svgAnimation) {
         string memory firstPart = string.concat(
             '<svg width="350" height="350" version="1.1" xmlns="http://www.w3.org/2000/svg">',
             '<filter id="a">',
@@ -141,7 +141,6 @@ contract Mercurial is ERC721, LinearVRGDA {
             "</svg>"
         );
 
-
         svgImage = string.concat(
             firstPart,
             staticFeDisplacementMap,
@@ -150,7 +149,7 @@ contract Mercurial is ERC721, LinearVRGDA {
             bottomPart
         );
 
-        svgAnimated = string.concat(
+        svgAnimation = string.concat(
             firstPart,
             animatedFeDisplacementMap,
             '<feColorMatrix type="hueRotate" result="rotateResult">',
@@ -159,26 +158,15 @@ contract Mercurial is ERC721, LinearVRGDA {
             bottomPart
         );
 
-        return (svgImage, svgAnimated);
+        return (svgImage, svgAnimation);
     }
 
-    /// @notice Generates the entire SVG
-    function generateSVG(
+    function generateSVGPartOne(
         uint256 seed
-    ) public pure returns (string memory svgImage, string memory svgAnimation, string memory attributes) {
-        uint256 nonce;
-
-        // Generate SVG elements
-        // uint256 animationType; // either 0=scale, 1=huerotate
-        // (animationType, nonce) = generateRandom(0, 2, seed, nonce);
-
-        // string memory animationDuration;
-        // (animationDuration, nonce) = generateAnimationDuration(
-        //     animationType,
-        //     seed,
-        //     nonce
-        // );
-
+    ) public pure returns (
+        string memory partOne,
+        string memory attributes,
+        uint256 nonce) {
         string memory feTurbulence;
         string memory numOctaves;
         string memory baseFrequencyStr;
@@ -189,20 +177,42 @@ contract Mercurial is ERC721, LinearVRGDA {
             nonce
         ) = generateFeTurbulence(seed, nonce);
 
-        string memory staticFeDisplacementMap;
-        string memory animatedFeDisplacementMap;
-        string memory scaleStart;
-        string memory animationDurationString;
-        (
-            scaleStart,
-            staticFeDisplacementMap,
-            animatedFeDisplacementMap,
-            animationDurationString,
-            nonce
-        ) = generateFeDisplacementMap(
-            seed,
-            nonce
+        partOne = string.concat(
+            '<svg width="350" height="350" version="1.1" xmlns="http://www.w3.org/2000/svg">',
+            '<filter id="a">',
+            feTurbulence
         );
+
+        attributes = string.concat(
+            '{ "trait_type": "Base Frequency", "value": "', baseFrequencyStr, '" },',
+            '{ "trait_type": "Octaves", "value": "', numOctaves, '" },');
+
+        return (partOne, attributes, nonce);
+    }
+
+    function generateSVGPartTwo(
+        uint256 seed,
+        uint256 nonce,
+        string memory attributes
+    ) public pure returns (
+        string memory partTwo,
+        string memory,
+        uint256
+    ) {
+        // string memory staticFeDisplacementMap;
+        // string memory animatedFeDisplacementMap;
+        // string memory scaleStart;
+        // string memory animationSpeedFeDisplacementMap;
+        // (
+        //     scaleStart,
+        //     staticFeDisplacementMap,
+        //     animatedFeDisplacementMap,
+        //     animationSpeedFeDisplacementMap,
+        //     nonce
+        // ) = generateFeDisplacementMap(
+        //     seed,
+        //     nonce
+        // );
 
         string memory feComposites;
         (feComposites, nonce) = generateFeComposites(seed, nonce);
@@ -215,41 +225,94 @@ contract Mercurial is ERC721, LinearVRGDA {
             seed,
             nonce
         );
+        partTwo = string.concat(
+            '<feColorMatrix type="matrix" result="colorChannelResult" ',
+            'values="0 0 0 0 0 ',
+            "0 0 0 0 0 ",
+            "0 0 0 0 0 ",
+            '1 0 0 0 0">',
+            "</feColorMatrix>",
+            // Add inside-out effect and flatness effect
+            feComposites,
+            // Light
+            feDiffuseLighting,
+            // Invert the colors half the time
+            feColorMatrixForInversion,
+            "</filter>",
+            '<rect width="350" height="350" filter="url(#a)"/>',
+            "</svg>"
+        );
 
+//         attributes = string.concat(
+//             attributes,
+//             '{ "trait_type": "Animation Type", "value": "',
+//             // animationType == 0 ? "Scale" : "Hue Rotate",
+//             '" },',
+//             '{ "trait_type": "Animation Speed", "value": "',
+//             // animationSpeedFeDisplacementMap, ' ', animationSpeedHueRotate.toString(), TODO
+//             '" },'
+//         );
+        return (partTwo, attributes, nonce);
+    }
 
-        (uint animationDuration2,) = generateRandom(1, 30, seed, nonce);
+    /// @notice Generates the entire SVG
+    function generateSVG(
+        uint256 seed
+    ) public pure returns (
+        string memory svgImage,
+        string memory svgAnimation,
+        string memory attributes
+    ) {
+        uint256 nonce;
+        string memory partOne;
+        string memory partTwo;
+        (partOne, attributes, nonce) = generateSVGPartOne(seed);
+        (partTwo, attributes, nonce) = generateSVGPartTwo(seed, nonce, attributes);
+        (uint animationSpeedHueRotate,) = generateRandom(1, 30, seed, nonce);
+
+        string memory staticFeDisplacementMap;
+        string memory animatedFeDisplacementMap;
+        string memory scaleStart;
+        string memory animationSpeedFeDisplacementMap;
+        (
+            scaleStart,
+            staticFeDisplacementMap,
+            animatedFeDisplacementMap,
+            animationSpeedFeDisplacementMap,
+            nonce
+        ) = generateFeDisplacementMap(
+            seed,
+            nonce
+        );
+
+        // attributes = string.concat(
+        //     attributes,
+        //     '{ "trait_type": "Scale", "value": "', scaleStart, '" },',
+        //     '{ "trait_type": "Scale Animation", "value": "', animationSpeedFeDisplacementMap, 's" },',
+        //     '{ "trait_type": "Hue Rotate Animation", "value": "', animationSpeedHueRotate.toString(), 's" }'
+        // );
+
         string memory animatedFeColorMatrix = string.concat(
             '<animate attributeName="values" from="0" to="360" ',
-            'dur="', animationDuration2.toString(), 's" ',
+            'dur="', animationSpeedHueRotate.toString(), 's" ',
             'repeatCount="indefinite" result="colorMatrixResult"/>'
         );
 
-        attributes = string.concat(
-            '{ "trait_type": "Base Frequency", "value": "',
-            baseFrequencyStr,
-            '" },',
-            '{ "trait_type": "Animation Type", "value": "',
-            // animationType == 0 ? "Scale" : "Hue Rotate",
-            '" },',
-            '{ "trait_type": "Animation Speed", "value": "',
-            animationDurationString, ' ', animationDuration2.toString(),
-            '" },',
-            '{ "trait_type": "Scale", "value": "',
-            scaleStart, // TODO - shouldn't always just be start
-            '" },',
-            '{ "trait_type": "Octaves", "value": "',
-            numOctaves,
-            '" }'
+        svgImage = string.concat(
+            partOne,
+            staticFeDisplacementMap,
+            '<feColorMatrix type="hueRotate" result="rotateResult">',
+            "</feColorMatrix>",
+            partTwo
         );
 
-        (svgImage, svgAnimation) = composeSVGsFromParts(
-            feTurbulence,
-            staticFeDisplacementMap,
+        svgAnimation = string.concat(
+            partOne,
             animatedFeDisplacementMap,
+            '<feColorMatrix type="hueRotate" result="rotateResult">',
             animatedFeColorMatrix,
-            feComposites,
-            feDiffuseLighting,
-            feColorMatrixForInversion
+            "</feColorMatrix>",
+            partTwo
         );
 
         return (svgImage, svgAnimation, attributes);
@@ -475,7 +538,7 @@ contract Mercurial is ERC721, LinearVRGDA {
         string memory scaleStart,
         string memory staticFeDisplacementMap,
         string memory animatedFeDisplacementMap,
-        string memory animationDurationString,
+        string memory animationSpeedFeDisplacementMap,
         uint256
     ) {
         uint start;
@@ -484,19 +547,24 @@ contract Mercurial is ERC721, LinearVRGDA {
         bool endNegative;
 
         (start, startNegative, end, endNegative, nonce) = _getStartAndEndValues(seed, nonce);
-        string memory scaleStart = _convertValueToString(start, startNegative);
+        scaleStart = _convertValueToString(start, startNegative);
         string memory scaleEnd = _convertValueToString(end, endNegative);
 
-        uint256 animationDuration;
-        (animationDuration, nonce) = generateRandom(1, 61, seed, nonce);
-        animationDurationString = string.concat(animationDuration.toString(), "s");
-        (staticFeDisplacementMap, animatedFeDisplacementMap) = _createElementStrings(scaleStart, scaleEnd, animationDurationString);
+        uint256 animationSpeedFeDisplacementMapUint;
+        (animationSpeedFeDisplacementMapUint, nonce) = generateRandom(1, 61, seed, nonce);
+        animationSpeedFeDisplacementMap = string.concat(
+            animationSpeedFeDisplacementMapUint.toString(), "s");
+        (staticFeDisplacementMap, animatedFeDisplacementMap) = _createElementStrings(
+            scaleStart,
+            scaleEnd,
+            animationSpeedFeDisplacementMap
+        );
 
         return (
             scaleStart,
             staticFeDisplacementMap,
             animatedFeDisplacementMap,
-            animationDurationString,
+            animationSpeedFeDisplacementMap,
             nonce
         );
     }
@@ -533,123 +601,6 @@ contract Mercurial is ERC721, LinearVRGDA {
         return (staticFeDisplacementMap, animatedFeDisplacementMap);
     }
 
-    // /// @notice Generates feDisplacementMap SVG element
-    // function generateFeDisplacementMap(
-    //     uint256 seed,
-    //     uint256 nonce,
-    //     bool animate,
-    //     string memory animationDuration
-    // ) internal pure returns (string memory, string memory, uint) {
-    //     // Generate a random start value from 0 to 150
-    //     uint256 start;
-    //     (start, nonce) = generateRandom(0, 151, seed, nonce);
-    //     bool startNegative;
-    //     (startNegative, nonce) = generateRandomBool(seed, nonce);
-
-    //     // Generate a random delta value from 75 to 150
-    //     uint256 delta;
-    //     (delta, nonce) = generateRandom(75, 250, seed, nonce);
-    //     bool deltaNegative;
-    //     (deltaNegative, nonce) = generateRandomBool(seed, nonce);
-
-    //     uint end;
-    //     bool endNegative;
-
-    //     if (startNegative == deltaNegative) {
-    //         // If the start and delta are both positive or both negative, then the end will be the same
-    //         end = start + delta;
-    //         endNegative = startNegative;
-    //     } else {
-    //         if (start > delta) {
-    //             end = start - delta;
-    //             endNegative = startNegative;
-    //         } else {
-    //             end = delta - start;
-    //             endNegative = deltaNegative;
-    //         }
-    //     }
-
-    //     // Convert start value to string and apply the sign if needed
-    //     string memory startString;
-    //     if (startNegative) {
-    //         startString = string.concat("-", start.toString());
-    //     } else {
-    //         startString = start.toString();
-    //     }
-
-    //     // Convert end value to string and apply the sign if needed
-    //     string memory endString;
-    //     if (endNegative) {
-    //         endString = string.concat("-", end.toString());
-    //     } else {
-    //         endString = end.toString();
-    //     }
-
-    //     if (animate) {
-    //         startString = string.concat(
-    //             startString,
-    //             ";",
-    //             endString,
-    //             ";",
-    //             startString,
-    //             ";"
-    //         );
-
-    //         return (
-    //             string.concat(
-    //                 '<feDisplacementMap result="displacementResult">',
-    //                 '<animate attributeName="scale" ',
-    //                 'values="',
-    //                 startString,
-    //                 '" keyTimes="0; 0.5; 1" dur="',
-    //                 animationDuration,
-    //                 '" repeatCount="indefinite" result="displacementResult" calcMode="spline" keySplines="0.3 0 0.7 1; 0.3 0 0.7 1"/>',
-    //                 "</feDisplacementMap>"
-    //             ),
-    //             startString,
-    //             nonce
-    //         );
-    //     } else {
-    //         return (
-    //             string.concat(
-    //                 '<feDisplacementMap scale="',
-    //                 startString,
-    //                 '" result="displacementResult">',
-    //                 "</feDisplacementMap>"
-    //             ),
-    //             startString,
-    //             nonce
-    //         );
-    //     }
-    // }
-
-    /// @notice Generates the duration value for the animations
-    // function generateAnimationDuration(
-    //     uint256 animationType,
-    //     uint256 seed,
-    //     uint256 nonce
-    // ) internal pure returns (string memory, uint) {
-    //     uint256 animationDuration;
-    //     string memory animationLengthStr;
-    //     if (animationType == 0) {
-    //         // scale
-    //         (animationDuration, nonce) = generateRandom(1, 60, seed, nonce);
-    //         animationLengthStr = string.concat(
-    //             animationDuration.toString(),
-    //             "s"
-    //         );
-    //     } else {
-    //         // hue rotate
-    //         (animationDuration, nonce) = generateRandom(1, 30, seed, nonce);
-    //         animationLengthStr = string.concat(
-    //             animationDuration.toString(),
-    //             "s"
-    //         );
-    //     }
-
-    //     return (animationLengthStr, nonce);
-    // }
-
     /// @notice Generates the feTurbulence SVG element
     function generateFeTurbulence(
         uint256 seed,
@@ -665,6 +616,9 @@ contract Mercurial is ERC721, LinearVRGDA {
         uint256 numOctaves;
         (numOctaves, nonce) = generateRandom(1, 4, seed, 0);
 
+        uint seedForSvg;
+
+        (seedForSvg, nonce) = generateRandom(0, 18446744073709552000, seed, nonce);
         return (
             string.concat(
                 '<feTurbulence baseFrequency="',
@@ -672,7 +626,7 @@ contract Mercurial is ERC721, LinearVRGDA {
                 '" numOctaves="',
                 numOctaves.toString(),
                 '" seed="',
-                (seed / 64).toString(),
+                seedForSvg.toString(),
                 '" result="turbulenceResult"/> '
             ),
             numOctaves.toString(),

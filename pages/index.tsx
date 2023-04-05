@@ -51,13 +51,16 @@ const Home: NextPage = () => {
     watch: true,
   }) as { data: Result; isFetching: boolean };
 
+  console.log(nextToken)
+
   const encodedMetadata = nextToken?.[1];
-  const extractMetdataFromTokenURI = (tokenURI: string) => {
+  const extractMetadataFromTokenURI = (tokenURI: string) => {
     return JSON.parse(atob(tokenURI.split(",")[1]));
   };
 
   const extractSVGFromTokenURI = (tokenURI: string) => {
-    const metadata = extractMetdataFromTokenURI(tokenURI);
+    console.log("tokenURI", tokenURI);
+    const metadata = extractMetadataFromTokenURI(tokenURI);
     if (!metadata.animation_url) {
       return "";
     }
@@ -67,7 +70,7 @@ const Home: NextPage = () => {
 
   if (nextToken?.[1]) {
     const { animation_url, image, ...selectedMetadataFields } =
-      extractMetdataFromTokenURI(nextToken?.[1] || "");
+      extractMetadataFromTokenURI(nextToken?.[1] || "");
     const metadataString = JSON.stringify(selectedMetadataFields, null, 2);
     console.log("metadataString", metadataString);
   }
