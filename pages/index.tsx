@@ -51,7 +51,7 @@ const Home: NextPage = () => {
     watch: true,
   }) as { data: Result; isFetching: boolean };
 
-  console.log(nextToken)
+  console.log(nextToken);
 
   const encodedMetadata = nextToken?.[1];
   const extractMetadataFromTokenURI = (tokenURI: string) => {
