@@ -66,7 +66,7 @@ const Home: NextPage = () => {
       return "";
     }
 
-    return atob(metadata.image.split(",")[1]);
+    return atob(metadata.animation_url.split(",")[1]);
   };
 
   if (nextToken?.[1]) {

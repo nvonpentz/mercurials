@@ -626,7 +626,7 @@ contract Mercurial is ERC721, LinearVRGDA {
 
         (seedForSvg, nonce) = generateRandom(
             0,
-            18446744073709552000,
+            65536, // 65535 is the max value for a uint16 (seed used in SVG)
             seed,
             nonce
         );
