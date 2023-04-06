@@ -66,7 +66,7 @@ const Home: NextPage = () => {
       return "";
     }
 
-    return atob(metadata.image.split(",")[1]);
+    return atob(metadata.animation_url.split(",")[1]);
   };
 
   if (nextToken?.[1]) {
@@ -96,6 +96,15 @@ const Home: NextPage = () => {
             Mercurial #{nextToken?.[0].toString()}
           </h1>
           <TokenInfo blockNumber={blockNumber} nextToken={nextToken} />
+          <div className={styles.tokenImage}>
+            {nextToken && (
+              <div
+                dangerouslySetInnerHTML={{
+                  __html: extractSVGFromTokenURI(nextToken[1]),
+                }}
+              />
+            )}
+          </div>
           <div></div>{" "}
           <div className={styles.buttonContainer}>
             <MintButton
@@ -116,20 +125,6 @@ const Home: NextPage = () => {
             mintAttempt={mintAttempt}
             address={address}
           />
-          <svg xmlns="http://www.w3.org/2000/svg" width="350" height="350" viewBox="0 0 350 350">
-            <filter id="a">
-              <feTurbulence baseFrequency="0.0044" numOctaves="3" seed="1" result="turbulenceResult"/>
-              <feDisplacementMap scale="75" result="displacementResult"/>
-              <feColorMatrix type="hueRotate" result="rotateResult"/>
-              <feColorMatrix type="matrix" result="colorChannelResult" values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 1 0 0 0 0"/>
-              <feComposite in="rotateResult" in2="colorChannelResult" operator="out" result="compositeResult2"/>
-              <feComposite in="compositeResult2" in2="compositeResult2" operator="arithmetic" k1="1" k2="1" k3="1" k4="-0.48"/>
-              <feDiffuseLighting lighting-color="white" diffuseConstant="3" result="diffuseResult" surfaceScale="27">
-                <feDistantLight elevation="16"/>
-              </feDiffuseLighting>
-            </filter>
-            <rect width="350" height="350" filter="url(#a)"/>
-          </svg>
         </main>
       </div>
     </div>
