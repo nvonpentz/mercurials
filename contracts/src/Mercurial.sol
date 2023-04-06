@@ -112,10 +112,7 @@ contract Mercurial is ERC721, LinearVRGDA {
         return (
             uint256(
                 keccak256(
-                    abi.encodePacked(
-                        blockhash(block.number - 1),
-                        tokenId
-                    )
+                    abi.encodePacked(blockhash(block.number - 1), tokenId)
                 )
             ),
             ttl
@@ -163,10 +160,18 @@ contract Mercurial is ERC721, LinearVRGDA {
         string memory attributes
     ) public pure returns (string memory partTwo, string memory, uint256) {
         string memory feComposites;
-        (feComposites, attributes, nonce) = generateFeComposites(seed, nonce, attributes);
+        (feComposites, attributes, nonce) = generateFeComposites(
+            seed,
+            nonce,
+            attributes
+        );
 
         string memory feDiffuseLighting;
-        (feDiffuseLighting, attributes, nonce) = generateFeDiffuseLighting(seed, nonce, attributes);
+        (feDiffuseLighting, attributes, nonce) = generateFeDiffuseLighting(
+            seed,
+            nonce,
+            attributes
+        );
 
         string memory feColorMatrixForInversion;
         (feColorMatrixForInversion, nonce) = generateFeColorMatrixForInversion(
@@ -428,9 +433,15 @@ contract Mercurial is ERC721, LinearVRGDA {
 
         attributes = string.concat(
             attributes,
-            '{ "trait_type": "K1", "value": "', k1, '" }, ',
-            '{ "trait_type": "K4", "value": "', k4, '" }, ',
-            '{ "trait_type": "Composite Operator", "value": "', operator, '" }, '
+            '{ "trait_type": "K1", "value": "',
+            k1,
+            '" }, ',
+            '{ "trait_type": "K4", "value": "',
+            k4,
+            '" }, ',
+            '{ "trait_type": "Composite Operator", "value": "',
+            operator,
+            '" }, '
         );
 
         string memory feComposites = string.concat(
