@@ -222,7 +222,7 @@ contract Mercurial is ERC721, LinearVRGDA {
         );
         (uint animationDurationHueRotate, ) = generateRandom(
             1,
-            30,
+            25,
             seed,
             nonce
         );
@@ -551,7 +551,7 @@ contract Mercurial is ERC721, LinearVRGDA {
         uint256 animationDurationFeDisplacementMapUint;
         (animationDurationFeDisplacementMapUint, nonce) = generateRandom(
             1,
-            101,
+            81,
             seed,
             nonce
         );
