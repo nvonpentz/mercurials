@@ -99,6 +99,7 @@ const Home: NextPage = () => {
           <div className={styles.tokenImage}>
             {nextToken && (
               <div
+                key={nextToken?.[0]?.toString()}
                 dangerouslySetInnerHTML={{
                   __html: extractSVGFromTokenURI(nextToken[1]),
                 }}
