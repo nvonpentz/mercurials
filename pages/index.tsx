@@ -29,7 +29,7 @@ const Home: NextPage = () => {
   const [address, setAddress] = useState(deployments[chain.id].address);
   const [abi, setAbi] = useState(deployments[chain.id].abi);
   const [mintAttempt, setMintAttempt] = useState<MintAttempt>();
-  console.log("address", address);
+  // console.log("address", address);
 
   // Hooks
   const { isConnected } = useAccount();
@@ -39,6 +39,11 @@ const Home: NextPage = () => {
     setAbi(deployments[chain.id].abi);
   }, [chain]);
   const { data: blockNumber } = useBlockNumber();
+  // Listen for changes in the blockNumber variable and log the new block number
+  useEffect(() => {
+    console.log("New block number:", blockNumber);
+  }, [blockNumber]);
+
   const { data: nextToken, isFetching: readIsFetching } = useContractRead({
     address: address,
     abi: abi,
@@ -68,7 +73,7 @@ const Home: NextPage = () => {
     const { animation_url, image, ...selectedMetadataFields } =
       extractMetadataFromTokenURI(nextToken?.[1] || "");
     const metadataString = JSON.stringify(selectedMetadataFields, null, 2);
-    console.log("metadataString", metadataString);
+    // console.log("metadataString", metadataString);
   }
 
   const {

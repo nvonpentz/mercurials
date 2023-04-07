@@ -32,18 +32,14 @@ contract Mercurial is ERC721, LinearVRGDA {
         )
     {}
 
-    function mint(
-        uint256 expectedTokenId,
-        bytes32 expectedParentBlockhash
-    ) external payable {
+    function mint(uint256 tokenId, bytes32 blockHash) external payable {
         // Only settle if desired token would be minted by checking the
         // parent blockhash and the expected token ID.
-        bytes32 parentBlockhash = blockhash(block.number - 1);
-        require(
-            expectedParentBlockhash == parentBlockhash,
-            "Invalid or expired blockhash"
+        bytes32 expectedBlockHash = blockhash(
+            (block.number - 1) - ((block.number - 1) % 5)
         );
-        require(expectedTokenId == totalSold, "Invalid or expired token ID");
+        require(blockHash == expectedBlockHash, "Invalid or expired blockhash");
+        require(tokenId == totalSold, "Invalid or expired token ID");
 
         unchecked {
             // Validate the purchase request against the VRGDA rules.
@@ -51,7 +47,7 @@ contract Mercurial is ERC721, LinearVRGDA {
             require(msg.value >= price, "Insufficient funds");
 
             // Mint the NFT using mintedId.
-            _mint(msg.sender, expectedTokenId);
+            _mint(msg.sender, tokenId);
 
             // Increment the total sold counter.
             totalSold += 1;
@@ -61,8 +57,8 @@ contract Mercurial is ERC721, LinearVRGDA {
             // Unchecked is safe here because we validate msg.value >= price above.
             SafeTransferLib.safeTransferETH(msg.sender, msg.value - price);
         }
-        (uint seed, ) = generateSeed(expectedTokenId);
-        seeds[expectedTokenId] = seed;
+        (uint seed, ) = generateSeed(tokenId);
+        seeds[tokenId] = seed;
     }
 
     /// @dev This function should be called using the `pending` block tag.
@@ -386,7 +382,7 @@ contract Mercurial is ERC721, LinearVRGDA {
         (surfaceScale, nonce) = generateRandom(5, 11, seed, nonce);
 
         uint256 elevation;
-        (elevation, nonce) = generateRandom(0, 21, seed, nonce);
+        (elevation, nonce) = generateRandom(2, 21, seed, nonce);
         // prettier-ignore
         attributes = string.concat(
             attributes,

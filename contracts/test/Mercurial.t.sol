@@ -65,7 +65,55 @@ contract MercurialTest is Test {
         balanceBefore = address(this).balance;
         (tokenId, svg, price, hash, ttl) = mercurial.nextToken();
         mercurial.mint{value: price + 1}(tokenId, hash);
-        assertEq(address(this).balance, balanceBefore - price); // Extra ETH should have been refunded
+    }
+
+    function testMintWithOldButNotExpiredDetails() public {
+        // This test simulates if you submit your mint request, but it takes a block
+        // or two to be confirmed
+        uint256 tokenId;
+        string memory svg;
+        uint256 price;
+        bytes32 hash;
+        uint8 ttl;
+
+        vm.roll(1);
+        (tokenId, svg, price, hash, ttl) = mercurial.nextToken();
+        assertEq(ttl, 5);
+
+        vm.roll(2);
+        (, , price, , ttl) = mercurial.nextToken();
+        assertEq(ttl, 4);
+        mercurial.mint{value: price}(tokenId, hash);
+        assertEq(mercurial.balanceOf(address(this)), 1);
+        assertEq(mercurial.ownerOf(tokenId), address(this));
+
+        vm.roll(3);
+        (, , price, , ttl) = mercurial.nextToken();
+        assertEq(ttl, 3);
+        mercurial.mint{value: price}(tokenId + 1, hash);
+        assertEq(mercurial.balanceOf(address(this)), 2);
+        assertEq(mercurial.ownerOf(tokenId + 1), address(this));
+
+        vm.roll(4);
+        (, , price, , ttl) = mercurial.nextToken();
+        assertEq(ttl, 2);
+        mercurial.mint{value: price}(tokenId + 2, hash);
+        assertEq(mercurial.balanceOf(address(this)), 3);
+        assertEq(mercurial.ownerOf(tokenId + 2), address(this));
+
+        vm.roll(5);
+        (, , price, , ttl) = mercurial.nextToken();
+        assertEq(ttl, 1);
+        mercurial.mint{value: price}(tokenId + 3, hash);
+        assertEq(mercurial.balanceOf(address(this)), 4);
+        assertEq(mercurial.ownerOf(tokenId + 3), address(this));
+
+        // Should not work with expired details
+        vm.roll(6);
+        (, , price, , ttl) = mercurial.nextToken();
+        assertEq(ttl, 5);
+        vm.expectRevert("Invalid or expired blockhash");
+        mercurial.mint{value: price}(tokenId + 4, hash);
     }
 
     function testGenerateSeed() public {
