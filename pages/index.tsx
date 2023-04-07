@@ -29,7 +29,6 @@ const Home: NextPage = () => {
   const [address, setAddress] = useState(deployments[chain.id].address);
   const [abi, setAbi] = useState(deployments[chain.id].abi);
   const [mintAttempt, setMintAttempt] = useState<MintAttempt>();
-
   console.log("address", address);
 
   // Hooks
@@ -51,16 +50,12 @@ const Home: NextPage = () => {
     watch: true,
   }) as { data: Result; isFetching: boolean };
 
-  console.log(nextToken);
-
   const encodedMetadata = nextToken?.[1];
   const extractMetadataFromTokenURI = (tokenURI: string) => {
-    console.log("tokenURI", tokenURI);
     return JSON.parse(atob(tokenURI.split(",")[1]));
   };
 
   const extractSVGFromTokenURI = (tokenURI: string) => {
-    console.log("tokenURI", tokenURI);
     const metadata = extractMetadataFromTokenURI(tokenURI);
     if (!metadata.animation_url) {
       return "";
