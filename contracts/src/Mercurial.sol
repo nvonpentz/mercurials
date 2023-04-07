@@ -50,8 +50,11 @@ contract Mercurial is ERC721, LinearVRGDA {
             uint256 price = getCurrentVRGDAPrice();
             require(msg.value >= price, "Insufficient funds");
 
-            _mint(msg.sender, expectedTokenId); // Mint the NFT using mintedId.
-            totalSold += 1; // Increment the total sold counter.
+            // Mint the NFT using mintedId.
+            _mint(msg.sender, expectedTokenId);
+
+            // Increment the total sold counter.
+            totalSold += 1;
 
             // Note: We do this at the end to avoid creating a reentrancy vector.
             // Refund the user any ETH they spent over the current price of the NFT.
@@ -112,189 +115,6 @@ contract Mercurial is ERC721, LinearVRGDA {
         );
     }
 
-    function generateSVGPartOne(
-        uint256 seed
-    )
-        public
-        pure
-        returns (string memory partOne, string memory attributes, uint256 nonce)
-    {
-        string memory feTurbulence;
-        string memory numOctaves;
-        string memory baseFrequencyStr;
-        (
-            feTurbulence,
-            numOctaves,
-            baseFrequencyStr,
-            nonce
-        ) = generateFeTurbulence(seed, nonce);
-
-        partOne = string.concat(
-            '<svg width="350" height="350" version="1.1" xmlns="http://www.w3.org/2000/svg">',
-            '<filter id="a">',
-            feTurbulence
-        );
-
-        // prettier-ignore
-        attributes = string.concat(
-            '{ "trait_type": "Base Frequency", "value": "', baseFrequencyStr, '" }, ',
-            '{ "trait_type": "Octaves", "value": "', numOctaves, '" }, '
-        );
-
-        return (partOne, attributes, nonce);
-    }
-
-    function generateSVGPartTwo(
-        uint256 seed,
-        uint256 nonce,
-        string memory attributes
-    ) public pure returns (string memory partTwo, string memory, uint256) {
-        string memory feComposites;
-        (feComposites, attributes, nonce) = generateFeComposites(
-            seed,
-            nonce,
-            attributes
-        );
-
-        string memory feDiffuseLighting;
-        (feDiffuseLighting, attributes, nonce) = generateFeDiffuseLighting(
-            seed,
-            nonce,
-            attributes
-        );
-
-        string memory feColorMatrixForInversion;
-        (feColorMatrixForInversion, nonce) = generateFeColorMatrixForInversion(
-            seed,
-            nonce
-        );
-        partTwo = string.concat(
-            '<feColorMatrix type="matrix" result="colorChannelResult" ',
-            'values="0 0 0 0 0 ',
-            "0 0 0 0 0 ",
-            "0 0 0 0 0 ",
-            '1 0 0 0 0">',
-            "</feColorMatrix>",
-            // Add inside-out effect and flatness effect
-            feComposites,
-            // Light
-            feDiffuseLighting,
-            // Invert the colors half the time
-            feColorMatrixForInversion,
-            "</filter>",
-            '<rect width="350" height="350" filter="url(#a)"/>',
-            "</svg>"
-        );
-
-        return (partTwo, attributes, nonce);
-    }
-
-    /// @notice Generates the entire SVG
-    function generateSVG(
-        uint256 seed
-    )
-        public
-        pure
-        returns (
-            string memory svgImage,
-            string memory svgAnimation,
-            string memory attributes
-        )
-    {
-        uint256 nonce;
-        string memory partOne;
-        string memory partTwo;
-        (partOne, attributes, nonce) = generateSVGPartOne(seed);
-        (partTwo, attributes, nonce) = generateSVGPartTwo(
-            seed,
-            nonce,
-            attributes
-        );
-        (uint animationDurationHueRotate, ) = generateRandom(
-            1,
-            25,
-            seed,
-            nonce
-        );
-
-        string memory staticFeDisplacementMap;
-        string memory animatedFeDisplacementMap;
-        string memory scaleValues;
-        string memory animationDurationFeDisplacementMap;
-        (
-            scaleValues,
-            staticFeDisplacementMap,
-            animatedFeDisplacementMap,
-            animationDurationFeDisplacementMap,
-            nonce
-        ) = generateFeDisplacementMap(seed, nonce);
-
-        // prettier-ignore
-        attributes = string.concat(
-            attributes,
-            '{ "trait_type": "Scale", "value": "', scaleValues, '" }, ',
-            '{ "trait_type": "Scale Animation", "value": "', animationDurationFeDisplacementMap, '" }, ',
-            '{ "trait_type": "Hue Rotate Animation", "value": "', animationDurationHueRotate.toString(), 's" }'
-        );
-
-        // prettier-ignore
-        string memory animatedFeColorMatrix = string.concat(
-            '<animate attributeName="values" from="0" to="360" ',
-                     'dur="', animationDurationHueRotate.toString(), 's" ',
-                     'repeatCount="indefinite" result="colorMatrixResult"/>'
-        );
-
-        svgImage = string.concat(
-            partOne,
-            staticFeDisplacementMap,
-            '<feColorMatrix type="hueRotate" result="rotateResult">',
-            "</feColorMatrix>",
-            partTwo
-        );
-
-        svgAnimation = string.concat(
-            partOne,
-            animatedFeDisplacementMap,
-            '<feColorMatrix type="hueRotate" result="rotateResult">',
-            animatedFeColorMatrix,
-            "</feColorMatrix>",
-            partTwo
-        );
-
-        return (svgImage, svgAnimation, attributes);
-    }
-
-    function generateTokenUri(
-        uint seed,
-        uint tokenId
-    ) internal pure returns (string memory) {
-        string memory attributes;
-        string memory svgImage;
-        string memory svgAnimation;
-        (svgImage, svgAnimation, attributes) = generateSVG(seed);
-        attributes = string.concat('"attributes": [ ', attributes, " ]");
-
-        string memory metadataJson = Base64.encode(
-            bytes(
-                string(
-                    // prettier-ignore
-                    abi.encodePacked(
-                        '{ "name": "Mercurial #', tokenId.toString(), '", ',
-                          '"description": "On chain generative art project.", ',
-                          '"image": "data:image/svg+xml;base64,', Base64.encode(bytes(svgImage)), '", ',
-                          '"animation_url": "data:image/svg+xml;base64,', Base64.encode(bytes(svgAnimation)), '", ',
-                            attributes, ' }'
-                    )
-                )
-            )
-        );
-
-        return
-            string(
-                abi.encodePacked("data:application/json;base64,", metadataJson)
-            );
-    }
-
     function tokenURI(
         uint256 tokenId
     ) public view override returns (string memory) {
@@ -330,6 +150,18 @@ contract Mercurial is ERC721, LinearVRGDA {
         return (rand % 2 == 0, nonce);
     }
 
+    function convertSignedUintToString(
+        uint value,
+        bool isNegative
+    ) internal pure returns (string memory valueString) {
+        if (isNegative) {
+            valueString = string.concat("-", value.toString());
+        } else {
+            valueString = value.toString();
+        }
+        return valueString;
+    }
+
     /// @notice Generates a baseFrequency string for a feTurbulence element
     function generateBaseFrequency(
         uint256 seed,
@@ -338,13 +170,10 @@ contract Mercurial is ERC721, LinearVRGDA {
         uint256 baseFrequency;
         (baseFrequency, nonce) = generateRandom(50, 301, seed, nonce);
         string memory baseFrequencyStr;
-        if (baseFrequency >= 10 && baseFrequency < 100) {
-            baseFrequencyStr = string.concat("0.00", baseFrequency.toString()); // 0.010 - 0.100
-        } else if (baseFrequency >= 100) {
-            baseFrequencyStr = string.concat("0.0", baseFrequency.toString()); // 0.100 - 0.200
+        if (baseFrequency < 100) {
+            baseFrequencyStr = string.concat("0.00", baseFrequency.toString());
         } else {
-            require(false, "Invalid base frequency");
-            assert(false);
+            baseFrequencyStr = string.concat("0.0", baseFrequency.toString());
         }
 
         return (baseFrequencyStr, nonce);
@@ -361,13 +190,10 @@ contract Mercurial is ERC721, LinearVRGDA {
         // k4
         string memory k4;
         (random, nonce) = generateRandom(0, 51, seed, nonce);
-        if (random >= 0 && random < 10) {
+        if (random < 10) {
             k4 = string.concat("0.0", random.toString());
-        } else if (random >= 10 && random < 100) {
-            k4 = string.concat("0.", random.toString());
         } else {
-            require(false, "Invalid k4");
-            assert(false);
+            k4 = string.concat("0.", random.toString());
         }
 
         // Randomly make k4 negative
@@ -438,28 +264,15 @@ contract Mercurial is ERC721, LinearVRGDA {
             }
         }
         scaleStart = convertSignedUintToString(start, startNegative);
+
+        // prettier-ignore
         scaleValues = string.concat(
-            scaleStart,
-            ";",
-            convertSignedUintToString(end, endNegative),
-            ";",
-            scaleStart,
-            ";"
+            scaleStart, ";",
+            convertSignedUintToString(end, endNegative), ";",
+            scaleStart, ";"
         );
 
         return (scaleStart, scaleValues, nonce);
-    }
-
-    function convertSignedUintToString(
-        uint value,
-        bool isNegative
-    ) internal pure returns (string memory valueString) {
-        if (isNegative) {
-            valueString = string.concat("-", value.toString());
-        } else {
-            valueString = value.toString();
-        }
-        return valueString;
     }
 
     /// @notice Generates feDisplacementMap SVG element
@@ -608,5 +421,188 @@ contract Mercurial is ERC721, LinearVRGDA {
         }
 
         return (feColorMatrixForInversion, nonce);
+    }
+
+    function generateSVGPartOne(
+        uint256 seed
+    )
+        internal
+        pure
+        returns (string memory partOne, string memory attributes, uint256 nonce)
+    {
+        string memory feTurbulence;
+        string memory numOctaves;
+        string memory baseFrequencyStr;
+        (
+            feTurbulence,
+            numOctaves,
+            baseFrequencyStr,
+            nonce
+        ) = generateFeTurbulence(seed, nonce);
+
+        partOne = string.concat(
+            '<svg width="350" height="350" version="1.1" xmlns="http://www.w3.org/2000/svg">',
+            '<filter id="a">',
+            feTurbulence
+        );
+
+        // prettier-ignore
+        attributes = string.concat(
+            '{ "trait_type": "Base Frequency", "value": "', baseFrequencyStr, '" }, ',
+            '{ "trait_type": "Octaves", "value": "', numOctaves, '" }, '
+        );
+
+        return (partOne, attributes, nonce);
+    }
+
+    function generateSVGPartTwo(
+        uint256 seed,
+        uint256 nonce,
+        string memory attributes
+    ) internal pure returns (string memory partTwo, string memory, uint256) {
+        string memory feComposites;
+        (feComposites, attributes, nonce) = generateFeComposites(
+            seed,
+            nonce,
+            attributes
+        );
+
+        string memory feDiffuseLighting;
+        (feDiffuseLighting, attributes, nonce) = generateFeDiffuseLighting(
+            seed,
+            nonce,
+            attributes
+        );
+
+        string memory feColorMatrixForInversion;
+        (feColorMatrixForInversion, nonce) = generateFeColorMatrixForInversion(
+            seed,
+            nonce
+        );
+        partTwo = string.concat(
+            '<feColorMatrix type="matrix" result="colorChannelResult" ',
+            'values="0 0 0 0 0 ',
+            "0 0 0 0 0 ",
+            "0 0 0 0 0 ",
+            '1 0 0 0 0">',
+            "</feColorMatrix>",
+            // Add inside-out effect and flatness effect
+            feComposites,
+            // Light
+            feDiffuseLighting,
+            // Invert the colors half the time
+            feColorMatrixForInversion,
+            "</filter>",
+            '<rect width="350" height="350" filter="url(#a)"/>',
+            "</svg>"
+        );
+
+        return (partTwo, attributes, nonce);
+    }
+
+    /// @notice Generates the entire SVG
+    function generateSVG(
+        uint256 seed
+    )
+        internal
+        pure
+        returns (
+            string memory svgImage,
+            string memory svgAnimation,
+            string memory attributes
+        )
+    {
+        uint256 nonce;
+        string memory partOne;
+        string memory partTwo;
+        (partOne, attributes, nonce) = generateSVGPartOne(seed);
+        (partTwo, attributes, nonce) = generateSVGPartTwo(
+            seed,
+            nonce,
+            attributes
+        );
+        (uint animationDurationHueRotate, ) = generateRandom(
+            1,
+            25,
+            seed,
+            nonce
+        );
+
+        string memory staticFeDisplacementMap;
+        string memory animatedFeDisplacementMap;
+        string memory scaleValues;
+        string memory animationDurationFeDisplacementMap;
+        (
+            scaleValues,
+            staticFeDisplacementMap,
+            animatedFeDisplacementMap,
+            animationDurationFeDisplacementMap,
+            nonce
+        ) = generateFeDisplacementMap(seed, nonce);
+
+        // prettier-ignore
+        attributes = string.concat(
+            attributes,
+            '{ "trait_type": "Scale", "value": "', scaleValues, '" }, ',
+            '{ "trait_type": "Scale Animation", "value": "', animationDurationFeDisplacementMap, '" }, ',
+            '{ "trait_type": "Hue Rotate Animation", "value": "', animationDurationHueRotate.toString(), 's" }'
+        );
+
+        // prettier-ignore
+        string memory animatedFeColorMatrix = string.concat(
+            '<animate attributeName="values" from="0" to="360" ',
+                     'dur="', animationDurationHueRotate.toString(), 's" ',
+                     'repeatCount="indefinite" result="colorMatrixResult"/>'
+        );
+
+        svgImage = string.concat(
+            partOne,
+            staticFeDisplacementMap,
+            '<feColorMatrix type="hueRotate" result="rotateResult">',
+            "</feColorMatrix>",
+            partTwo
+        );
+
+        svgAnimation = string.concat(
+            partOne,
+            animatedFeDisplacementMap,
+            '<feColorMatrix type="hueRotate" result="rotateResult">',
+            animatedFeColorMatrix,
+            "</feColorMatrix>",
+            partTwo
+        );
+
+        return (svgImage, svgAnimation, attributes);
+    }
+
+    function generateTokenUri(
+        uint seed,
+        uint tokenId
+    ) internal pure returns (string memory) {
+        string memory attributes;
+        string memory svgImage;
+        string memory svgAnimation;
+        (svgImage, svgAnimation, attributes) = generateSVG(seed);
+        attributes = string.concat('"attributes": [ ', attributes, " ]");
+
+        string memory metadataJson = Base64.encode(
+            bytes(
+                string(
+                    // prettier-ignore
+                    abi.encodePacked(
+                        '{ "name": "Mercurial #', tokenId.toString(), '", ',
+                          '"description": "On chain generative art project.", ',
+                          '"image": "data:image/svg+xml;base64,', Base64.encode(bytes(svgImage)), '", ',
+                          '"animation_url": "data:image/svg+xml;base64,', Base64.encode(bytes(svgAnimation)), '", ',
+                            attributes, ' }'
+                    )
+                )
+            )
+        );
+
+        return
+            string(
+                abi.encodePacked("data:application/json;base64,", metadataJson)
+            );
     }
 }

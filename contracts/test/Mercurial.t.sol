@@ -15,10 +15,6 @@ contract MercurialTest is Test {
 
     receive() external payable {}
 
-    function testGenerateSVGOnce() public view {
-        mercurial.generateSVG(0);
-    }
-
     // Token tests
     function testNextToken() public {
         uint256 tokenId;
