@@ -23,7 +23,7 @@ contract Mercurial is ERC721, LinearVRGDA {
             "MERC" // Symbol.
         )
         LinearVRGDA(
-            0.001e18, // Target price. TODO change
+            0.001e18, // Target price.
             0.01e18, // Price decay percent.
             24 * 30e18 // Per time unit.
         )
@@ -75,7 +75,7 @@ contract Mercurial is ERC721, LinearVRGDA {
         id = totalSold;
         uint seed;
         (seed, ttl) = generateSeed(id);
-        uri = generateTokenUri(seed, id); // TODO use tokenURI
+        uri = generateTokenUri(seed, id);
         price = getVRGDAPrice(toDaysWadUnsafe(block.timestamp - startTime), id);
         hash = blockhash(block.number - 1);
 
@@ -91,28 +91,17 @@ contract Mercurial is ERC721, LinearVRGDA {
             );
     }
 
-    // function generateSeed(uint256 tokenId) public view returns (uint, uint8) {
-    //     uint8 ttl = 5 - uint8((block.number - 1) % 5);
-    //     return (
-    //         uint256(
-    //             keccak256(
-    //                 abi.encodePacked(
-    //                     blockhash(
-    //                         (block.number - 1) - ((block.number - 1) % 5)
-    //                     ),
-    //                     tokenId
-    //                 )
-    //             )
-    //         ),
-    //         ttl
-    //     );
-    // }
     function generateSeed(uint256 tokenId) public view returns (uint, uint8) {
-        uint8 ttl = 1;
+        uint8 ttl = 5 - uint8((block.number - 1) % 5);
         return (
             uint256(
                 keccak256(
-                    abi.encodePacked(blockhash(block.number - 1), tokenId)
+                    abi.encodePacked(
+                        blockhash(
+                            (block.number - 1) - ((block.number - 1) % 5)
+                        ),
+                        tokenId
+                    )
                 )
             ),
             ttl
@@ -143,6 +132,7 @@ contract Mercurial is ERC721, LinearVRGDA {
         );
 
         attributes = string.concat(
+            // prettier-ignore
             '{ "trait_type": "Base Frequency", "value": "',
             baseFrequencyStr,
             '" }, ',
@@ -240,6 +230,7 @@ contract Mercurial is ERC721, LinearVRGDA {
         ) = generateFeDisplacementMap(seed, nonce);
 
         attributes = string.concat(
+            // prettier-ignore
             attributes,
             '{ "trait_type": "Scale", "value": "',
             scaleValues,
@@ -253,6 +244,7 @@ contract Mercurial is ERC721, LinearVRGDA {
         );
 
         string memory animatedFeColorMatrix = string.concat(
+            // prettier-ignore
             '<animate attributeName="values" from="0" to="360" ',
             'dur="',
             animationDurationHueRotate.toString(),
@@ -353,13 +345,9 @@ contract Mercurial is ERC721, LinearVRGDA {
         uint256 nonce
     ) internal pure returns (string memory, uint) {
         uint256 baseFrequency;
-        // (baseFrequency, nonce) = generateRandom(30, 251, seed, nonce);
         (baseFrequency, nonce) = generateRandom(50, 301, seed, nonce);
         string memory baseFrequencyStr;
-        if (baseFrequency >= 0 && baseFrequency < 10) {
-            // TODO remove this case, never hits
-            baseFrequencyStr = string.concat("0.000", baseFrequency.toString()); // 0.0001 - 0.0010
-        } else if (baseFrequency >= 10 && baseFrequency < 100) {
+        if (baseFrequency >= 10 && baseFrequency < 100) {
             baseFrequencyStr = string.concat("0.00", baseFrequency.toString()); // 0.010 - 0.100
         } else if (baseFrequency >= 100) {
             baseFrequencyStr = string.concat("0.0", baseFrequency.toString()); // 0.100 - 0.200
@@ -377,28 +365,7 @@ contract Mercurial is ERC721, LinearVRGDA {
         uint256 nonce,
         string memory attributes
     ) internal pure returns (string memory, string memory, uint) {
-        // Randomly assign k1, k2, and k3 to '0' or '1'
-        string memory k1 = "1";
-        string memory k2 = "1";
-        string memory k3 = "1";
-
         uint256 random;
-        // (random, nonce) = generateRandom(0, 3, seed, nonce);
-        // k1 = random % 2 == 0 ? "0" : "1";
-        // (random, nonce) = generateRandom(0, 3, seed, nonce);
-        // k2 = random % 2 == 0 ? "1" : "1"; // TODO
-        // (random, nonce) = generateRandom(0, 3, seed, nonce);
-        // k3 = random % 2 == 0 ? "0" : "1";
-
-        // // Randomly choose which of k1, k2, or k3 to set to '1'
-        // (random, nonce) = generateRandom(1, 4, seed, nonce);
-        // if (random == 1) {
-        //     k1 = "1";
-        // } else if (random == 2) {
-        //     k2 = "1";
-        // } else {
-        //     k3 = "1";
-        // }
 
         // k4
         string memory k4;
@@ -429,10 +396,8 @@ contract Mercurial is ERC721, LinearVRGDA {
         }
 
         attributes = string.concat(
+            // prettier-ignore
             attributes,
-            '{ "trait_type": "K1", "value": "',
-            k1,
-            '" }, ',
             '{ "trait_type": "K4", "value": "',
             k4,
             '" }, ',
@@ -442,16 +407,11 @@ contract Mercurial is ERC721, LinearVRGDA {
         );
 
         string memory feComposites = string.concat(
+            // prettier-ignore
             '<feComposite in="rotateResult" in2="colorChannelResult" operator="',
             operator,
             '" result="compositeResult2"/>',
-            '<feComposite in="compositeResult2" in2="compositeResult2" operator="arithmetic" k1="',
-            k1,
-            '" k2="',
-            k2,
-            '" k3="',
-            k3,
-            '" k4="',
+            '<feComposite in="compositeResult2" in2="compositeResult2" operator="arithmetic" k1="1" k2="1" k3="1" k4="',
             k4,
             '"/>'
         );
@@ -465,15 +425,7 @@ contract Mercurial is ERC721, LinearVRGDA {
     )
         internal
         pure
-        returns (
-            string memory scaleStart,
-            string memory scaleValues,
-            // uint start,
-            // bool startNegative,
-            // uint end,
-            // bool endNegative,
-            uint256
-        )
+        returns (string memory scaleStart, string memory scaleValues, uint256)
     {
         uint start;
         bool startNegative;
@@ -571,6 +523,7 @@ contract Mercurial is ERC721, LinearVRGDA {
         );
 
         staticFeDisplacementMap = string.concat(
+            // prettier-ignore
             '<feDisplacementMap scale="',
             scaleStart,
             '" result="displacementResult">',
@@ -602,15 +555,16 @@ contract Mercurial is ERC721, LinearVRGDA {
         (numOctaves, nonce) = generateRandom(1, 4, seed, 0);
 
         uint seedForSvg;
-
         (seedForSvg, nonce) = generateRandom(
             0,
-            65536, // 65535 is the max value for a uint16 (seed used in SVG)
+            // 65535 is the max value for a uint16 (seed used in SVG)
+            65536,
             seed,
             nonce
         );
         return (
             string.concat(
+                // prettier-ignore
                 '<feTurbulence baseFrequency="',
                 baseFrequencyStr,
                 '" numOctaves="',
@@ -634,15 +588,14 @@ contract Mercurial is ERC721, LinearVRGDA {
         uint256 diffuseConstant;
         (diffuseConstant, nonce) = generateRandom(1, 4, seed, nonce);
 
+        // 10 is the largest surface scaled rendered on mobile devices (tested on iPhone 13)
         uint256 surfaceScale;
-        // (surfaceScale, nonce) = generateRandom(10, 30, seed, nonce); TODO
-
         (surfaceScale, nonce) = generateRandom(5, 11, seed, nonce);
 
         uint256 elevation;
-        // (elevation, nonce) = generateRandom(0, 30, seed, nonce);
         (elevation, nonce) = generateRandom(0, 21, seed, nonce);
         attributes = string.concat(
+            // prettier-ignore
             attributes,
             '{ "trait_type": "Diffuse Constant", "value": "',
             diffuseConstant.toString(),
@@ -656,6 +609,7 @@ contract Mercurial is ERC721, LinearVRGDA {
         );
         return (
             string.concat(
+                // prettier-ignore
                 '<feDiffuseLighting lighting-color="white" diffuseConstant="',
                 diffuseConstant.toString(),
                 '" result="diffuseResult" surfaceScale="',
