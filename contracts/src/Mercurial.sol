@@ -13,19 +13,22 @@ contract Mercurial is ERC721, LinearVRGDA {
     using Strings for uint256;
     using Strings for int256;
 
-    uint256 public totalSold; // The total number of tokens sold so far.
-    uint256 public immutable startTime = block.timestamp; // When VRGDA sales begun.
+    // The total number of tokens sold so far.
+    uint256 public totalSold;
+
+    // When VRGDA sales begun.
+    uint256 public immutable startTime = block.timestamp;
     mapping(uint256 => uint256) public seeds;
 
     constructor()
-        ERC721(
-            "Mercurials", // Name.
-            "MERC" // Symbol.
-        )
+        ERC721("Mercurials", "MERC")
         LinearVRGDA(
-            0.001e18, // Target price.
-            0.01e18, // Price decay percent.
-            24 * 30e18 // Per time unit.
+            // Target price
+            0.001e18,
+            // Price decay percent
+            0.01e18,
+            // Per time unit
+            24 * 30e18
         )
     {}
 
@@ -83,7 +86,8 @@ contract Mercurial is ERC721, LinearVRGDA {
     }
 
     function getCurrentVRGDAPrice() public view returns (uint256) {
-        // Note: By using toDaysWadUnsafe(block.timestamp - startTime) we are establishing that 1 "unit of time" is 1 day.
+        // Note: By using toDaysWadUnsafe(block.timestamp - startTime) we are
+        // establishing that 1 "unit of time" is 1 day.
         return
             getVRGDAPrice(
                 toDaysWadUnsafe(block.timestamp - startTime),
@@ -131,14 +135,10 @@ contract Mercurial is ERC721, LinearVRGDA {
             feTurbulence
         );
 
+        // prettier-ignore
         attributes = string.concat(
-            // prettier-ignore
-            '{ "trait_type": "Base Frequency", "value": "',
-            baseFrequencyStr,
-            '" }, ',
-            '{ "trait_type": "Octaves", "value": "',
-            numOctaves,
-            '" }, '
+            '{ "trait_type": "Base Frequency", "value": "', baseFrequencyStr, '" }, ',
+            '{ "trait_type": "Octaves", "value": "', numOctaves, '" }, '
         );
 
         return (partOne, attributes, nonce);
@@ -229,27 +229,19 @@ contract Mercurial is ERC721, LinearVRGDA {
             nonce
         ) = generateFeDisplacementMap(seed, nonce);
 
+        // prettier-ignore
         attributes = string.concat(
-            // prettier-ignore
             attributes,
-            '{ "trait_type": "Scale", "value": "',
-            scaleValues,
-            '" }, ',
-            '{ "trait_type": "Scale Animation", "value": "',
-            animationDurationFeDisplacementMap,
-            '" }, ',
-            '{ "trait_type": "Hue Rotate Animation", "value": "',
-            animationDurationHueRotate.toString(),
-            's" }'
+            '{ "trait_type": "Scale", "value": "', scaleValues, '" }, ',
+            '{ "trait_type": "Scale Animation", "value": "', animationDurationFeDisplacementMap, '" }, ',
+            '{ "trait_type": "Hue Rotate Animation", "value": "', animationDurationHueRotate.toString(), 's" }'
         );
 
+        // prettier-ignore
         string memory animatedFeColorMatrix = string.concat(
-            // prettier-ignore
             '<animate attributeName="values" from="0" to="360" ',
-            'dur="',
-            animationDurationHueRotate.toString(),
-            's" ',
-            'repeatCount="indefinite" result="colorMatrixResult"/>'
+                     'dur="', animationDurationHueRotate.toString(), 's" ',
+                     'repeatCount="indefinite" result="colorMatrixResult"/>'
         );
 
         svgImage = string.concat(
@@ -288,11 +280,10 @@ contract Mercurial is ERC721, LinearVRGDA {
                     // prettier-ignore
                     abi.encodePacked(
                         '{ "name": "Mercurial #', tokenId.toString(), '", ',
-                            '"description": "On chain generative art project.", ',
-                            '"image": "data:image/svg+xml;base64,', Base64.encode(bytes(svgImage)), '", ',
-                            '"animation_url": "data:image/svg+xml;base64,', Base64.encode(bytes(svgAnimation)), '", ',
-                            attributes,
-                        ' }'
+                          '"description": "On chain generative art project.", ',
+                          '"image": "data:image/svg+xml;base64,', Base64.encode(bytes(svgImage)), '", ',
+                          '"animation_url": "data:image/svg+xml;base64,', Base64.encode(bytes(svgAnimation)), '", ',
+                            attributes, ' }'
                     )
                 )
             )
@@ -395,22 +386,17 @@ contract Mercurial is ERC721, LinearVRGDA {
             operator = "in";
         }
 
+        // prettier-ignore
         attributes = string.concat(
-            // prettier-ignore
             attributes,
-            '{ "trait_type": "K4", "value": "',
-            k4,
-            '" }, ',
-            '{ "trait_type": "Composite Operator", "value": "',
-            operator,
-            '" }, '
+            '{ "trait_type": "K4", "value": "', k4, '" }, ',
+            '{ "trait_type": "Composite Operator", "value": "', operator, '" }, '
         );
 
+        // prettier-ignore
         string memory feComposites = string.concat(
-            // prettier-ignore
-            '<feComposite in="rotateResult" in2="colorChannelResult" operator="',
-            operator,
-            '" result="compositeResult2"/>',
+            '<feComposite in="rotateResult" in2="colorChannelResult" operator="', operator,
+                       '" result="compositeResult2"/>',
             '<feComposite in="compositeResult2" in2="compositeResult2" operator="arithmetic" k1="1" k2="1" k3="1" k4="',
             k4,
             '"/>'
@@ -510,23 +496,20 @@ contract Mercurial is ERC721, LinearVRGDA {
         );
 
         // Create the static and animated feDisplacementMap elements
+        // prettier-ignore
         animatedFeDisplacementMap = string.concat(
-            // prettier-ignore
             '<feDisplacementMap result="displacementResult">',
             '<animate attributeName="scale" ',
-            'values="',
-            scaleValues,
-            '" keyTimes="0; 0.5; 1" dur="',
-            animationDurationFeDisplacementMap,
-            '" repeatCount="indefinite" result="displacementResult" calcMode="spline" keySplines="0.3 0 0.7 1; 0.3 0 0.7 1"/>',
+                     'values="', scaleValues,
+                   '" keyTimes="0; 0.5; 1" dur="', animationDurationFeDisplacementMap,
+                   '" repeatCount="indefinite" result="displacementResult" calcMode="spline" keySplines="0.3 0 0.7 1; 0.3 0 0.7 1"/>',
             "</feDisplacementMap>"
         );
 
+        // prettier-ignore
         staticFeDisplacementMap = string.concat(
-            // prettier-ignore
-            '<feDisplacementMap scale="',
-            scaleStart,
-            '" result="displacementResult">',
+            '<feDisplacementMap scale="', scaleStart,
+                             '" result="displacementResult">',
             "</feDisplacementMap>"
         );
 
@@ -563,15 +546,12 @@ contract Mercurial is ERC721, LinearVRGDA {
             nonce
         );
         return (
+            // prettier-ignore
             string.concat(
-                // prettier-ignore
-                '<feTurbulence baseFrequency="',
-                baseFrequencyStr,
-                '" numOctaves="',
-                numOctaves.toString(),
-                '" seed="',
-                seedForSvg.toString(),
-                '" result="turbulenceResult"/> '
+                '<feTurbulence baseFrequency="', baseFrequencyStr,
+                            '" numOctaves="', numOctaves.toString(),
+                            '" seed="', seedForSvg.toString(),
+                            '" result="turbulenceResult"/> '
             ),
             numOctaves.toString(),
             baseFrequencyStr,
@@ -594,28 +574,19 @@ contract Mercurial is ERC721, LinearVRGDA {
 
         uint256 elevation;
         (elevation, nonce) = generateRandom(0, 21, seed, nonce);
+        // prettier-ignore
         attributes = string.concat(
-            // prettier-ignore
             attributes,
-            '{ "trait_type": "Diffuse Constant", "value": "',
-            diffuseConstant.toString(),
-            '" }, ',
-            '{ "trait_type": "Surface Scale", "value": "',
-            surfaceScale.toString(),
-            '" }, ',
-            '{ "trait_type": "Elevation", "value": "',
-            elevation.toString(),
-            '" },'
+            '{ "trait_type": "Diffuse Constant", "value": "', diffuseConstant.toString(), '" }, ',
+            '{ "trait_type": "Surface Scale", "value": "', surfaceScale.toString(), '" }, ',
+            '{ "trait_type": "Elevation", "value": "', elevation.toString(), '" },'
         );
         return (
+            // prettier-ignore
             string.concat(
-                // prettier-ignore
-                '<feDiffuseLighting lighting-color="white" diffuseConstant="',
-                diffuseConstant.toString(),
-                '" result="diffuseResult" surfaceScale="',
-                surfaceScale.toString(),
-                '"><feDistantLight elevation="',
-                elevation.toString(),
+                '<feDiffuseLighting lighting-color="white" diffuseConstant="', diffuseConstant.toString(),
+                                 '" result="diffuseResult" surfaceScale="', surfaceScale.toString(),
+                '"><feDistantLight elevation="', elevation.toString(),
                 '"></feDistantLight></feDiffuseLighting>'
             ),
             attributes,
