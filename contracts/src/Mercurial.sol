@@ -378,30 +378,27 @@ contract Mercurial is ERC721, LinearVRGDA {
         string memory attributes
     ) internal pure returns (string memory, string memory, uint) {
         // Randomly assign k1, k2, and k3 to '0' or '1'
-        string memory k1;
-        string memory k2;
-        string memory k3;
+        string memory k1 = "1";
+        string memory k2 = "1";
+        string memory k3 = "1";
 
         uint256 random;
-        (random, nonce) = generateRandom(0, 3, seed, nonce);
-        k1 = random % 2 == 0 ? "0" : "1";
-        (random, nonce) = generateRandom(0, 3, seed, nonce);
-        k2 = random % 2 == 0 ? "1" : "1"; // TODO
-        (random, nonce) = generateRandom(0, 3, seed, nonce);
-        k3 = random % 2 == 0 ? "0" : "1";
+        // (random, nonce) = generateRandom(0, 3, seed, nonce);
+        // k1 = random % 2 == 0 ? "0" : "1";
+        // (random, nonce) = generateRandom(0, 3, seed, nonce);
+        // k2 = random % 2 == 0 ? "1" : "1"; // TODO
+        // (random, nonce) = generateRandom(0, 3, seed, nonce);
+        // k3 = random % 2 == 0 ? "0" : "1";
 
-        // Randomly choose which of k1, k2, or k3 to set to '1'
-        (random, nonce) = generateRandom(1, 4, seed, nonce);
-        if (random == 1) {
-            k1 = "1";
-        } else if (random == 2) {
-            k2 = "1";
-        } else if (random == 3) {
-            k3 = "1";
-        } else {
-            require(false, "Invalid k1, k2, k3");
-            assert(false);
-        }
+        // // Randomly choose which of k1, k2, or k3 to set to '1'
+        // (random, nonce) = generateRandom(1, 4, seed, nonce);
+        // if (random == 1) {
+        //     k1 = "1";
+        // } else if (random == 2) {
+        //     k2 = "1";
+        // } else {
+        //     k3 = "1";
+        // }
 
         // k4
         string memory k4;
@@ -635,7 +632,7 @@ contract Mercurial is ERC721, LinearVRGDA {
         string memory attributes
     ) internal pure returns (string memory, string memory, uint) {
         uint256 diffuseConstant;
-        (diffuseConstant, nonce) = generateRandom(2, 4, seed, nonce);
+        (diffuseConstant, nonce) = generateRandom(1, 4, seed, nonce);
 
         uint256 surfaceScale;
         // (surfaceScale, nonce) = generateRandom(10, 30, seed, nonce); TODO
@@ -644,7 +641,7 @@ contract Mercurial is ERC721, LinearVRGDA {
 
         uint256 elevation;
         // (elevation, nonce) = generateRandom(0, 30, seed, nonce);
-        (elevation, nonce) = generateRandom(0, 25, seed, nonce);
+        (elevation, nonce) = generateRandom(0, 21, seed, nonce);
         attributes = string.concat(
             attributes,
             '{ "trait_type": "Diffuse Constant", "value": "',
