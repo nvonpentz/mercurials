@@ -7,11 +7,28 @@
   margin-bottom: 5px;
 }
 
+.traitsAndImageContainer {
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  flex-wrap: wrap;
+  padding: 16px 16px 0 16px; /* top right bottom left */
+}
+
+.traitsContainer {
+  display: flex;
+  flex-direction: column;
+  /* margin-right: 16px; */
+}
+
+.trait {
+  margin-bottom: 2px;
+}
+
 .tokenImage {
   display: flex;
   justify-content: center;
   max-width: 100%;
-  padding: 16px 16px 0 16px; /* top right bottom left */
   box-sizing: border-box; /* to include padding in max-width */
 }
 
@@ -27,4 +44,17 @@
   justify-content: center;
   align-items: center;
   margin-top: 16px;
+}
+
+/* Add a media query for small screens */
+@media screen and (max-width: 768px) {
+  .traitsAndImageContainer {
+    flex-direction: column;
+  }
+
+  .traitsContainer {
+    align-items: flex-start;
+    /* If needed, you can remove the commented-out margin-right */
+    /* margin-right: 0; */
+  }
 }

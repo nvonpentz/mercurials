@@ -382,7 +382,8 @@ contract Mercurial is ERC721, LinearVRGDA {
         (surfaceScale, nonce) = generateRandom(5, 11, seed, nonce);
 
         uint256 elevation;
-        (elevation, nonce) = generateRandom(2, 21, seed, nonce);
+        (elevation, nonce) = generateRandom(3, 21, seed, nonce);
+
         // prettier-ignore
         attributes = string.concat(
             attributes,
@@ -437,7 +438,7 @@ contract Mercurial is ERC721, LinearVRGDA {
         ) = generateFeTurbulence(seed, nonce);
 
         partOne = string.concat(
-            '<svg width="350" height="350" version="1.1" xmlns="http://www.w3.org/2000/svg">',
+            '<svg width="350" height="350" version="1.1" viewBox="0 0 350 350" xmlns="http://www.w3.org/2000/svg">',
             '<filter id="a">',
             feTurbulence
         );

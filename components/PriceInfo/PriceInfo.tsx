@@ -1,15 +1,15 @@
 import React, { useState, useEffect } from "react";
 import ExpiresIn from "../ExpiresIn/ExpiresIn";
-import styles from "../../styles/TokenInfo.module.css";
+import styles from "../../styles/PriceInfo.module.css";
 import { ethers } from "ethers";
 import { Result } from "ethers/lib/utils";
 
-type TokenInfoProps = {
+type PriceInfoProps = {
   blockNumber: number | undefined;
   nextToken: Result | undefined;
 };
 
-const TokenInfo: React.FC<TokenInfoProps> = ({
+const PriceInfo: React.FC<PriceInfoProps> = ({
   blockNumber,
   nextToken,
 }) => {
@@ -66,4 +66,4 @@ const TokenInfo: React.FC<TokenInfoProps> = ({
   );
 };
 
-export default TokenInfo;
+export default PriceInfo;

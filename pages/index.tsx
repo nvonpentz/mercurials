@@ -17,7 +17,7 @@ import { Result } from "ethers/lib/utils";
 import { deployments } from "../utils/config";
 import Navbar from "../components/Navbar/Navbar";
 import MintButton from "../components/MintButton/MintButton";
-import TokenInfo from "../components/TokenInfo/TokenInfo";
+import PriceInfo from "../components/PriceInfo/PriceInfo";
 import TransactionInfo from "../components/TransactionInfo/TransactionInfo";
 import { MintAttempt } from "../utils/types";
 
@@ -29,7 +29,6 @@ const Home: NextPage = () => {
   const [address, setAddress] = useState(deployments[chain.id].address);
   const [abi, setAbi] = useState(deployments[chain.id].abi);
   const [mintAttempt, setMintAttempt] = useState<MintAttempt>();
-  // console.log("address", address);
 
   // Hooks
   const { isConnected } = useAccount();
@@ -69,12 +68,13 @@ const Home: NextPage = () => {
     return atob(metadata.animation_url.split(",")[1]);
   };
 
-  if (nextToken?.[1]) {
-    const { animation_url, image, ...selectedMetadataFields } =
-      extractMetadataFromTokenURI(nextToken?.[1] || "");
-    const metadataString = JSON.stringify(selectedMetadataFields, null, 2);
-    // console.log("metadataString", metadataString);
-  }
+  const extractTraitsFromTokenURI = (tokenURI: string) => {
+    if (!tokenURI) {
+      return [];
+    }
+    const metadata = extractMetadataFromTokenURI(tokenURI);
+    return metadata.attributes;
+  };
 
   const {
     data: receipt,
@@ -95,29 +95,42 @@ const Home: NextPage = () => {
           <h1 className={styles.header}>
             Mercurial #{nextToken?.[0].toString()}
           </h1>
-          <TokenInfo blockNumber={blockNumber} nextToken={nextToken} />
-          <div className={styles.tokenImage}>
-            {nextToken && (
-              <div
-                key={nextToken?.[0]?.toString()}
-                dangerouslySetInnerHTML={{
-                  __html: extractSVGFromTokenURI(nextToken[1]),
-                }}
-              />
-            )}
-          </div>
-          <div></div>{" "}
-          <div className={styles.buttonContainer}>
-            <MintButton
-              isConnected={isConnected}
-              readIsFetching={readIsFetching}
-              waitIsFetching={waitIsFetching}
-              address={address}
-              abi={abi}
-              nextToken={nextToken}
-              mintAttempt={mintAttempt}
-              setMintAttempt={setMintAttempt}
-            />
+          <PriceInfo blockNumber={blockNumber} nextToken={nextToken} />
+          <div className={styles.traitsAndImageContainer}>
+            <div className={styles.traitsContainer}>
+              {extractTraitsFromTokenURI(nextToken?.[1] || "").map((trait: any) => {
+                  return (
+                    <div className={styles.trait}>
+                      <strong>{trait.trait_type}</strong> {trait.value}
+                    </div>
+                  );
+                })}
+            </div>
+            <div className={styles.imageContainer}>
+              <div className={styles.tokenImage}>
+                {nextToken && (
+                  <div
+                    // key={nextToken?.[0]?.toString() + blockNumber?.toString()}
+                    key={nextToken?.[0]?.toString()}
+                    dangerouslySetInnerHTML={{
+                      __html: extractSVGFromTokenURI(nextToken[1]),
+                    }}
+                  />
+                )}
+              </div>
+              <div className={styles.buttonContainer}>
+                <MintButton
+                  isConnected={isConnected}
+                  readIsFetching={readIsFetching}
+                  waitIsFetching={waitIsFetching}
+                  address={address}
+                  abi={abi}
+                  nextToken={nextToken}
+                  mintAttempt={mintAttempt}
+                  setMintAttempt={setMintAttempt}
+                />
+              </div>
+            </div>
           </div>
           <TransactionInfo
             waitIsFetching={waitIsFetching}
@@ -130,6 +143,6 @@ const Home: NextPage = () => {
       </div>
     </div>
   );
-};
+}
 
 export default Home;
