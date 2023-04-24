@@ -97,15 +97,6 @@ const Home: NextPage = () => {
           </h1>
           <PriceInfo blockNumber={blockNumber} nextToken={nextToken} />
           <div className={styles.traitsAndImageContainer}>
-            <div className={styles.traitsContainer}>
-              {extractTraitsFromTokenURI(nextToken?.[1] || "").map((trait: any) => {
-                  return (
-                    <div className={styles.trait}>
-                      <strong>{trait.trait_type}</strong> {trait.value}
-                    </div>
-                  );
-                })}
-            </div>
             <div className={styles.imageContainer}>
               <div className={styles.tokenImage}>
                 {nextToken && (
@@ -143,6 +134,6 @@ const Home: NextPage = () => {
       </div>
     </div>
   );
-}
+};
 
 export default Home;
