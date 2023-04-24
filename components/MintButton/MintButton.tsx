@@ -33,7 +33,7 @@ const MintButton: React.FC<MintButtonProps> = ({
     // if (!isConnected) {
     //   return "Connect Wallet to Mint";
     // }
-    return "Burn and Mint";
+    return "Burn Ether and Mint";
   };
 
   // Hooks
