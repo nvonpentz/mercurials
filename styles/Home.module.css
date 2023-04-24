@@ -16,7 +16,7 @@
 }
 
 .traitsContainer {
-  display: flex;
+  display: none; /* flex; */
   flex-direction: column;
   /* margin-right: 16px; */
 }
