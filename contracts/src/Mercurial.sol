@@ -79,7 +79,7 @@ contract Mercurial is ERC721, LinearVRGDA {
         (seed, ttl) = generateSeed(id);
         uri = generateTokenUri(seed, id);
         price = getVRGDAPrice(toDaysWadUnsafe(block.timestamp - startTime), id);
-        hash = blockhash(block.number - 1);
+        hash = blockhash((block.number - 1) - ((block.number - 1) % 5));
 
         return (id, uri, price, hash, ttl);
     }
@@ -239,12 +239,12 @@ contract Mercurial is ERC721, LinearVRGDA {
         bool startNegative;
         uint end;
         bool endNegative;
-        (start, nonce) = generateRandom(0, 151, seed, nonce);
+        (start, nonce) = generateRandom(0, 201, seed, nonce);
         (startNegative, nonce) = generateRandomBool(seed, nonce);
 
         uint256 delta;
         bool deltaNegative;
-        (delta, nonce) = generateRandom(75, 250, seed, nonce);
+        (delta, nonce) = generateRandom(50, 250, seed, nonce);
         (deltaNegative, nonce) = generateRandomBool(seed, nonce);
 
         if (startNegative == deltaNegative) {
@@ -283,6 +283,7 @@ contract Mercurial is ERC721, LinearVRGDA {
             string memory staticFeDisplacementMap,
             string memory animatedFeDisplacementMap,
             string memory animationDurationFeDisplacementMap,
+            string memory keyTimeStr,
             uint256
         )
     {
@@ -304,13 +305,17 @@ contract Mercurial is ERC721, LinearVRGDA {
             "s"
         );
 
+        uint256 keyTime;
+        (keyTime, nonce) = generateRandom(3, 8, seed, nonce);
+        keyTimeStr = string.concat("0.", keyTime.toString());
+
         // Create the static and animated feDisplacementMap elements
         // prettier-ignore
         animatedFeDisplacementMap = string.concat(
             '<feDisplacementMap result="displacementResult">',
             '<animate attributeName="scale" ',
                      'values="', scaleValues,
-                   '" keyTimes="0; 0.5; 1" dur="', animationDurationFeDisplacementMap,
+                   '" keyTimes="0; ', keyTimeStr, '; 1" dur="', animationDurationFeDisplacementMap,
                    '" repeatCount="indefinite" result="displacementResult" calcMode="spline" keySplines="0.3 0 0.7 1; 0.3 0 0.7 1"/>',
             "</feDisplacementMap>"
         );
@@ -327,6 +332,7 @@ contract Mercurial is ERC721, LinearVRGDA {
             staticFeDisplacementMap,
             animatedFeDisplacementMap,
             animationDurationFeDisplacementMap,
+            keyTimeStr,
             nonce
         );
     }
@@ -529,11 +535,13 @@ contract Mercurial is ERC721, LinearVRGDA {
         string memory animatedFeDisplacementMap;
         string memory scaleValues;
         string memory animationDurationFeDisplacementMap;
+        string memory keyTime;
         (
             scaleValues,
             staticFeDisplacementMap,
             animatedFeDisplacementMap,
             animationDurationFeDisplacementMap,
+            keyTime,
             nonce
         ) = generateFeDisplacementMap(seed, nonce);
 
@@ -542,6 +550,7 @@ contract Mercurial is ERC721, LinearVRGDA {
             attributes,
             '{ "trait_type": "Scale", "value": "', scaleValues, '" }, ',
             '{ "trait_type": "Scale Animation", "value": "', animationDurationFeDisplacementMap, '" }, ',
+            '{ "trait_type": "Key Time", "value": "', keyTime, '" }, ',
             '{ "trait_type": "Hue Rotate Animation", "value": "', animationDurationHueRotate.toString(), 's" }'
         );
 

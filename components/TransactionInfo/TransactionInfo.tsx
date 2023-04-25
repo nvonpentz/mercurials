@@ -20,7 +20,7 @@ const TransactionInfo: React.FC<TransactionInfoProps> = ({
   const openSeaLink = `https://opensea.io/assets/ethereum/${address}/${mintAttempt?.tokenId}`;
   return (
     <div className={styles.transactionInfo}>
-      <div>{waitIsFetching && <div>Transaction sent, waiting for confirmation. View on <a href={`https://etherscan.io/tx/${mintAttempt?.transactionHash}`} target="_blank" rel="noreferrer">Etherscan</a>.</div>}</div>
+      <div>{waitIsFetching && <div><a href={`https://etherscan.io/tx/${mintAttempt?.transactionHash}`} target="_blank" rel="noreferrer">Transaction</a> sent, waiting for confirmation.</div>}</div>
       <div>
         {receipt && (
           <div>

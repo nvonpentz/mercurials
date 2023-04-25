@@ -116,6 +116,21 @@ contract MercurialTest is Test {
         mercurial.mint{value: price}(tokenId + 4, hash);
     }
 
+    function testCanMintFiveBlocksInARow() public {
+        uint256 tokenId;
+        string memory svg;
+        uint256 price;
+        bytes32 hash;
+        uint8 ttl;
+
+        uint256 blockNumber = block.number;
+        for (uint256 i = 0; i < 5; i++) {
+            (tokenId, svg, price, hash, ttl) = mercurial.nextToken();
+            mercurial.mint{value: price}(tokenId, hash);
+            vm.roll(blockNumber + 1);
+        }
+    }
+
     function testGenerateSeed() public {
         uint256 seed1;
         uint8 ttl1;
