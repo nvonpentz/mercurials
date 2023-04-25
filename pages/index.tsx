@@ -76,6 +76,11 @@ const Home: NextPage = () => {
     return metadata.attributes;
   };
 
+  // Log traits when nextToken changes
+  useEffect(() => {
+    console.log("Traits:", extractTraitsFromTokenURI(encodedMetadata));
+  }, [encodedMetadata]);
+
   const {
     data: receipt,
     error: waitForTransactionError,
