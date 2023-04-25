@@ -61,6 +61,7 @@ contract Mercurial is ERC721, LinearVRGDA {
         seeds[tokenId] = seed;
     }
 
+    /// @notice Returns information about the next token that can be minted.
     /// @dev This function should be called using the `pending` block tag.
     /// @dev The id and hash should passed as arguments to the `mint` function.
     function nextToken()
@@ -122,7 +123,7 @@ contract Mercurial is ERC721, LinearVRGDA {
         return generateTokenUri(seed, tokenId);
     }
 
-    /// @notice Generates a psuedo-random number from min (includsive) to max (exclusive)
+    /// @notice Generates a psuedo-random number from min (inclusive) to max (exclusive)
     /// @param seed The seed to use for the random number (the same across multiple calls)
     /// @param nonce The nonce to use for the random number (different between calls)
     function generateRandom(
@@ -131,7 +132,6 @@ contract Mercurial is ERC721, LinearVRGDA {
         uint256 seed,
         uint256 nonce
     ) internal pure returns (uint256 random, uint) {
-        // safely generates a random uint256 between min and max using the seed
         uint256 rand = uint(keccak256(abi.encodePacked(seed, nonce)));
         nonce++;
         return ((rand % (max - min)) + min, nonce);
