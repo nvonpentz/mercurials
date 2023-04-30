@@ -52,13 +52,15 @@ contract Mercurial is ERC721, LinearVRGDA {
             // Increment the total sold counter.
             totalSold += 1;
 
+            // Generate the seed and store it
+            (uint seed, ) = generateSeed(tokenId);
+            seeds[tokenId] = seed;
+
             // Note: We do this at the end to avoid creating a reentrancy vector.
             // Refund the user any ETH they spent over the current price of the NFT.
             // Unchecked is safe here because we validate msg.value >= price above.
             SafeTransferLib.safeTransferETH(msg.sender, msg.value - price);
         }
-        (uint seed, ) = generateSeed(tokenId);
-        seeds[tokenId] = seed;
     }
 
     /// @notice Returns information about the next token that can be minted.

@@ -169,45 +169,4 @@ contract MercurialTest is Test {
         vm.roll(7);
         (seed1, ttl1) = mercurial.generateSeed(0);
     }
-
-    // TODO fixme
-    // function testTokenURI() public {
-    //     uint256 tokenId;
-    //     string memory svg;
-    //     uint256 price;
-    //     bytes32 hash;
-    //     uint8 ttl;
-
-    //     // Get values for mint
-    //     (tokenId, svg, price, hash, ttl) = mercurial.nextToken();
-
-    //     // Mint with correct values
-    //     mercurial.mint{value: price}(tokenId, hash);
-
-    //     // Check token URI
-    //     string memory tokenURI = mercurial.tokenURI(tokenId);
-    //     string memory expectedMetadataJson = Base64.encode(
-    //         bytes(
-    //             string(
-    //                 abi.encodePacked(
-    //                     '{"name": "Mercurial #',
-    //                     tokenId.toString(),
-    //                     '", "description": "On chain generative art project.", "image": "data:image/svg+xml;base64,',
-    //                     Base64.encode(bytes(svg)),
-    //                     '"}'
-    //                 )
-    //             )
-    //         )
-    //     );
-
-    //     assertEq(
-    //         tokenURI,
-    //         string(
-    //             abi.encodePacked(
-    //                 "data:application/json;base64,",
-    //                 expectedMetadataJson
-    //             )
-    //         )
-    //     );
-    // }
 }
