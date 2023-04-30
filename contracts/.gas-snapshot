@@ -1,0 +1,5 @@
+MercurialTest:testCanMintFiveBlocksInARow() (gas: 3018731)
+MercurialTest:testGenerateSeed() (gas: 23395)
+MercurialTest:testMint() (gas: 1259272)
+MercurialTest:testMintWithOldButNotExpiredDetails() (gas: 3510502)
+MercurialTest:testNextToken() (gas: 536133)
