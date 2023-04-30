@@ -56,6 +56,7 @@ contract MercurialTest is Test {
         mercurial.mint{value: price - 1}(tokenId, hash);
 
         // Mint with correct values
+        vm.expectEmit(true, true, false, false, address(mercurial));
         mercurial.mint{value: price}(tokenId, hash);
         assertEq(mercurial.balanceOf(address(this)), 1); // Token should be owned by this contract
         assertEq(address(this).balance, balanceBefore - price); // ETH should have gone to the token contract
@@ -131,6 +132,23 @@ contract MercurialTest is Test {
         }
     }
 
+    function testTransfer() public {
+        uint256 tokenId;
+        string memory svg;
+        uint256 price;
+        bytes32 hash;
+        uint8 ttl;
+
+        (tokenId, svg, price, hash, ttl) = mercurial.nextToken();
+        mercurial.mint{value: price}(tokenId, hash);
+        assertEq(mercurial.balanceOf(address(this)), 1);
+        assertEq(mercurial.ownerOf(tokenId), address(this));
+
+        mercurial.transferFrom(address(this), address(0xdead), tokenId);
+        assertEq(mercurial.balanceOf(address(this)), 0);
+        assertEq(mercurial.ownerOf(tokenId), address(0xdead));
+    }
+
     function testGenerateSeed() public {
         uint256 seed1;
         uint8 ttl1;
@@ -168,5 +186,40 @@ contract MercurialTest is Test {
 
         vm.roll(7);
         (seed1, ttl1) = mercurial.generateSeed(0);
+    }
+
+    function testCannotReceiveETH() public {
+        vm.expectRevert("Cannot receive ETH");
+        // Send 1 wei to the contract
+        (bool success, ) = address(mercurial).call{value: 1}("");
+        assertEq(address(mercurial).balance, 0);
+        assertEq(success, false);
+    }
+
+    // Test overpayment refund
+    function testOverpaymentRefund() public {
+        uint256 tokenId;
+        string memory svg;
+        uint256 price;
+        bytes32 hash;
+        uint8 ttl;
+
+        // Get values for mint
+        (tokenId, svg, price, hash, ttl) = mercurial.nextToken();
+
+        // Mint with more ETH than the required price
+        uint256 overpaymentAmount = 10 ether;
+        uint256 totalPayment = price + overpaymentAmount;
+
+        uint256 balanceBefore = address(this).balance;
+        mercurial.mint{value: totalPayment}(tokenId, hash);
+
+        // Check that the NFT has been minted successfully
+        assertEq(mercurial.balanceOf(address(this)), 1);
+        assertEq(mercurial.ownerOf(tokenId), address(this));
+
+        // Verify that the overpayment amount has been refunded
+        uint256 expectedBalanceAfter = balanceBefore - price;
+        assertEq(address(this).balance, expectedBalanceAfter);
     }
 }

@@ -13,6 +13,13 @@ contract Mercurial is ERC721, LinearVRGDA {
     using Strings for uint256;
     using Strings for int256;
 
+    // Events
+    event TokenMinted(
+        uint256 indexed tokenId,
+        address indexed owner,
+        uint256 price
+    );
+
     // The total number of tokens sold so far.
     uint256 public totalSold;
 
@@ -48,6 +55,7 @@ contract Mercurial is ERC721, LinearVRGDA {
 
             // Mint the NFT using mintedId.
             _mint(msg.sender, tokenId);
+            emit TokenMinted(tokenId, msg.sender, price);
 
             // Increment the total sold counter.
             totalSold += 1;
