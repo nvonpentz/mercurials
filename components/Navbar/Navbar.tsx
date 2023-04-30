@@ -22,7 +22,7 @@ const Navbar: React.FC<NavbarProps> = ({ chainId, address }) => {
     <nav className={styles.navbar}>
       <ul>
         <li>
-          <a href="https://example.com" target="_blank" rel="noopener noreferrer">About</a>
+          <a href="https://nvp.dev/posts/mercurials" target="_blank" rel="noopener noreferrer">About</a>
         </li>
         <li>
           <a href={openseaLink} target="_blank" rel="noopener noreferrer">OpenSea</a>
