@@ -143,7 +143,7 @@ contract Mercurial is ERC721, LinearVRGDA, ReentrancyGuard {
         uint256 seed,
         uint8 nonce
     ) internal pure returns (uint256 random, uint8) {
-        uint256 rand = uint(keccak256(abi.encodePacked(seed, nonce)));
+        uint256 rand = uint256(keccak256(abi.encodePacked(seed, nonce)));
         nonce++;
         return ((rand % (max - min)) + min, nonce);
     }
@@ -152,7 +152,7 @@ contract Mercurial is ERC721, LinearVRGDA, ReentrancyGuard {
         uint256 seed,
         uint8 nonce
     ) internal pure returns (bool, uint8) {
-        uint256 rand = uint(keccak256(abi.encodePacked(seed, nonce)));
+        uint256 rand = uint256(keccak256(abi.encodePacked(seed, nonce)));
         nonce++;
         return (rand % 2 == 0, nonce);
     }
@@ -204,19 +204,19 @@ contract Mercurial is ERC721, LinearVRGDA, ReentrancyGuard {
         }
 
         // Randomly make k4 negative
-        uint256 k4NegativeIfZero;
-        (k4NegativeIfZero, nonce) = generateRandom(0, 2, seed, nonce);
-        if (k4NegativeIfZero == 0) {
-            k4 = string.concat("-", k4);
-        }
-
-        // Set operator of first feComposite to 'in' if k4 is not negative
-        (random, nonce) = generateRandom(0, 3, seed, nonce);
         string memory operator;
-        if ((random % 2 == 0) || (k4NegativeIfZero == 0)) {
+        bool randomBool;
+        (randomBool, nonce) = generateRandomBool(seed, nonce);
+        if (randomBool) {
+            k4 = string.concat("-", k4);
             operator = "out";
         } else {
-            operator = "in";
+            (randomBool, nonce) = generateRandomBool(seed, nonce);
+            if (randomBool) {
+                operator = "out";
+            } else {
+                operator = "in";
+            }
         }
 
         // prettier-ignore
