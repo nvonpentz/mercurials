@@ -61,7 +61,7 @@ contract Mercurial is ERC721, LinearVRGDA {
             totalSold += 1;
 
             // Generate the seed and store it
-            (uint seed, ) = generateSeed(tokenId);
+            (uint256 seed, ) = generateSeed(tokenId);
             seeds[tokenId] = seed;
 
             // Note: We do this at the end to avoid creating a reentrancy vector.
@@ -86,7 +86,7 @@ contract Mercurial is ERC721, LinearVRGDA {
         )
     {
         id = totalSold;
-        uint seed;
+        uint256 seed;
         (seed, ttl) = generateSeed(id);
         uri = generateTokenUri(seed, id);
         price = getVRGDAPrice(toDaysWadUnsafe(block.timestamp - startTime), id);
@@ -157,7 +157,7 @@ contract Mercurial is ERC721, LinearVRGDA {
     }
 
     function convertSignedUintToString(
-        uint value,
+        uint256 value,
         bool isNegative
     ) internal pure returns (string memory valueString) {
         if (isNegative) {
@@ -245,9 +245,9 @@ contract Mercurial is ERC721, LinearVRGDA {
         pure
         returns (string memory scaleStart, string memory scaleValues, uint8)
     {
-        uint start;
+        uint256 start;
         bool startNegative;
-        uint end;
+        uint256 end;
         bool endNegative;
         (start, nonce) = generateRandom(0, 201, seed, nonce);
         (startNegative, nonce) = generateRandomBool(seed, nonce);
@@ -362,7 +362,7 @@ contract Mercurial is ERC721, LinearVRGDA {
         uint256 numOctaves;
         (numOctaves, nonce) = generateRandom(1, 4, seed, 0);
 
-        uint seedForSvg;
+        uint256 seedForSvg;
         (seedForSvg, nonce) = generateRandom(
             0,
             // 65535 is the max value for a uint16 (seed used in SVG)
@@ -534,7 +534,7 @@ contract Mercurial is ERC721, LinearVRGDA {
             nonce,
             attributes
         );
-        uint animationDurationHueRotate;
+        uint256 animationDurationHueRotate;
         (animationDurationHueRotate, nonce) = generateRandom(
             1,
             25,
@@ -593,8 +593,8 @@ contract Mercurial is ERC721, LinearVRGDA {
     }
 
     function generateTokenUri(
-        uint seed,
-        uint tokenId
+        uint256 seed,
+        uint256 tokenId
     ) internal pure returns (string memory) {
         string memory attributes;
         string memory svgImage;
