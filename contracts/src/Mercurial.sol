@@ -140,8 +140,8 @@ contract Mercurial is ERC721, LinearVRGDA {
         uint256 min,
         uint256 max,
         uint256 seed,
-        uint256 nonce
-    ) internal pure returns (uint256 random, uint) {
+        uint8 nonce
+    ) internal pure returns (uint256 random, uint8) {
         uint256 rand = uint(keccak256(abi.encodePacked(seed, nonce)));
         nonce++;
         return ((rand % (max - min)) + min, nonce);
@@ -149,8 +149,8 @@ contract Mercurial is ERC721, LinearVRGDA {
 
     function generateRandomBool(
         uint256 seed,
-        uint256 nonce
-    ) internal pure returns (bool, uint) {
+        uint8 nonce
+    ) internal pure returns (bool, uint8) {
         uint256 rand = uint(keccak256(abi.encodePacked(seed, nonce)));
         nonce++;
         return (rand % 2 == 0, nonce);
@@ -171,8 +171,8 @@ contract Mercurial is ERC721, LinearVRGDA {
     /// @notice Generates a baseFrequency string for a feTurbulence element
     function generateBaseFrequency(
         uint256 seed,
-        uint256 nonce
-    ) internal pure returns (string memory, uint) {
+        uint8 nonce
+    ) internal pure returns (string memory, uint8) {
         uint256 baseFrequency;
         (baseFrequency, nonce) = generateRandom(50, 301, seed, nonce);
         string memory baseFrequencyStr;
@@ -188,9 +188,9 @@ contract Mercurial is ERC721, LinearVRGDA {
     /// @notice Generates feComposite elements
     function generateFeComposites(
         uint256 seed,
-        uint256 nonce,
+        uint8 nonce,
         string memory attributes
-    ) internal pure returns (string memory, string memory, uint) {
+    ) internal pure returns (string memory, string memory, uint8) {
         uint256 random;
 
         // k4
@@ -239,11 +239,11 @@ contract Mercurial is ERC721, LinearVRGDA {
 
     function generateScale(
         uint256 seed,
-        uint256 nonce
+        uint8 nonce
     )
         internal
         pure
-        returns (string memory scaleStart, string memory scaleValues, uint256)
+        returns (string memory scaleStart, string memory scaleValues, uint8)
     {
         uint start;
         bool startNegative;
@@ -284,7 +284,7 @@ contract Mercurial is ERC721, LinearVRGDA {
     /// @notice Generates feDisplacementMap SVG element
     function generateFeDisplacementMap(
         uint256 seed,
-        uint256 nonce
+        uint8 nonce
     )
         internal
         pure
@@ -294,7 +294,7 @@ contract Mercurial is ERC721, LinearVRGDA {
             string memory animatedFeDisplacementMap,
             string memory animationDurationFeDisplacementMap,
             string memory keyTimeStr,
-            uint256
+            uint8
         )
     {
         // Generate initial scale value (scaleStart) for static image and animation,
@@ -350,11 +350,11 @@ contract Mercurial is ERC721, LinearVRGDA {
     /// @notice Generates the feTurbulence SVG element
     function generateFeTurbulence(
         uint256 seed,
-        uint256 nonce
+        uint8 nonce
     )
         internal
         pure
-        returns (string memory, string memory, string memory, uint)
+        returns (string memory, string memory, string memory, uint8)
     {
         string memory baseFrequencyStr;
         (baseFrequencyStr, nonce) = generateBaseFrequency(seed, nonce);
@@ -387,9 +387,9 @@ contract Mercurial is ERC721, LinearVRGDA {
     /// @notice Generates the feDiffuseLighting SVG element
     function generateFeDiffuseLighting(
         uint256 seed,
-        uint256 nonce,
+        uint8 nonce,
         string memory attributes
-    ) internal pure returns (string memory, string memory, uint) {
+    ) internal pure returns (string memory, string memory, uint8) {
         uint256 diffuseConstant;
         (diffuseConstant, nonce) = generateRandom(1, 4, seed, nonce);
 
@@ -423,8 +423,8 @@ contract Mercurial is ERC721, LinearVRGDA {
     /// @notice Generates the feColorMatrix SVG element for (maybe) inverting the colors
     function generateFeColorMatrixForInversion(
         uint256 seed,
-        uint256 nonce
-    ) internal pure returns (string memory, uint) {
+        uint8 nonce
+    ) internal pure returns (string memory, uint8) {
         bool random;
         (random, nonce) = generateRandomBool(seed, nonce);
         string memory feColorMatrixForInversion;
@@ -441,7 +441,7 @@ contract Mercurial is ERC721, LinearVRGDA {
     )
         internal
         pure
-        returns (string memory partOne, string memory attributes, uint256 nonce)
+        returns (string memory partOne, string memory attributes, uint8 nonce)
     {
         string memory feTurbulence;
         string memory numOctaves;
@@ -470,9 +470,9 @@ contract Mercurial is ERC721, LinearVRGDA {
 
     function generateSVGPartTwo(
         uint256 seed,
-        uint256 nonce,
+        uint8 nonce,
         string memory attributes
-    ) internal pure returns (string memory partTwo, string memory, uint256) {
+    ) internal pure returns (string memory partTwo, string memory, uint8) {
         string memory feComposites;
         (feComposites, attributes, nonce) = generateFeComposites(
             seed,
@@ -525,7 +525,7 @@ contract Mercurial is ERC721, LinearVRGDA {
             string memory attributes
         )
     {
-        uint256 nonce;
+        uint8 nonce;
         string memory partOne;
         string memory partTwo;
         (partOne, attributes, nonce) = generateSVGPartOne(seed);
@@ -534,7 +534,8 @@ contract Mercurial is ERC721, LinearVRGDA {
             nonce,
             attributes
         );
-        (uint animationDurationHueRotate, ) = generateRandom(
+        uint animationDurationHueRotate;
+        (animationDurationHueRotate, nonce) = generateRandom(
             1,
             25,
             seed,
