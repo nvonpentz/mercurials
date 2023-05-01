@@ -4,12 +4,13 @@ pragma solidity ^0.8.19;
 import {ERC721} from "openzeppelin-contracts/contracts/token/ERC721/ERC721.sol";
 import {Base64} from "openzeppelin-contracts/contracts/utils/Base64.sol";
 import {Strings} from "openzeppelin-contracts/contracts/utils/Strings.sol";
+import {ReentrancyGuard} from "openzeppelin-contracts/contracts/security/ReentrancyGuard.sol";
 import {console} from "forge-std/console.sol";
 import {LinearVRGDA} from "VRGDAs/LinearVRGDA.sol";
 import {toDaysWadUnsafe} from "solmate/utils/SignedWadMath.sol";
 import {SafeTransferLib} from "solmate/utils/SafeTransferLib.sol";
 
-contract Mercurial is ERC721, LinearVRGDA {
+contract Mercurial is ERC721, LinearVRGDA, ReentrancyGuard {
     using Strings for uint256;
     using Strings for int256;
 
@@ -39,7 +40,7 @@ contract Mercurial is ERC721, LinearVRGDA {
         )
     {}
 
-    function mint(uint256 tokenId, bytes32 blockHash) external payable {
+    function mint(uint256 tokenId, bytes32 blockHash) external payable nonReentrant {
         // Only settle if desired token would be minted by checking the
         // parent blockhash and the expected token ID.
         bytes32 expectedBlockHash = blockhash(
