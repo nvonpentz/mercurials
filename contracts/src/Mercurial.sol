@@ -231,7 +231,7 @@ contract Mercurial is ERC721, LinearVRGDA, ReentrancyGuard {
     function generateFeComposites(
         uint256 seed,
         uint8 nonce
-    ) internal pure returns (string memory, string memory, uint8) {
+    ) internal pure returns (string memory feComposites, string memory attributes, uint8) {
         uint256 random;
 
         // k4
@@ -260,7 +260,7 @@ contract Mercurial is ERC721, LinearVRGDA, ReentrancyGuard {
         }
 
         // prettier-ignore
-        string memory feComposites = string.concat(
+        feComposites = string.concat(
             '<feComposite in="rotateResult" in2="colorChannelResult" operator="', operator,
                        '" result="compositeResult2"/>',
             '<feComposite in="compositeResult2" in2="compositeResult2" operator="arithmetic" k1="1" k2="1" k3="1" k4="',
@@ -268,12 +268,14 @@ contract Mercurial is ERC721, LinearVRGDA, ReentrancyGuard {
             '"/>'
         );
 
+        // prettier-ignore
+        attributes = string.concat(
+            '{ "trait_type": "K4", "value": "', k4, '" }, ',
+            '{ "trait_type": "Composite Operator", "value": "', operator, '" }, '
+        );
         return (
             feComposites,
-            string.concat(
-                '{ "trait_type": "K4", "value": "', k4, '" }, ',
-                '{ "trait_type": "Composite Operator", "value": "', operator, '" }, '
-            ),
+            attributes,
             nonce
         );
     }
@@ -282,7 +284,7 @@ contract Mercurial is ERC721, LinearVRGDA, ReentrancyGuard {
     function generateFeDiffuseLighting(
         uint256 seed,
         uint8 nonce
-    ) internal pure returns (string memory, string memory, uint8) {
+    ) internal pure returns (string memory feDiffuseLighting, string memory attributes, uint8) {
         uint256 diffuseConstant;
         (diffuseConstant, nonce) = generateRandom(1, 4, seed, nonce);
 
@@ -294,19 +296,22 @@ contract Mercurial is ERC721, LinearVRGDA, ReentrancyGuard {
         (elevation, nonce) = generateRandom(3, 21, seed, nonce);
 
         // prettier-ignore
-        string memory attributes = string.concat(
+        feDiffuseLighting = string.concat(
+            '<feDiffuseLighting lighting-color="white" diffuseConstant="', diffuseConstant.toString(),
+                             '" result="diffuseResult" surfaceScale="', surfaceScale.toString(),
+            '"><feDistantLight elevation="', elevation.toString(),
+            '"></feDistantLight></feDiffuseLighting>'
+        );
+
+        // prettier-ignore
+        attributes = string.concat(
             '{ "trait_type": "Diffuse Constant", "value": "', diffuseConstant.toString(), '" }, ',
             '{ "trait_type": "Surface Scale", "value": "', surfaceScale.toString(), '" }, ',
             '{ "trait_type": "Elevation", "value": "', elevation.toString(), '" },'
         );
         return (
             // prettier-ignore
-            string.concat(
-                '<feDiffuseLighting lighting-color="white" diffuseConstant="', diffuseConstant.toString(),
-                                 '" result="diffuseResult" surfaceScale="', surfaceScale.toString(),
-                '"><feDistantLight elevation="', elevation.toString(),
-                '"></feDistantLight></feDiffuseLighting>'
-            ),
+            feDiffuseLighting,
             attributes,
             nonce
         );
