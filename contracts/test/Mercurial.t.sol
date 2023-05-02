@@ -21,7 +21,7 @@ contract MercurialTest is Test {
         string memory svg;
         uint256 price;
         bytes32 hash;
-        uint8 ttl;
+        uint256 ttl;
 
         (tokenId, svg, price, hash, ttl) = mercurial.nextToken();
         assertEq(tokenId, 0); // tokenId should start at 0
@@ -36,7 +36,7 @@ contract MercurialTest is Test {
         string memory svg;
         uint256 price;
         bytes32 hash;
-        uint8 ttl;
+        uint256 ttl;
 
         uint balanceBefore = address(this).balance;
 
@@ -75,7 +75,7 @@ contract MercurialTest is Test {
         string memory svg;
         uint256 price;
         bytes32 hash;
-        uint8 ttl;
+        uint256 ttl;
 
         vm.roll(1);
         (tokenId, svg, price, hash, ttl) = mercurial.nextToken();
@@ -122,7 +122,7 @@ contract MercurialTest is Test {
         string memory svg;
         uint256 price;
         bytes32 hash;
-        uint8 ttl;
+        uint256 ttl;
 
         uint256 blockNumber = block.number;
         for (uint256 i = 0; i < 5; i++) {
@@ -137,7 +137,7 @@ contract MercurialTest is Test {
         string memory svg;
         uint256 price;
         bytes32 hash;
-        uint8 ttl;
+        uint256 ttl;
 
         (tokenId, svg, price, hash, ttl) = mercurial.nextToken();
         mercurial.mint{value: price}(tokenId, hash);
@@ -151,9 +151,9 @@ contract MercurialTest is Test {
 
     function testGenerateSeed() public {
         uint256 seed1;
-        uint8 ttl1;
+        uint256 ttl1;
         uint256 seed2;
-        uint8 ttl2;
+        uint256 ttl2;
 
         // Token should be the same within one interval (5 blocks)
         uint expectedSeedFirstFiveBlocksTokenIdZero = 47325194593512000241468536448559833359437483699567969619987864577538981999987;
@@ -202,7 +202,7 @@ contract MercurialTest is Test {
         string memory svg;
         uint256 price;
         bytes32 hash;
-        uint8 ttl;
+        uint256 ttl;
 
         // Get values for mint
         (tokenId, svg, price, hash, ttl) = mercurial.nextToken();
