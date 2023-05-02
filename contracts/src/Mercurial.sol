@@ -549,7 +549,9 @@ contract Mercurial is ERC721, LinearVRGDA, ReentrancyGuard {
             "</svg>"
         );
 
-        return (partTwo, string.concat(attributes1, attributes2), nonce);
+        attributes = string.concat(attributes1, attributes2);
+
+        return (partTwo, attributes, nonce);
     }
 
     ///@notice Combines partOne and partTwo to create the animated and static SVGs
@@ -624,8 +626,10 @@ contract Mercurial is ERC721, LinearVRGDA, ReentrancyGuard {
         uint8 nonce;
         string memory partOne;
         string memory partTwo;
-        (partOne, attributes, nonce) = generateSVGPartOne(seed);
-        (partTwo, attributes, nonce) = generateSVGPartTwo(
+        string memory attributes1;
+        string memory attributes2;
+        (partOne, attributes1, nonce) = generateSVGPartOne(seed);
+        (partTwo, attributes2, nonce) = generateSVGPartTwo(
             seed,
             nonce
         );
@@ -638,6 +642,7 @@ contract Mercurial is ERC721, LinearVRGDA, ReentrancyGuard {
             nonce,
             seed
         );
+        attributes = string.concat(attributes1, attributes2, attributes);
 
         return (svgImage, svgAnimation, attributes);
     }
