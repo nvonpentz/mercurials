@@ -665,7 +665,7 @@ contract Mercurial is ERC721, LinearVRGDA, ReentrancyGuard {
     function generateTokenUri(
         uint256 seed,
         uint256 tokenId
-    ) internal pure returns (string memory) {
+    ) internal pure returns (string memory tokenUri) {
         string memory attributes;
         string memory svgImage;
         string memory svgAnimation;
@@ -674,22 +674,18 @@ contract Mercurial is ERC721, LinearVRGDA, ReentrancyGuard {
 
         string memory metadataJson = Base64.encode(
             bytes(
-                string(
-                    // prettier-ignore
-                    abi.encodePacked(
-                        '{ "name": "Mercurial #', tokenId.toString(), '", ',
-                          '"description": "On chain generative art project.", ',
-                          '"image": "data:image/svg+xml;base64,', Base64.encode(bytes(svgImage)), '", ',
-                          '"animation_url": "data:image/svg+xml;base64,', Base64.encode(bytes(svgAnimation)), '", ',
-                            attributes, ' }'
-                    )
+                // prettier-ignore
+                string.concat(
+                    '{ "name": "Mercurial #', tokenId.toString(), '", ',
+                      '"description": "On chain generative art project.", ',
+                      '"image": "data:image/svg+xml;base64,', Base64.encode(bytes(svgImage)), '", ',
+                      '"animation_url": "data:image/svg+xml;base64,', Base64.encode(bytes(svgAnimation)), '", ',
+                        attributes, ' }'
                 )
             )
         );
 
-        return
-            string(
-                abi.encodePacked("data:application/json;base64,", metadataJson)
-            );
+        tokenUri = string.concat("data:application/json;base64,", metadataJson);
+        return tokenUri;
     }
 }
