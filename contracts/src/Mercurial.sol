@@ -553,8 +553,12 @@ contract Mercurial is ERC721, LinearVRGDA, ReentrancyGuard {
         return (partTwo, attributes, nonce);
     }
 
-    /// @notice Generates the entire SVG
-    function generateSVG(
+    ///@notice Combines partOne and partTwo to create the animated and static SVGs
+    function generateSvgPartThree(
+        string memory partOne,
+        string memory partTwo,
+        string memory attributes,
+        uint8 nonce,
         uint256 seed
     )
         internal
@@ -562,19 +566,9 @@ contract Mercurial is ERC721, LinearVRGDA, ReentrancyGuard {
         returns (
             string memory svgImage,
             string memory svgAnimation,
-            string memory attributes
+            string memory updatedAttributes
         )
     {
-        uint8 nonce;
-        string memory partOne;
-        string memory partTwo;
-        (partOne, attributes, nonce) = generateSVGPartOne(seed);
-        (partTwo, attributes, nonce) = generateSVGPartTwo(
-            seed,
-            nonce,
-            attributes
-        );
-
         string memory staticFeDisplacementMap;
         string memory animatedFeDisplacementMap;
         (
@@ -583,6 +577,7 @@ contract Mercurial is ERC721, LinearVRGDA, ReentrancyGuard {
             attributes,
             nonce
         ) = generateFeDisplacementMap(seed, nonce, attributes);
+
         string memory animatedFeColorMatrix;
         (
             animatedFeColorMatrix,
@@ -608,6 +603,40 @@ contract Mercurial is ERC721, LinearVRGDA, ReentrancyGuard {
             animatedFeColorMatrix,
             "</feColorMatrix>",
             partTwo
+        );
+
+        return (svgImage, svgAnimation, attributes);
+    }
+
+    /// @notice Generates the entire SVG
+    function generateSVG(
+        uint256 seed
+    )
+        internal
+        pure
+        returns (
+            string memory svgImage,
+            string memory svgAnimation,
+            string memory attributes
+        )
+    {
+        uint8 nonce;
+        string memory partOne;
+        string memory partTwo;
+        (partOne, attributes, nonce) = generateSVGPartOne(seed);
+        (partTwo, attributes, nonce) = generateSVGPartTwo(
+            seed,
+            nonce,
+            attributes
+        );
+
+        // Call the new function generateSvgPartThree
+        (svgImage, svgAnimation, attributes) = generateSvgPartThree(
+            partOne,
+            partTwo,
+            attributes,
+            nonce,
+            seed
         );
 
         return (svgImage, svgAnimation, attributes);
