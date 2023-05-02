@@ -40,7 +40,10 @@ contract Mercurial is ERC721, LinearVRGDA, ReentrancyGuard {
         )
     {}
 
-    function mint(uint256 tokenId, bytes32 blockHash) external payable nonReentrant {
+    function mint(
+        uint256 tokenId,
+        bytes32 blockHash
+    ) external payable nonReentrant {
         // Only settle if desired token would be minted by checking the
         // parent blockhash and the expected token ID.
         bytes32 expectedBlockHash = blockhash(
@@ -285,22 +288,22 @@ contract Mercurial is ERC721, LinearVRGDA, ReentrancyGuard {
     /// @notice Generates feDisplacementMap SVG element
     function generateFeDisplacementMap(
         uint256 seed,
-        uint8 nonce
+        uint8 nonce,
+        string memory attributes
     )
         internal
         pure
         returns (
-            string memory scaleValues,
             string memory staticFeDisplacementMap,
             string memory animatedFeDisplacementMap,
-            string memory animationDurationFeDisplacementMap,
-            string memory keyTimeStr,
+            string memory, // attributes
             uint8
         )
     {
         // Generate initial scale value (scaleStart) for static image and animation,
         // and start and end values for animated image (scaleValues)
         string memory scaleStart;
+        string memory scaleValues;
         (scaleStart, scaleValues, nonce) = generateScale(seed, nonce);
 
         // Generate an animation duration for the scale effect
@@ -311,14 +314,14 @@ contract Mercurial is ERC721, LinearVRGDA, ReentrancyGuard {
             seed,
             nonce
         );
-        animationDurationFeDisplacementMap = string.concat(
+        string memory animationDurationFeDisplacementMap = string.concat(
             animationDurationFeDisplacementMapUint.toString(),
             "s"
         );
 
         uint256 keyTime;
         (keyTime, nonce) = generateRandom(3, 8, seed, nonce);
-        keyTimeStr = string.concat("0.", keyTime.toString());
+        string memory keyTimeStr = string.concat("0.", keyTime.toString());
 
         // Create the static and animated feDisplacementMap elements
         // prettier-ignore
@@ -338,12 +341,23 @@ contract Mercurial is ERC721, LinearVRGDA, ReentrancyGuard {
             "</feDisplacementMap>"
         );
 
-        return (
+        attributes = string.concat(
+            attributes,
+            '{ "trait_type": "Scale", "value": "',
             scaleValues,
+            '" }, ',
+            '{ "trait_type": "Scale Animation", "value": "',
+            animationDurationFeDisplacementMap,
+            '" }, ',
+            '{ "trait_type": "Key Time", "value": "',
+            keyTimeStr,
+            '" }, '
+        );
+
+        return (
             staticFeDisplacementMap,
             animatedFeDisplacementMap,
-            animationDurationFeDisplacementMap,
-            keyTimeStr,
+            attributes,
             nonce
         );
     }
@@ -454,10 +468,11 @@ contract Mercurial is ERC721, LinearVRGDA, ReentrancyGuard {
             nonce
         ) = generateFeTurbulence(seed, nonce);
 
+        // prettier-ignore
         partOne = string.concat(
             '<svg width="350" height="350" version="1.1" viewBox="0 0 350 350" xmlns="http://www.w3.org/2000/svg">',
-            '<filter id="a">',
-            feTurbulence
+                '<filter id="a">',
+                    feTurbulence
         );
 
         // prettier-ignore
@@ -535,6 +550,18 @@ contract Mercurial is ERC721, LinearVRGDA, ReentrancyGuard {
             nonce,
             attributes
         );
+
+        string memory staticFeDisplacementMap;
+        string memory animatedFeDisplacementMap;
+        (
+            staticFeDisplacementMap,
+            animatedFeDisplacementMap,
+            attributes,
+            nonce
+        ) = generateFeDisplacementMap(seed, nonce, attributes);
+
+        // Attributes
+        // prettier-ignore
         uint256 animationDurationHueRotate;
         (animationDurationHueRotate, nonce) = generateRandom(
             1,
@@ -542,43 +569,28 @@ contract Mercurial is ERC721, LinearVRGDA, ReentrancyGuard {
             seed,
             nonce
         );
-
-        string memory staticFeDisplacementMap;
-        string memory animatedFeDisplacementMap;
-        string memory scaleValues;
-        string memory animationDurationFeDisplacementMap;
-        string memory keyTime;
-        (
-            scaleValues,
-            staticFeDisplacementMap,
-            animatedFeDisplacementMap,
-            animationDurationFeDisplacementMap,
-            keyTime,
-            nonce
-        ) = generateFeDisplacementMap(seed, nonce);
-
-        // prettier-ignore
         attributes = string.concat(
             attributes,
-            '{ "trait_type": "Scale", "value": "', scaleValues, '" }, ',
-            '{ "trait_type": "Scale Animation", "value": "', animationDurationFeDisplacementMap, '" }, ',
-            '{ "trait_type": "Key Time", "value": "', keyTime, '" }, ',
-            '{ "trait_type": "Hue Rotate Animation", "value": "', animationDurationHueRotate.toString(), 's" }'
+            '{ "trait_type": "Hue Rotate Animation", "value": "',
+            animationDurationHueRotate.toString(),
+            's" }'
         );
 
-        // prettier-ignore
-        string memory animatedFeColorMatrix = string.concat(
-            '<animate attributeName="values" from="0" to="360" ',
-                     'dur="', animationDurationHueRotate.toString(), 's" ',
-                     'repeatCount="indefinite" result="colorMatrixResult"/>'
-        );
-
+        // Image
         svgImage = string.concat(
             partOne,
             staticFeDisplacementMap,
             '<feColorMatrix type="hueRotate" result="rotateResult">',
             "</feColorMatrix>",
             partTwo
+        );
+
+        // Animation
+        // prettier-ignore
+        string memory animatedFeColorMatrix = string.concat(
+            '<animate attributeName="values" from="0" to="360" ',
+                     'dur="', animationDurationHueRotate.toString(), 's" ',
+                     'repeatCount="indefinite" result="colorMatrixResult"/>'
         );
 
         svgAnimation = string.concat(
