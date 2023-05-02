@@ -196,7 +196,7 @@ contract Mercurial is ERC721, LinearVRGDA, ReentrancyGuard {
     )
         internal
         pure
-        returns (string memory, string memory, string memory, uint8)
+        returns (string memory feTurbulence, string memory, string memory, uint8)
     {
         string memory baseFrequencyStr;
         (baseFrequencyStr, nonce) = generateBaseFrequency(seed, nonce);
@@ -212,14 +212,15 @@ contract Mercurial is ERC721, LinearVRGDA, ReentrancyGuard {
             seed,
             nonce
         );
+        // prettier-ignore
+        feTurbulence = string.concat(
+            '<feTurbulence baseFrequency="', baseFrequencyStr,
+                        '" numOctaves="', numOctaves.toString(),
+                        '" seed="', seedForSvg.toString(),
+                        '" result="turbulenceResult"/> '
+        );
         return (
-            // prettier-ignore
-            string.concat(
-                '<feTurbulence baseFrequency="', baseFrequencyStr,
-                            '" numOctaves="', numOctaves.toString(),
-                            '" seed="', seedForSvg.toString(),
-                            '" result="turbulenceResult"/> '
-            ),
+            feTurbulence,
             numOctaves.toString(),
             baseFrequencyStr,
             nonce
@@ -381,7 +382,7 @@ contract Mercurial is ERC721, LinearVRGDA, ReentrancyGuard {
         returns (
             string memory staticFeDisplacementMap,
             string memory animatedFeDisplacementMap,
-            string memory,
+            string memory attributes,
             uint8
         )
     {
@@ -426,15 +427,16 @@ contract Mercurial is ERC721, LinearVRGDA, ReentrancyGuard {
             "</feDisplacementMap>"
         );
 
+        // prettier-ignore
+        attributes = string.concat(
+            '{ "trait_type": "Scale", "value": "', scaleValues, '" }, ',
+            '{ "trait_type": "Scale Animation", "value": "', animationDurationFeDisplacementMap, '" }, ',
+            '{ "trait_type": "Key Time", "value": "', keyTimeStr, '" }, '
+        );
         return (
             staticFeDisplacementMap,
             animatedFeDisplacementMap,
-            // prettier-ignore
-            string.concat(
-                '{ "trait_type": "Scale", "value": "', scaleValues, '" }, ',
-                '{ "trait_type": "Scale Animation", "value": "', animationDurationFeDisplacementMap, '" }, ',
-                '{ "trait_type": "Key Time", "value": "', keyTimeStr, '" }, '
-            ),
+            attributes,
             nonce
         );
     }
