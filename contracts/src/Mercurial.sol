@@ -189,6 +189,43 @@ contract Mercurial is ERC721, LinearVRGDA, ReentrancyGuard {
         return (baseFrequencyStr, nonce);
     }
 
+    /// @notice Generates the feTurbulence SVG element
+    function generateFeTurbulence(
+        uint256 seed,
+        uint8 nonce
+    )
+        internal
+        pure
+        returns (string memory, string memory, string memory, uint8)
+    {
+        string memory baseFrequencyStr;
+        (baseFrequencyStr, nonce) = generateBaseFrequency(seed, nonce);
+
+        uint256 numOctaves;
+        (numOctaves, nonce) = generateRandom(1, 4, seed, 0);
+
+        uint256 seedForSvg;
+        (seedForSvg, nonce) = generateRandom(
+            0,
+            // 65535 is the max value for a uint16 (seed used in SVG)
+            65536,
+            seed,
+            nonce
+        );
+        return (
+            // prettier-ignore
+            string.concat(
+                '<feTurbulence baseFrequency="', baseFrequencyStr,
+                            '" numOctaves="', numOctaves.toString(),
+                            '" seed="', seedForSvg.toString(),
+                            '" result="turbulenceResult"/> '
+            ),
+            numOctaves.toString(),
+            baseFrequencyStr,
+            nonce
+        );
+    }
+
     /// @notice Generates feComposite elements
     function generateFeComposites(
         uint256 seed,
@@ -239,6 +276,58 @@ contract Mercurial is ERC721, LinearVRGDA, ReentrancyGuard {
         );
 
         return (feComposites, attributes, nonce);
+    }
+
+    /// @notice Generates the feDiffuseLighting SVG element
+    function generateFeDiffuseLighting(
+        uint256 seed,
+        uint8 nonce,
+        string memory attributes
+    ) internal pure returns (string memory, string memory, uint8) {
+        uint256 diffuseConstant;
+        (diffuseConstant, nonce) = generateRandom(1, 4, seed, nonce);
+
+        // 10 is the largest surface scaled rendered on mobile devices (tested on iPhone 13)
+        uint256 surfaceScale;
+        (surfaceScale, nonce) = generateRandom(5, 11, seed, nonce);
+
+        uint256 elevation;
+        (elevation, nonce) = generateRandom(3, 21, seed, nonce);
+
+        // prettier-ignore
+        attributes = string.concat(
+            attributes,
+            '{ "trait_type": "Diffuse Constant", "value": "', diffuseConstant.toString(), '" }, ',
+            '{ "trait_type": "Surface Scale", "value": "', surfaceScale.toString(), '" }, ',
+            '{ "trait_type": "Elevation", "value": "', elevation.toString(), '" },'
+        );
+        return (
+            // prettier-ignore
+            string.concat(
+                '<feDiffuseLighting lighting-color="white" diffuseConstant="', diffuseConstant.toString(),
+                                 '" result="diffuseResult" surfaceScale="', surfaceScale.toString(),
+                '"><feDistantLight elevation="', elevation.toString(),
+                '"></feDistantLight></feDiffuseLighting>'
+            ),
+            attributes,
+            nonce
+        );
+    }
+
+    /// @notice Generates the feColorMatrix SVG element for (maybe) inverting the colors
+    function generateFeColorMatrixForInversion(
+        uint256 seed,
+        uint8 nonce
+    ) internal pure returns (string memory, uint8) {
+        bool random;
+        (random, nonce) = generateRandomBool(seed, nonce);
+        string memory feColorMatrixForInversion;
+        // Apply the inversion half the time
+        if (random) {
+            feColorMatrixForInversion = '<feColorMatrix type="matrix" values="-1 0 0 0 1 0 -1 0 0 1 0 0 -1 0 1 0 0 0 1 0"/>';
+        }
+
+        return (feColorMatrixForInversion, nonce);
     }
 
     function generateScale(
@@ -355,95 +444,6 @@ contract Mercurial is ERC721, LinearVRGDA, ReentrancyGuard {
             attributes,
             nonce
         );
-    }
-
-    /// @notice Generates the feTurbulence SVG element
-    function generateFeTurbulence(
-        uint256 seed,
-        uint8 nonce
-    )
-        internal
-        pure
-        returns (string memory, string memory, string memory, uint8)
-    {
-        string memory baseFrequencyStr;
-        (baseFrequencyStr, nonce) = generateBaseFrequency(seed, nonce);
-
-        uint256 numOctaves;
-        (numOctaves, nonce) = generateRandom(1, 4, seed, 0);
-
-        uint256 seedForSvg;
-        (seedForSvg, nonce) = generateRandom(
-            0,
-            // 65535 is the max value for a uint16 (seed used in SVG)
-            65536,
-            seed,
-            nonce
-        );
-        return (
-            // prettier-ignore
-            string.concat(
-                '<feTurbulence baseFrequency="', baseFrequencyStr,
-                            '" numOctaves="', numOctaves.toString(),
-                            '" seed="', seedForSvg.toString(),
-                            '" result="turbulenceResult"/> '
-            ),
-            numOctaves.toString(),
-            baseFrequencyStr,
-            nonce
-        );
-    }
-
-    /// @notice Generates the feDiffuseLighting SVG element
-    function generateFeDiffuseLighting(
-        uint256 seed,
-        uint8 nonce,
-        string memory attributes
-    ) internal pure returns (string memory, string memory, uint8) {
-        uint256 diffuseConstant;
-        (diffuseConstant, nonce) = generateRandom(1, 4, seed, nonce);
-
-        // 10 is the largest surface scaled rendered on mobile devices (tested on iPhone 13)
-        uint256 surfaceScale;
-        (surfaceScale, nonce) = generateRandom(5, 11, seed, nonce);
-
-        uint256 elevation;
-        (elevation, nonce) = generateRandom(3, 21, seed, nonce);
-
-        // prettier-ignore
-        attributes = string.concat(
-            attributes,
-            '{ "trait_type": "Diffuse Constant", "value": "', diffuseConstant.toString(), '" }, ',
-            '{ "trait_type": "Surface Scale", "value": "', surfaceScale.toString(), '" }, ',
-            '{ "trait_type": "Elevation", "value": "', elevation.toString(), '" },'
-        );
-        return (
-            // prettier-ignore
-            string.concat(
-                '<feDiffuseLighting lighting-color="white" diffuseConstant="', diffuseConstant.toString(),
-                                 '" result="diffuseResult" surfaceScale="', surfaceScale.toString(),
-                '"><feDistantLight elevation="', elevation.toString(),
-                '"></feDistantLight></feDiffuseLighting>'
-            ),
-            attributes,
-            nonce
-        );
-    }
-
-    /// @notice Generates the feColorMatrix SVG element for (maybe) inverting the colors
-    function generateFeColorMatrixForInversion(
-        uint256 seed,
-        uint8 nonce
-    ) internal pure returns (string memory, uint8) {
-        bool random;
-        (random, nonce) = generateRandomBool(seed, nonce);
-        string memory feColorMatrixForInversion;
-        // Apply the inversion half the time
-        if (random) {
-            feColorMatrixForInversion = '<feColorMatrix type="matrix" values="-1 0 0 0 1 0 -1 0 0 1 0 0 -1 0 1 0 0 0 1 0"/>';
-        }
-
-        return (feColorMatrixForInversion, nonce);
     }
 
     function generateFeColorMatrixHueRotate(
