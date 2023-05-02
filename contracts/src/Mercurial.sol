@@ -259,12 +259,6 @@ contract Mercurial is ERC721, LinearVRGDA, ReentrancyGuard {
         }
 
         // prettier-ignore
-        string memory attributes = string.concat(
-            '{ "trait_type": "K4", "value": "', k4, '" }, ',
-            '{ "trait_type": "Composite Operator", "value": "', operator, '" }, '
-        );
-
-        // prettier-ignore
         string memory feComposites = string.concat(
             '<feComposite in="rotateResult" in2="colorChannelResult" operator="', operator,
                        '" result="compositeResult2"/>',
@@ -273,7 +267,14 @@ contract Mercurial is ERC721, LinearVRGDA, ReentrancyGuard {
             '"/>'
         );
 
-        return (feComposites, attributes, nonce);
+        return (
+            feComposites,
+            string.concat(
+                '{ "trait_type": "K4", "value": "', k4, '" }, ',
+                '{ "trait_type": "Composite Operator", "value": "', operator, '" }, '
+            ),
+            nonce
+        );
     }
 
     /// @notice Generates the feDiffuseLighting SVG element
@@ -373,15 +374,14 @@ contract Mercurial is ERC721, LinearVRGDA, ReentrancyGuard {
     /// @notice Generates feDisplacementMap SVG element
     function generateFeDisplacementMap(
         uint256 seed,
-        uint8 nonce,
-        string memory attributes
+        uint8 nonce
     )
         internal
         pure
         returns (
             string memory staticFeDisplacementMap,
             string memory animatedFeDisplacementMap,
-            string memory, // attributes
+            string memory,
             uint8
         )
     {
@@ -426,26 +426,22 @@ contract Mercurial is ERC721, LinearVRGDA, ReentrancyGuard {
             "</feDisplacementMap>"
         );
 
-        // prettier-ignore
-        attributes = string.concat(
-            attributes,
-            '{ "trait_type": "Scale", "value": "', scaleValues, '" }, ',
-            '{ "trait_type": "Scale Animation", "value": "', animationDurationFeDisplacementMap, '" }, ',
-            '{ "trait_type": "Key Time", "value": "', keyTimeStr, '" }, '
-        );
-
         return (
             staticFeDisplacementMap,
             animatedFeDisplacementMap,
-            attributes,
+            // prettier-ignore
+            string.concat(
+                '{ "trait_type": "Scale", "value": "', scaleValues, '" }, ',
+                '{ "trait_type": "Scale Animation", "value": "', animationDurationFeDisplacementMap, '" }, ',
+                '{ "trait_type": "Key Time", "value": "', keyTimeStr, '" }, '
+            ),
             nonce
         );
     }
 
     function generateFeColorMatrixHueRotate(
         uint256 seed,
-        uint8 nonce,
-        string memory attributes
+        uint8 nonce
     ) internal pure returns (string memory, string memory, uint8) {
         uint256 animationDurationHueRotate;
         (animationDurationHueRotate, nonce) = generateRandom(
@@ -463,12 +459,22 @@ contract Mercurial is ERC721, LinearVRGDA, ReentrancyGuard {
         );
 
         // prettier-ignore
-        attributes = string.concat(
-            attributes,
-            '{ "trait_type": "Hue Rotate Animation", "value": "', animationDurationHueRotate.toString(), 's" }'
-        );
+        // attributes = string.concat(
+        //     attributes,
+        //     '{ "trait_type": "Hue Rotate Animation", "value": "', animationDurationHueRotate.toString(), 's" }'
+        // );
+        // string.concat(
+        //     attributes,
+        //     '{ "trait_type": "Hue Rotate Animation", "value": "', animationDurationHueRotate.toString(), 's" }'
+        // );
 
-        return (animatedFeColorMatrix, attributes, nonce);
+        return (
+            animatedFeColorMatrix,
+            string.concat(
+                '{ "trait_type": "Hue Rotate Animation", "value": "', animationDurationHueRotate.toString(), 's" }'
+            ),
+            nonce
+        );
     }
 
     function generateSVGPartOne(
@@ -552,7 +558,7 @@ contract Mercurial is ERC721, LinearVRGDA, ReentrancyGuard {
     function generateSvgPartThree(
         string memory partOne,
         string memory partTwo,
-        string memory attributes,
+        // string memory attributes,
         uint8 nonce,
         uint256 seed
     )
@@ -561,24 +567,26 @@ contract Mercurial is ERC721, LinearVRGDA, ReentrancyGuard {
         returns (
             string memory svgImage,
             string memory svgAnimation,
-            string memory updatedAttributes
+            string memory
         )
     {
         string memory staticFeDisplacementMap;
         string memory animatedFeDisplacementMap;
+        string memory attributes1;
         (
             staticFeDisplacementMap,
             animatedFeDisplacementMap,
-            attributes,
+            attributes1,
             nonce
-        ) = generateFeDisplacementMap(seed, nonce, attributes);
+        ) = generateFeDisplacementMap(seed, nonce);
 
         string memory animatedFeColorMatrix;
+        string memory attributes2;
         (
             animatedFeColorMatrix,
-            attributes,
+            attributes2,
             nonce
-        ) = generateFeColorMatrixHueRotate(seed, nonce, attributes);
+        ) = generateFeColorMatrixHueRotate(seed, nonce);
 
         // Image
         svgImage = string.concat(
@@ -600,7 +608,7 @@ contract Mercurial is ERC721, LinearVRGDA, ReentrancyGuard {
             partTwo
         );
 
-        return (svgImage, svgAnimation, attributes);
+        return (svgImage, svgAnimation, string.concat(attributes1, attributes2));
     }
 
     /// @notice Generates the entire SVG
@@ -628,7 +636,7 @@ contract Mercurial is ERC721, LinearVRGDA, ReentrancyGuard {
         (svgImage, svgAnimation, attributes) = generateSvgPartThree(
             partOne,
             partTwo,
-            attributes,
+            // attributes,
             nonce,
             seed
         );
