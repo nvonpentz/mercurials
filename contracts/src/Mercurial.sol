@@ -196,7 +196,12 @@ contract Mercurial is ERC721, LinearVRGDA, ReentrancyGuard {
     )
         internal
         pure
-        returns (string memory feTurbulence, string memory, string memory, uint256)
+        returns (
+            string memory feTurbulence,
+            string memory,
+            string memory,
+            uint256
+        )
     {
         string memory baseFrequencyStr;
         (baseFrequencyStr, nonce) = generateBaseFrequency(seed, nonce);
@@ -219,19 +224,18 @@ contract Mercurial is ERC721, LinearVRGDA, ReentrancyGuard {
                         '" seed="', seedForSvg.toString(),
                         '" result="turbulenceResult"/> '
         );
-        return (
-            feTurbulence,
-            numOctaves.toString(),
-            baseFrequencyStr,
-            nonce
-        );
+        return (feTurbulence, numOctaves.toString(), baseFrequencyStr, nonce);
     }
 
     /// @notice Generates feComposite elements
     function generateFeComposites(
         uint256 seed,
         uint256 nonce
-    ) internal pure returns (string memory feComposites, string memory attributes, uint256) {
+    )
+        internal
+        pure
+        returns (string memory feComposites, string memory attributes, uint256)
+    {
         uint256 random;
 
         // k4
@@ -273,18 +277,22 @@ contract Mercurial is ERC721, LinearVRGDA, ReentrancyGuard {
             '{ "trait_type": "K4", "value": "', k4, '" }, ',
             '{ "trait_type": "Composite Operator", "value": "', operator, '" }, '
         );
-        return (
-            feComposites,
-            attributes,
-            nonce
-        );
+        return (feComposites, attributes, nonce);
     }
 
     /// @notice Generates the feDiffuseLighting SVG element
     function generateFeDiffuseLighting(
         uint256 seed,
         uint256 nonce
-    ) internal pure returns (string memory feDiffuseLighting, string memory attributes, uint256) {
+    )
+        internal
+        pure
+        returns (
+            string memory feDiffuseLighting,
+            string memory attributes,
+            uint256
+        )
+    {
         uint256 diffuseConstant;
         (diffuseConstant, nonce) = generateRandom(1, 4, seed, nonce);
 
@@ -449,7 +457,15 @@ contract Mercurial is ERC721, LinearVRGDA, ReentrancyGuard {
     function generateFeColorMatrixHueRotate(
         uint256 seed,
         uint256 nonce
-    ) internal pure returns (string memory animatedFeColorMatrix, string memory attributes, uint256) {
+    )
+        internal
+        pure
+        returns (
+            string memory animatedFeColorMatrix,
+            string memory attributes,
+            uint256
+        )
+    {
         uint256 animationDurationHueRotate;
         (animationDurationHueRotate, nonce) = generateRandom(
             1,
@@ -464,15 +480,12 @@ contract Mercurial is ERC721, LinearVRGDA, ReentrancyGuard {
                      'dur="', animationDurationHueRotate.toString(), 's" ',
                      'repeatCount="indefinite" result="colorMatrixResult"/>'
         );
+        // prettier-ignore
         attributes = string.concat(
             '{ "trait_type": "Hue Rotate Animation", "value": "', animationDurationHueRotate.toString(), 's" }'
         );
 
-        return (
-            animatedFeColorMatrix,
-            attributes,
-            nonce
-        );
+        return (animatedFeColorMatrix, attributes, nonce);
     }
 
     function generateSVGPartOne(
@@ -511,13 +524,14 @@ contract Mercurial is ERC721, LinearVRGDA, ReentrancyGuard {
     function generateSVGPartTwo(
         uint256 seed,
         uint256 nonce
-    ) internal pure returns (string memory partTwo, string memory attributes, uint256) {
+    )
+        internal
+        pure
+        returns (string memory partTwo, string memory attributes, uint256)
+    {
         string memory feComposites;
         string memory attributes1;
-        (feComposites, attributes1, nonce) = generateFeComposites(
-            seed,
-            nonce
-        );
+        (feComposites, attributes1, nonce) = generateFeComposites(seed, nonce);
 
         string memory attributes2;
         string memory feDiffuseLighting;
@@ -608,7 +622,11 @@ contract Mercurial is ERC721, LinearVRGDA, ReentrancyGuard {
             partTwo
         );
 
-        return (svgImage, svgAnimation, string.concat(attributes1, attributes2));
+        return (
+            svgImage,
+            svgAnimation,
+            string.concat(attributes1, attributes2)
+        );
     }
 
     /// @notice Generates the entire SVG
@@ -629,10 +647,7 @@ contract Mercurial is ERC721, LinearVRGDA, ReentrancyGuard {
         string memory attributes1;
         string memory attributes2;
         (partOne, attributes1, nonce) = generateSVGPartOne(seed);
-        (partTwo, attributes2, nonce) = generateSVGPartTwo(
-            seed,
-            nonce
-        );
+        (partTwo, attributes2, nonce) = generateSVGPartTwo(seed, nonce);
 
         // Call the new function generateSvgPartThree
         (svgImage, svgAnimation, attributes) = generateSvgPartThree(
