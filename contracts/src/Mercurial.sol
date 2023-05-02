@@ -442,7 +442,7 @@ contract Mercurial is ERC721, LinearVRGDA, ReentrancyGuard {
     function generateFeColorMatrixHueRotate(
         uint256 seed,
         uint8 nonce
-    ) internal pure returns (string memory, string memory, uint8) {
+    ) internal pure returns (string memory animatedFeColorMatrix, string memory attributes, uint8) {
         uint256 animationDurationHueRotate;
         (animationDurationHueRotate, nonce) = generateRandom(
             1,
@@ -452,27 +452,18 @@ contract Mercurial is ERC721, LinearVRGDA, ReentrancyGuard {
         );
 
         // prettier-ignore
-        string memory animatedFeColorMatrix = string.concat(
+        animatedFeColorMatrix = string.concat(
             '<animate attributeName="values" from="0" to="360" ',
                      'dur="', animationDurationHueRotate.toString(), 's" ',
                      'repeatCount="indefinite" result="colorMatrixResult"/>'
         );
-
-        // prettier-ignore
-        // attributes = string.concat(
-        //     attributes,
-        //     '{ "trait_type": "Hue Rotate Animation", "value": "', animationDurationHueRotate.toString(), 's" }'
-        // );
-        // string.concat(
-        //     attributes,
-        //     '{ "trait_type": "Hue Rotate Animation", "value": "', animationDurationHueRotate.toString(), 's" }'
-        // );
+        attributes = string.concat(
+            '{ "trait_type": "Hue Rotate Animation", "value": "', animationDurationHueRotate.toString(), 's" }'
+        );
 
         return (
             animatedFeColorMatrix,
-            string.concat(
-                '{ "trait_type": "Hue Rotate Animation", "value": "', animationDurationHueRotate.toString(), 's" }'
-            ),
+            attributes,
             nonce
         );
     }
