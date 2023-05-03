@@ -32,9 +32,9 @@ contract Mercurial is ERC721, LinearVRGDA, ReentrancyGuard {
         ERC721("Mercurials", "MERC")
         LinearVRGDA(
             // Target price
-            0.01e18,
+            0.001e18,
             // Price decay percent
-            0.1e18,
+            0.05e18,
             // Per time unit
             1e18
         )
