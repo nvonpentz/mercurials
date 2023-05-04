@@ -43,11 +43,11 @@ contract Mercurial is ERC721, LinearVRGDA, ReentrancyGuard {
 
     /// @notice Mint a new token
     /// @param tokenId The token ID to mint
-    /// @param blockHash The parent blockhash
+    /// @param blockHash TODO
     function mint(
         uint256 tokenId,
         bytes32 blockHash
-    ) external payable {
+    ) external payable nonReentrant {
         // Do not mint if transaction is late by checking the user supplied
         // token ID and blockhash match the current token ID and
         // blockhash
@@ -82,7 +82,7 @@ contract Mercurial is ERC721, LinearVRGDA, ReentrancyGuard {
     /// @return id The token ID of the next token
     /// @return uri The token URI of the next token
     /// @return price The price of the next token
-    /// @return blockHash The parent blockhash rounded to the nearest 5
+    /// @return blockHash TODO
     /// @return ttl The time to live, in blocks, of the next token
     function nextToken()
         external
@@ -108,12 +108,13 @@ contract Mercurial is ERC721, LinearVRGDA, ReentrancyGuard {
         // Calculate the current price according to VRGDA rules
         price = getVRGDAPrice(toDaysWadUnsafe(block.timestamp - startTime), id);
 
-        // Calculate the parent blockhash rounded down to the nearest 5.
+        // TODO
         blockHash = blockhash((block.number - 1) - ((block.number - 1) % 5));
 
         return (id, uri, price, blockHash, ttl);
     }
 
+    /// @notice Get the current price of the token based according to VRGDA rules
     function getCurrentVRGDAPrice() public view returns (uint256) {
         // Note: By using toDaysWadUnsafe(block.timestamp - startTime) we are
         // establishing that 1 "unit of time" is 1 day.
@@ -127,12 +128,12 @@ contract Mercurial is ERC721, LinearVRGDA, ReentrancyGuard {
     /// @notice Generate the seed for a given token ID
     /// @param tokenId The token ID to generate the seed for
     /// @return seed The seed for the given token ID
-    /// @return ttl The time to live, in blocks, of the seed
+    /// @return ttl The number of blocks before this seed expires
     function generateSeed(
         uint256 tokenId
     ) public view returns (uint256 seed, uint256 ttl) {
-        // Seed is calculated as the hash of current token ID and the parent
-        // blockhash, rounded down to the nearest 5.
+        // Seed is calculated as the hash of current token ID with the parent
+        // block rounded down to the nearest 5.
         seed = uint256(
             keccak256(
                 abi.encodePacked(
@@ -141,13 +142,12 @@ contract Mercurial is ERC721, LinearVRGDA, ReentrancyGuard {
                 )
             )
         );
-
-        // TODO
         ttl = 5 - ((block.number - 1) % 5);
 
         return (seed, ttl);
     }
 
+    // @notice TODO
     function tokenURI(
         uint256 tokenId
     ) public view override returns (string memory) {
@@ -182,6 +182,7 @@ contract Mercurial is ERC721, LinearVRGDA, ReentrancyGuard {
         return (rand % 2 == 0, nonce);
     }
 
+    /// @notice Returns a string representation of a signed integer
     function intToString(
         uint256 value,
         bool isNegative
@@ -272,7 +273,7 @@ contract Mercurial is ERC721, LinearVRGDA, ReentrancyGuard {
             k4 = string.concat("0.", random.toString());
         }
 
-        // Randomly make k4 negative
+        // Make k4 negative half the time
         string memory operator;
         bool randomBool;
         (randomBool, nonce) = generateRandomBool(seed, nonce);
@@ -323,7 +324,7 @@ contract Mercurial is ERC721, LinearVRGDA, ReentrancyGuard {
         uint256 diffuseConstant;
         (diffuseConstant, nonce) = generateRandom(1, 4, seed, nonce);
 
-        // 10 is the largest surface scaled rendered on mobile devices
+        // 10 is the largest surface scale rendered on mobile devices
         uint256 surfaceScale;
         (surfaceScale, nonce) = generateRandom(5, 11, seed, nonce);
 
@@ -350,6 +351,7 @@ contract Mercurial is ERC721, LinearVRGDA, ReentrancyGuard {
             elevation.toString(),
             '" },'
         );
+
         return (feDiffuseLightingElement, attributes, nonce);
     }
 
@@ -372,7 +374,7 @@ contract Mercurial is ERC721, LinearVRGDA, ReentrancyGuard {
         return (feColorMatrixForInversionElement, nonce);
     }
 
-    /// @notice TODO
+    /// @notice Generates the scale values for the feDisplacementMap SVG element
     function generateScale(
         uint256 seed,
         uint256 nonce
