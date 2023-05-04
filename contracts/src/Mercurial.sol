@@ -242,10 +242,13 @@ contract Mercurial is ERC721, LinearVRGDA, ReentrancyGuard {
             nonce
         );
         feTurbulence = string.concat(
-            '<feTurbulence baseFrequency="', baseFrequency,
-                        '" numOctaves="', numOctaves.toString(),
-                        '" seed="', seedForSvg.toString(),
-                        '" result="turbulenceResult"/> '
+            '<feTurbulence baseFrequency="',
+            baseFrequency,
+            '" numOctaves="',
+            numOctaves.toString(),
+            '" seed="',
+            seedForSvg.toString(),
+            '" result="turbulenceResult"/> '
         );
         return (feTurbulence, numOctaves.toString(), baseFrequency, nonce);
     }
@@ -257,7 +260,11 @@ contract Mercurial is ERC721, LinearVRGDA, ReentrancyGuard {
     )
         internal
         pure
-        returns (string memory feCompositeElements, string memory attributes, uint256)
+        returns (
+            string memory feCompositeElements,
+            string memory attributes,
+            uint256
+        )
     {
         uint256 random;
 
@@ -287,14 +294,20 @@ contract Mercurial is ERC721, LinearVRGDA, ReentrancyGuard {
         }
 
         feCompositeElements = string.concat(
-            '<feComposite in="rotateResult" in2="colorChannelResult" operator="', operator,
-                       '" result="compositeResult2"/>',
+            '<feComposite in="rotateResult" in2="colorChannelResult" operator="',
+            operator,
+            '" result="compositeResult2"/>',
             '<feComposite in="compositeResult2" in2="compositeResult2" operator="arithmetic" k1="1" k2="1" k3="1" k4="',
-                          k4, '"/>'
+            k4,
+            '"/>'
         );
 
         attributes = string.concat(
-            '{ "trait_type": "K4", "value": "', k4, '" }, { "trait_type": "Composite Operator", "value": "', operator, '" }, '
+            '{ "trait_type": "K4", "value": "',
+            k4,
+            '" }, { "trait_type": "Composite Operator", "value": "',
+            operator,
+            '" }, '
         );
         return (feCompositeElements, attributes, nonce);
     }
@@ -323,29 +336,37 @@ contract Mercurial is ERC721, LinearVRGDA, ReentrancyGuard {
         (elevation, nonce) = generateRandom(3, 21, seed, nonce);
 
         feDiffuseLightingElement = string.concat(
-            '<feDiffuseLighting lighting-color="white" diffuseConstant="', diffuseConstant.toString(),
-                             '" result="diffuseResult" surfaceScale="', surfaceScale.toString(),
-            '"><feDistantLight elevation="', elevation.toString(),
+            '<feDiffuseLighting lighting-color="white" diffuseConstant="',
+            diffuseConstant.toString(),
+            '" result="diffuseResult" surfaceScale="',
+            surfaceScale.toString(),
+            '"><feDistantLight elevation="',
+            elevation.toString(),
             '"></feDistantLight></feDiffuseLighting>'
         );
 
         attributes = string.concat(
-            '{ "trait_type": "Diffuse Constant", "value": "', diffuseConstant.toString(), '" }, ',
-            '{ "trait_type": "Surface Scale", "value": "', surfaceScale.toString(),
-            '" }, { "trait_type": "Elevation", "value": "', elevation.toString(), '" },'
+            '{ "trait_type": "Diffuse Constant", "value": "',
+            diffuseConstant.toString(),
+            '" }, ',
+            '{ "trait_type": "Surface Scale", "value": "',
+            surfaceScale.toString(),
+            '" }, { "trait_type": "Elevation", "value": "',
+            elevation.toString(),
+            '" },'
         );
-        return (
-            feDiffuseLightingElement,
-            attributes,
-            nonce
-        );
+        return (feDiffuseLightingElement, attributes, nonce);
     }
 
     /// @notice Generates the feColorMatrix SVG element for (maybe) inverting the colors
     function generateFeColorMatrixForInversionElement(
         uint256 seed,
         uint256 nonce
-    ) internal pure returns (string memory feColorMatrixForInversionElement, uint256) {
+    )
+        internal
+        pure
+        returns (string memory feColorMatrixForInversionElement, uint256)
+    {
         bool random;
         (random, nonce) = generateRandomBool(seed, nonce);
         // Apply the inversion half the time
@@ -392,9 +413,12 @@ contract Mercurial is ERC721, LinearVRGDA, ReentrancyGuard {
         scaleStart = intToString(start, startNegative);
 
         scaleValues = string.concat(
-            scaleStart, ";",
-            intToString(end, endNegative), ";",
-            scaleStart, ";"
+            scaleStart,
+            ";",
+            intToString(end, endNegative),
+            ";",
+            scaleStart,
+            ";"
         );
 
         return (scaleStart, scaleValues, nonce);
@@ -440,18 +464,30 @@ contract Mercurial is ERC721, LinearVRGDA, ReentrancyGuard {
         // Create the static and animated feDisplacementMap elements
         animatedFeDisplacementMapElement = string.concat(
             '<feDisplacementMap result="displacementResult"><animate attributeName="scale" ',
-                     'values="', scaleValues,
-                   '" keyTimes="0; ', keyTimeStr, '; 1" dur="', animationDurationFeDisplacementMap,
-                   '" repeatCount="indefinite" result="displacementResult" calcMode="spline" keySplines="0.3 0 0.7 1; 0.3 0 0.7 1"/>' "</feDisplacementMap>"
+            'values="',
+            scaleValues,
+            '" keyTimes="0; ',
+            keyTimeStr,
+            '; 1" dur="',
+            animationDurationFeDisplacementMap,
+            '" repeatCount="indefinite" result="displacementResult" calcMode="spline" keySplines="0.3 0 0.7 1; 0.3 0 0.7 1"/>'
+            "</feDisplacementMap>"
         );
 
         staticFeDisplacementMapElement = string.concat(
-            '<feDisplacementMap scale="', scaleStart,
-                             '" result="displacementResult"></feDisplacementMap>'
+            '<feDisplacementMap scale="',
+            scaleStart,
+            '" result="displacementResult"></feDisplacementMap>'
         );
 
         attributes = string.concat(
-            '{ "trait_type": "Scale", "value": "', scaleValues, '" }, { "trait_type": "Scale Animation", "value": "', animationDurationFeDisplacementMap, '" }, { "trait_type": "Key Time", "value": "', keyTimeStr, '" }, '
+            '{ "trait_type": "Scale", "value": "',
+            scaleValues,
+            '" }, { "trait_type": "Scale Animation", "value": "',
+            animationDurationFeDisplacementMap,
+            '" }, { "trait_type": "Key Time", "value": "',
+            keyTimeStr,
+            '" }, '
         );
         return (
             staticFeDisplacementMapElement,
@@ -484,11 +520,15 @@ contract Mercurial is ERC721, LinearVRGDA, ReentrancyGuard {
 
         animatedFeColorMatrixElement = string.concat(
             '<animate attributeName="values" from="0" to="360" ',
-                     'dur="', animationDurationHueRotate.toString(), 's" ',
-                     'repeatCount="indefinite" result="colorMatrixResult"/>'
+            'dur="',
+            animationDurationHueRotate.toString(),
+            's" ',
+            'repeatCount="indefinite" result="colorMatrixResult"/>'
         );
         attributes = string.concat(
-            '{ "trait_type": "Hue Rotate Animation", "value": "', animationDurationHueRotate.toString(), 's" }'
+            '{ "trait_type": "Hue Rotate Animation", "value": "',
+            animationDurationHueRotate.toString(),
+            's" }'
         );
 
         return (animatedFeColorMatrixElement, attributes, nonce);
@@ -514,12 +554,16 @@ contract Mercurial is ERC721, LinearVRGDA, ReentrancyGuard {
 
         partOne = string.concat(
             '<svg width="350" height="350" version="1.1" viewBox="0 0 350 350" xmlns="http://www.w3.org/2000/svg">',
-                '<filter id="a">',
-                    feTurbulenceElement
+            '<filter id="a">',
+            feTurbulenceElement
         );
 
         attributes = string.concat(
-            '{ "trait_type": "Base Frequency", "value": "', baseFrequency, '" }, { "trait_type": "Octaves", "value": "', numOctaves, '" }, '
+            '{ "trait_type": "Base Frequency", "value": "',
+            baseFrequency,
+            '" }, { "trait_type": "Octaves", "value": "',
+            numOctaves,
+            '" }, '
         );
 
         return (partOne, attributes, nonce);
@@ -536,20 +580,25 @@ contract Mercurial is ERC721, LinearVRGDA, ReentrancyGuard {
     {
         string memory feCompositeElements;
         string memory feCompositeAttributes;
-        (feCompositeElements, feCompositeAttributes, nonce) = generateFeCompositeElements(seed, nonce);
+        (
+            feCompositeElements,
+            feCompositeAttributes,
+            nonce
+        ) = generateFeCompositeElements(seed, nonce);
 
         string memory feDiffuseLightingAttributes;
         string memory feDiffuseLightingElement;
-        (feDiffuseLightingElement, feDiffuseLightingAttributes, nonce) = generateFeDiffuseLightingElement(
-            seed,
+        (
+            feDiffuseLightingElement,
+            feDiffuseLightingAttributes,
             nonce
-        );
+        ) = generateFeDiffuseLightingElement(seed, nonce);
 
         string memory feColorMatrixForInversionElement;
-        (feColorMatrixForInversionElement, nonce) = generateFeColorMatrixForInversionElement(
-            seed,
+        (
+            feColorMatrixForInversionElement,
             nonce
-        );
+        ) = generateFeColorMatrixForInversionElement(seed, nonce);
         partTwo = string.concat(
             '<feColorMatrix type="matrix" result="colorChannelResult" ',
             'values="0 0 0 0 0 ',
@@ -568,7 +617,10 @@ contract Mercurial is ERC721, LinearVRGDA, ReentrancyGuard {
             "</svg>"
         );
 
-        attributes = string.concat(feCompositeAttributes, feDiffuseLightingAttributes);
+        attributes = string.concat(
+            feCompositeAttributes,
+            feDiffuseLightingAttributes
+        );
 
         return (partTwo, attributes, nonce);
     }
@@ -660,7 +712,11 @@ contract Mercurial is ERC721, LinearVRGDA, ReentrancyGuard {
             seed
         );
 
-        attributes = string.concat(partOneAttributes, partTwoAttributes, attributes);
+        attributes = string.concat(
+            partOneAttributes,
+            partTwoAttributes,
+            attributes
+        );
 
         return (svgImage, svgAnimation, attributes);
     }
@@ -684,11 +740,19 @@ contract Mercurial is ERC721, LinearVRGDA, ReentrancyGuard {
             Base64.encode(
                 bytes(
                     string.concat(
-                        '{ "name": "Mercurial #', tokenId.toString(), '", ',
-                          '"description": "On chain generative art project.", ',
-                          '"image": "data:image/svg+xml;base64,', Base64.encode(bytes(svgImage)), '", ',
-                          '"animation_url": "data:image/svg+xml;base64,', Base64.encode(bytes(svgAnimation)), '", ',
-                          '"attributes": [ ', attributes, ' ] }'
+                        '{ "name": "Mercurial #',
+                        tokenId.toString(),
+                        '", ',
+                        '"description": "On chain generative art project.", ',
+                        '"image": "data:image/svg+xml;base64,',
+                        Base64.encode(bytes(svgImage)),
+                        '", ',
+                        '"animation_url": "data:image/svg+xml;base64,',
+                        Base64.encode(bytes(svgAnimation)),
+                        '", ',
+                        '"attributes": [ ',
+                        attributes,
+                        " ] }"
                     )
                 )
             )
