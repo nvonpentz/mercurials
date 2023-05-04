@@ -687,11 +687,12 @@ contract Mercurial is ERC721, LinearVRGDA, ReentrancyGuard {
         return (svgImage, svgAnimation, attributes);
     }
 
+    /// @notice Generates the entire SVG
     function generateTokenUri(
         uint256 seed,
         uint256 tokenId
     ) internal pure returns (string memory tokenUri) {
-        // Generate the code for the static SVG code, the code for the
+        // Generate the code for the static SVG, the code for the
         // animated SVG, and the attributes for the metadata.
         (
             string memory svgImage,
@@ -699,20 +700,23 @@ contract Mercurial is ERC721, LinearVRGDA, ReentrancyGuard {
             string memory attributes
         ) = generateSVG(seed);
 
-        string memory metadataJson = Base64.encode(
-            bytes(
-                // prettier-ignore
-                string.concat(
-                    '{ "name": "Mercurial #', tokenId.toString(), '", ',
-                      '"description": "On chain generative art project.", ',
-                      '"image": "data:image/svg+xml;base64,', Base64.encode(bytes(svgImage)), '", ',
-                      '"animation_url": "data:image/svg+xml;base64,', Base64.encode(bytes(svgAnimation)), '", ',
-                      '"attributes": [ ', attributes, ' ] }'
+        // Create token URI from base64 encoded metadata JSON
+        // prettier-ignore
+        tokenUri = string.concat(
+            "data:application/json;base64,",
+            Base64.encode(
+                bytes(
+                    string.concat(
+                        '{ "name": "Mercurial #', tokenId.toString(), '", ',
+                          '"description": "On chain generative art project.", ',
+                          '"image": "data:image/svg+xml;base64,', Base64.encode(bytes(svgImage)), '", ',
+                          '"animation_url": "data:image/svg+xml;base64,', Base64.encode(bytes(svgAnimation)), '", ',
+                          '"attributes": [ ', attributes, ' ] }'
+                    )
                 )
             )
         );
-
-        tokenUri = string.concat("data:application/json;base64,", metadataJson);
+        
         return tokenUri;
     }
 }
