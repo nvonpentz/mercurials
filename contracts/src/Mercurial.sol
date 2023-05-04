@@ -28,6 +28,7 @@ contract Mercurial is ERC721, LinearVRGDA, ReentrancyGuard {
     /// @notice The seed used to generate the token's attributes
     mapping(uint256 => uint256) public seeds;
 
+    // @notice Sets the VRGDA params, and the ERC721 name and symbol
     constructor()
         ERC721("Mercurials", "MERC")
         LinearVRGDA(
@@ -48,7 +49,7 @@ contract Mercurial is ERC721, LinearVRGDA, ReentrancyGuard {
         bytes32 blockHash
     ) external payable nonReentrant {
         // Do not mint if transaction is late by checking the user supplied
-        // supplied token ID and blockhash match the current token ID and
+        // token ID and blockhash match the current token ID and
         // blockhash
         bytes32 expectedBlockHash = blockhash(
             (block.number - 1) - ((block.number - 1) % 5)
@@ -187,13 +188,11 @@ contract Mercurial is ERC721, LinearVRGDA, ReentrancyGuard {
     function intToString(
         uint256 value,
         bool isNegative
-    ) internal pure returns (string memory valueString) {
+    ) internal pure returns (string memory) {
         if (isNegative) {
-            valueString = string.concat("-", value.toString());
-        } else {
-            valueString = value.toString();
+            return string.concat("-", value.toString());
         }
-        return valueString;
+        return value.toString();
     }
 
     /// @notice Generates a baseFrequency string for a feTurbulence element
