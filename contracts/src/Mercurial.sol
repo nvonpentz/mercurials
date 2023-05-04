@@ -362,16 +362,15 @@ contract Mercurial is ERC721, LinearVRGDA, ReentrancyGuard {
     )
         internal
         pure
-        returns (string memory feColorMatrixForInversionElement, uint256)
+        returns (string memory feColorMatrixForInversionElement, bool inverted, uint256)
     {
-        bool random;
-        (random, nonce) = generateRandomBool(seed, nonce);
         // Apply the inversion half the time
-        if (random) {
+        (inverted, nonce) = generateRandomBool(seed, nonce);
+        if (inverted) {
             feColorMatrixForInversionElement = '<feColorMatrix type="matrix" values="-1 0 0 0 1 0 -1 0 0 1 0 0 -1 0 1 0 0 0 1 0"/>';
         }
 
-        return (feColorMatrixForInversionElement, nonce);
+        return (feColorMatrixForInversionElement, inverted, nonce);
     }
 
     /// @notice Generates the scale values for the feDisplacementMap SVG element
@@ -592,8 +591,10 @@ contract Mercurial is ERC721, LinearVRGDA, ReentrancyGuard {
         ) = generateFeDiffuseLightingElement(seed, nonce);
 
         string memory feColorMatrixForInversionElement;
+        bool inverted;
         (
             feColorMatrixForInversionElement,
+            inverted,
             nonce
         ) = generateFeColorMatrixForInversionElement(seed, nonce);
         partTwo = string.concat(
@@ -616,7 +617,10 @@ contract Mercurial is ERC721, LinearVRGDA, ReentrancyGuard {
 
         attributes = string.concat(
             feCompositeAttributes,
-            feDiffuseLightingAttributes
+            feDiffuseLightingAttributes,
+            '{ "trait_type": "Inverted", "value": "',
+            inverted ? "Yes" : "No",
+            '" }, '
         );
 
         return (partTwo, attributes, nonce);
@@ -740,8 +744,7 @@ contract Mercurial is ERC721, LinearVRGDA, ReentrancyGuard {
                         '{ "name": "Mercurial #',
                         tokenId.toString(),
                         '", ',
-                        '"description": "On chain generative art project.", ',
-                        '"image": "data:image/svg+xml;base64,',
+                        '"description": "On chain generative art project.", "image": "data:image/svg+xml;base64,',
                         Base64.encode(bytes(svgImage)),
                         '", ',
                         '"animation_url": "data:image/svg+xml;base64,',

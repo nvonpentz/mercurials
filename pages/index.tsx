@@ -37,11 +37,6 @@ const Home: NextPage = () => {
     setAddress(deployments[chain.id].address);
     setAbi(deployments[chain.id].abi);
   }, [chain]);
-  const { data: blockNumber } = useBlockNumber();
-  // Listen for changes in the blockNumber variable and log the new block number
-  useEffect(() => {
-    console.log("New block number:", blockNumber);
-  }, [blockNumber]);
 
   const { data: nextToken, isFetching: readIsFetching } = useContractRead({
     address: address,
