@@ -226,15 +226,15 @@ contract MercurialTest is Test {
     function testPriceCannotGoBelowZero() public {
         assertEq(block.timestamp, 1);
         uint256 price1;
-        (,,price1,,) = mercurial.nextToken();
+        (, , price1, , ) = mercurial.nextToken();
 
         vm.warp(1 days);
         uint256 price2;
-        (,,price2,,) = mercurial.nextToken();
+        (, , price2, , ) = mercurial.nextToken();
         assertTrue(price1 > price2);
 
         vm.warp(1000 days);
-        (,,price1,,) = mercurial.nextToken();
+        (, , price1, , ) = mercurial.nextToken();
         assertTrue(price1 == 0);
     }
 }

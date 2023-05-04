@@ -131,22 +131,22 @@ contract Mercurial is ERC721, LinearVRGDA, ReentrancyGuard {
     /// @param tokenId The token ID to generate the seed for
     /// @return seed The seed for the given token ID
     /// @return ttl The time to live, in blocks, of the seed
-    function generateSeed(uint256 tokenId) public view returns (uint256 seed, uint256 ttl) {
+    function generateSeed(
+        uint256 tokenId
+    ) public view returns (uint256 seed, uint256 ttl) {
         // Seed is calculated as the hash of current token ID and the parent
         // blockhash, rounded down to the nearest 5.
         seed = uint256(
-                keccak256(
-                    abi.encodePacked(
-                        blockhash(
-                            (block.number - 1) - ((block.number - 1) % 5)
-                        ),
-                        tokenId
-                    )
+            keccak256(
+                abi.encodePacked(
+                    blockhash((block.number - 1) - ((block.number - 1) % 5)),
+                    tokenId
                 )
-            );
-        
+            )
+        );
+
         // TODO
-        ttl = 5 - (block.number - 1) % 5;
+        ttl = 5 - ((block.number - 1) % 5);
 
         return (seed, ttl);
     }
@@ -716,7 +716,7 @@ contract Mercurial is ERC721, LinearVRGDA, ReentrancyGuard {
                 )
             )
         );
-        
+
         return tokenUri;
     }
 }
