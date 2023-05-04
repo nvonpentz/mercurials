@@ -86,7 +86,7 @@ contract Mercurial is ERC721, LinearVRGDA, ReentrancyGuard {
     /// @return uri The token URI of the next token
     /// @return price The price of the next token
     /// @return blockHash The parent blockhash rounded to the nearest 5
-    /// @return ttl The time to live of the next token in blocks
+    /// @return ttl The time to live, in blocks, of the next token
     function nextToken()
         external
         view
@@ -98,11 +98,20 @@ contract Mercurial is ERC721, LinearVRGDA, ReentrancyGuard {
             uint256 ttl
         )
     {
+        // Coveniently, the next token ID is also the total sold.
         id = totalSold;
+
+        // Fetch the current seed and it's TTL
         uint256 seed;
         (seed, ttl) = generateSeed(id);
+
+        // Generate the token URI using the seed
         uri = generateTokenUri(seed, id);
+
+        // Calculate the current price according to VRGDA rules
         price = getVRGDAPrice(toDaysWadUnsafe(block.timestamp - startTime), id);
+
+        // Calculate the parent blockhash rounded to the nearest 5.
         blockHash = blockhash((block.number - 1) - ((block.number - 1) % 5));
 
         return (id, uri, price, blockHash, ttl);
@@ -118,10 +127,15 @@ contract Mercurial is ERC721, LinearVRGDA, ReentrancyGuard {
             );
     }
 
-    function generateSeed(uint256 tokenId) public view returns (uint, uint256) {
-        uint256 ttl = 5 - uint256((block.number - 1) % 5);
-        return (
-            uint256(
+    /// @notice Generate the seed for a given token ID
+    /// @param tokenId The token ID to generate the seed for
+    /// @return seed The seed for the given token ID
+    function generateSeed(uint256 tokenId) public view returns (uint256 seed, uint256 ttl) {
+        // TODO
+        ttl = 5 - uint256((block.number - 1) % 5);
+
+        // TODO
+        seed = uint256(
                 keccak256(
                     abi.encodePacked(
                         blockhash(
@@ -130,9 +144,8 @@ contract Mercurial is ERC721, LinearVRGDA, ReentrancyGuard {
                         tokenId
                     )
                 )
-            ),
-            ttl
-        );
+            );
+        return (seed, ttl);
     }
 
     function tokenURI(
