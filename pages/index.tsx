@@ -38,6 +38,8 @@ const Home: NextPage = () => {
     setAbi(deployments[chain.id].abi);
   }, [chain]);
 
+  const { data: blockNumber } = useBlockNumber();
+
   const { data: nextToken, isFetching: readIsFetching } = useContractRead({
     address: address,
     abi: abi,

@@ -344,8 +344,7 @@ contract Mercurial is ERC721, LinearVRGDA, ReentrancyGuard {
         attributes = string.concat(
             '{ "trait_type": "Diffuse Constant", "value": "',
             diffuseConstant.toString(),
-            '" }, ',
-            '{ "trait_type": "Surface Scale", "value": "',
+            '" }, { "trait_type": "Surface Scale", "value": "',
             surfaceScale.toString(),
             '" }, { "trait_type": "Elevation", "value": "',
             elevation.toString(),
