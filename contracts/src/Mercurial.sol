@@ -57,26 +57,23 @@ contract Mercurial is ERC721, LinearVRGDA, ReentrancyGuard {
         require(blockHash == expectedBlockHash, "Invalid or expired blockhash");
         require(tokenId == totalSold, "Invalid or expired token ID");
 
-        unchecked {
-            // Validate the purchase request against the VRGDA rules.
-            uint256 price = getCurrentVRGDAPrice();
-            require(msg.value >= price, "Insufficient funds");
+        // Validate the purchase request against the VRGDA rules.
+        uint256 price = getCurrentVRGDAPrice();
+        require(msg.value >= price, "Insufficient funds");
 
-            // Mint the NFT
-            _mint(msg.sender, tokenId);
-            emit TokenMinted(tokenId, msg.sender, price);
+        // Mint the NFT
+        _mint(msg.sender, tokenId);
+        emit TokenMinted(tokenId, msg.sender, price);
 
-            // Increment the total sold counter.
-            totalSold += 1;
+        // Increment the total sold counter.
+        totalSold += 1;
 
-            // Generate the seed and store it
-            (uint256 seed, ) = generateSeed(tokenId);
-            seeds[tokenId] = seed;
+        // Generate the seed and store it
+        (uint256 seed, ) = generateSeed(tokenId);
+        seeds[tokenId] = seed;
 
-            // Refund the user any ETH they spent over the current price of the NFT.
-            // Unchecked is safe here because we validate msg.value >= price above.
-            SafeTransferLib.safeTransferETH(msg.sender, msg.value - price);
-        }
+        // Refund the user any ETH they spent over the current price of the NFT.
+        SafeTransferLib.safeTransferETH(msg.sender, msg.value - price);
     }
 
     /// @notice Returns information about the next token that can be minted.
