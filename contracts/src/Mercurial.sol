@@ -14,18 +14,19 @@ contract Mercurial is ERC721, LinearVRGDA, ReentrancyGuard {
     using Strings for uint256;
     using Strings for int256;
 
-    // Events
     event TokenMinted(
         uint256 indexed tokenId,
         address indexed owner,
         uint256 price
     );
 
-    // The total number of tokens sold so far.
+    /// @notice The total number of tokens sold, also used as the next token ID
     uint256 public totalSold;
 
-    // When VRGDA sales begun.
+    /// @notice The time at which the auction starts
     uint256 public immutable startTime = block.timestamp;
+
+    /// @notice The seed used to generate the token's attributes
     mapping(uint256 => uint256) public seeds;
 
     constructor()
@@ -40,12 +41,16 @@ contract Mercurial is ERC721, LinearVRGDA, ReentrancyGuard {
         )
     {}
 
+    /// @notice Mint a new token
+    /// @param tokenId The token ID to mint
+    /// @param blockHash The parent blockhash
     function mint(
         uint256 tokenId,
         bytes32 blockHash
     ) external payable nonReentrant {
-        // Only settle if desired token would be minted by checking the
-        // parent blockhash and the expected token ID.
+        // Do not mint if transaction is late by checking the user supplied
+        // supplied token ID and blockhash match the current token ID and
+        // blockhash
         bytes32 expectedBlockHash = blockhash(
             (block.number - 1) - ((block.number - 1) % 5)
         );
@@ -57,7 +62,7 @@ contract Mercurial is ERC721, LinearVRGDA, ReentrancyGuard {
             uint256 price = getCurrentVRGDAPrice();
             require(msg.value >= price, "Insufficient funds");
 
-            // Mint the NFT using mintedId.
+            // Mint the NFT
             _mint(msg.sender, tokenId);
             emit TokenMinted(tokenId, msg.sender, price);
 
@@ -68,7 +73,6 @@ contract Mercurial is ERC721, LinearVRGDA, ReentrancyGuard {
             (uint256 seed, ) = generateSeed(tokenId);
             seeds[tokenId] = seed;
 
-            // Note: We do this at the end to avoid creating a reentrancy vector.
             // Refund the user any ETH they spent over the current price of the NFT.
             // Unchecked is safe here because we validate msg.value >= price above.
             SafeTransferLib.safeTransferETH(msg.sender, msg.value - price);
@@ -78,6 +82,11 @@ contract Mercurial is ERC721, LinearVRGDA, ReentrancyGuard {
     /// @notice Returns information about the next token that can be minted.
     /// @dev This function should be called using the `pending` block tag.
     /// @dev The id and hash should passed as arguments to the `mint` function.
+    /// @return id The token ID of the next token
+    /// @return uri The token URI of the next token
+    /// @return price The price of the next token
+    /// @return blockHash The parent blockhash rounded to the nearest 5
+    /// @return ttl The time to live of the next token in blocks
     function nextToken()
         external
         view
@@ -85,7 +94,7 @@ contract Mercurial is ERC721, LinearVRGDA, ReentrancyGuard {
             uint256 id,
             string memory uri,
             uint256 price,
-            bytes32 hash,
+            bytes32 blockHash,
             uint256 ttl
         )
     {
@@ -94,9 +103,9 @@ contract Mercurial is ERC721, LinearVRGDA, ReentrancyGuard {
         (seed, ttl) = generateSeed(id);
         uri = generateTokenUri(seed, id);
         price = getVRGDAPrice(toDaysWadUnsafe(block.timestamp - startTime), id);
-        hash = blockhash((block.number - 1) - ((block.number - 1) % 5));
+        blockHash = blockhash((block.number - 1) - ((block.number - 1) % 5));
 
-        return (id, uri, price, hash, ttl);
+        return (id, uri, price, blockHash, ttl);
     }
 
     function getCurrentVRGDAPrice() public view returns (uint256) {
