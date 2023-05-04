@@ -698,6 +698,7 @@ contract Mercurial is ERC721, LinearVRGDA, ReentrancyGuard {
             string memory svgAnimation,
             string memory attributes
         ) = generateSVG(seed);
+
         string memory metadataJson = Base64.encode(
             bytes(
                 // prettier-ignore
@@ -706,7 +707,7 @@ contract Mercurial is ERC721, LinearVRGDA, ReentrancyGuard {
                       '"description": "On chain generative art project.", ',
                       '"image": "data:image/svg+xml;base64,', Base64.encode(bytes(svgImage)), '", ',
                       '"animation_url": "data:image/svg+xml;base64,', Base64.encode(bytes(svgAnimation)), '", ',
-                        '"attributes": [ ', attributes, ' ]', ' }'
+                      '"attributes": [ ', attributes, ' ] }'
                 )
             )
         );
