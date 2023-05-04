@@ -47,7 +47,7 @@ contract Mercurial is ERC721, LinearVRGDA, ReentrancyGuard {
     function mint(
         uint256 tokenId,
         bytes32 blockHash
-    ) external payable nonReentrant {
+    ) external payable {
         // Do not mint if transaction is late by checking the user supplied
         // token ID and blockhash match the current token ID and
         // blockhash
