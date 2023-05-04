@@ -338,7 +338,7 @@ contract Mercurial is ERC721, LinearVRGDA, ReentrancyGuard {
             surfaceScale.toString(),
             '"><feDistantLight elevation="',
             elevation.toString(),
-            '"></feDistantLight></feDiffuseLighting>'
+            '"/></feDiffuseLighting>'
         );
 
         attributes = string.concat(
@@ -664,8 +664,7 @@ contract Mercurial is ERC721, LinearVRGDA, ReentrancyGuard {
         svgImage = string.concat(
             partOne,
             staticFeDisplacementMapElement,
-            '<feColorMatrix type="hueRotate" result="rotateResult">',
-            "</feColorMatrix>",
+            '<feColorMatrix type="hueRotate" result="rotateResult"/>',
             partTwo
         );
 
@@ -675,7 +674,7 @@ contract Mercurial is ERC721, LinearVRGDA, ReentrancyGuard {
             animatedFeDisplacementMapElement,
             '<feColorMatrix type="hueRotate" result="rotateResult">',
             animatedFeColorMatrixElement,
-            "</feColorMatrix>",
+            '</feColorMatrix>',
             partTwo
         );
 
