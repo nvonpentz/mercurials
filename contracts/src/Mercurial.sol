@@ -111,7 +111,7 @@ contract Mercurial is ERC721, LinearVRGDA, ReentrancyGuard {
         // Calculate the current price according to VRGDA rules
         price = getVRGDAPrice(toDaysWadUnsafe(block.timestamp - startTime), id);
 
-        // Calculate the parent blockhash rounded to the nearest 5.
+        // Calculate the parent blockhash rounded down to the nearest 5.
         blockHash = blockhash((block.number - 1) - ((block.number - 1) % 5));
 
         return (id, uri, price, blockHash, ttl);
@@ -130,11 +130,10 @@ contract Mercurial is ERC721, LinearVRGDA, ReentrancyGuard {
     /// @notice Generate the seed for a given token ID
     /// @param tokenId The token ID to generate the seed for
     /// @return seed The seed for the given token ID
+    /// @return ttl The time to live, in blocks, of the seed
     function generateSeed(uint256 tokenId) public view returns (uint256 seed, uint256 ttl) {
-        // TODO
-        ttl = 5 - uint256((block.number - 1) % 5);
-
-        // TODO
+        // Seed is calculated as the hash of current token ID and the parent
+        // blockhash, rounded down to the nearest 5.
         seed = uint256(
                 keccak256(
                     abi.encodePacked(
@@ -145,6 +144,10 @@ contract Mercurial is ERC721, LinearVRGDA, ReentrancyGuard {
                     )
                 )
             );
+        
+        // TODO
+        ttl = 5 - (block.number - 1) % 5;
+
         return (seed, ttl);
     }
 
@@ -688,10 +691,13 @@ contract Mercurial is ERC721, LinearVRGDA, ReentrancyGuard {
         uint256 seed,
         uint256 tokenId
     ) internal pure returns (string memory tokenUri) {
-        string memory attributes;
-        string memory svgImage;
-        string memory svgAnimation;
-        (svgImage, svgAnimation, attributes) = generateSVG(seed);
+        // Generate the code for the static SVG code, the code for the
+        // animated SVG, and the attributes for the metadata.
+        (
+            string memory svgImage,
+            string memory svgAnimation,
+            string memory attributes
+        ) = generateSVG(seed);
         string memory metadataJson = Base64.encode(
             bytes(
                 // prettier-ignore
