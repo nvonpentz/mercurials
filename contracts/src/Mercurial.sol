@@ -12,7 +12,6 @@ import {SafeTransferLib} from "solmate/utils/SafeTransferLib.sol";
 
 contract Mercurial is ERC721, LinearVRGDA, ReentrancyGuard {
     using Strings for uint256;
-    using Strings for int256;
 
     event TokenMinted(
         uint256 indexed tokenId,
