@@ -472,7 +472,7 @@ contract Mercurial is ERC721, LinearVRGDA, ReentrancyGuard {
         staticFeDisplacementMapElement = string.concat(
             '<feDisplacementMap scale="',
             scaleStart,
-            '" result="displacementResult"></feDisplacementMap>'
+            '" result="displacementResult"/>'
         );
 
         attributes = string.concat(
