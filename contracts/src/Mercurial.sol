@@ -596,12 +596,7 @@ contract Mercurial is ERC721, LinearVRGDA, ReentrancyGuard {
             nonce
         ) = generateFeColorMatrixForInversionElement(seed, nonce);
         partTwo = string.concat(
-            '<feColorMatrix type="matrix" result="colorChannelResult" ',
-            'values="0 0 0 0 0 ',
-            "0 0 0 0 0 ",
-            "0 0 0 0 0 ",
-            '1 0 0 0 0">',
-            "</feColorMatrix>",
+            '<feColorMatrix type="matrix" result="colorChannelResult" values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 1 0 0 0 0"/>',
             // Add inside-out effect and flatness effect
             feCompositeElements,
             // Light
