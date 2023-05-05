@@ -201,9 +201,9 @@ contract Mercurial is ERC721, LinearVRGDA, ReentrancyGuard {
         uint256 random;
         (random, nonce) = generateRandom(50, 301, seed, nonce);
         if (random < 100) {
-            baseFrequency = string.concat(".00", random.toString());
+            baseFrequency = string.concat("0.00", random.toString());
         } else {
-            baseFrequency = string.concat(".0", random.toString());
+            baseFrequency = string.concat("0.0", random.toString());
         }
 
         return (baseFrequency, nonce);
@@ -269,9 +269,9 @@ contract Mercurial is ERC721, LinearVRGDA, ReentrancyGuard {
         string memory k4;
         (random, nonce) = generateRandom(0, 51, seed, nonce);
         if (random < 10) {
-            k4 = string.concat(".0", random.toString());
+            k4 = string.concat("0.0", random.toString());
         } else {
-            k4 = string.concat(".", random.toString());
+            k4 = string.concat("0.", random.toString());
         }
 
         // Make k4 negative half the time
@@ -300,9 +300,9 @@ contract Mercurial is ERC721, LinearVRGDA, ReentrancyGuard {
         );
 
         attributes = string.concat(
-            '{ "trait_type": "K4", "value": "',
+            '{ "trait_type": "K4", "value": ',
             k4,
-            '" }, { "trait_type": "Composite Operator", "value": "',
+            ' }, { "trait_type": "Composite Operator", "value": "',
             operator,
             '" }, '
         );
@@ -343,13 +343,13 @@ contract Mercurial is ERC721, LinearVRGDA, ReentrancyGuard {
         );
 
         attributes = string.concat(
-            '{ "trait_type": "Diffuse Constant", "value": "',
+            '{ "trait_type": "Diffuse Constant", "value": ',
             diffuseConstant.toString(),
-            '" }, { "trait_type": "Surface Scale", "value": "',
+            ' }, { "trait_type": "Surface Scale", "value": ',
             surfaceScale.toString(),
-            '" }, { "trait_type": "Elevation", "value": "',
+            ' }, { "trait_type": "Elevation", "value": ',
             elevation.toString(),
-            '" },'
+            ' },'
         );
 
         return (feDiffuseLightingElement, attributes, nonce);
@@ -485,9 +485,9 @@ contract Mercurial is ERC721, LinearVRGDA, ReentrancyGuard {
             scaleValues,
             '" }, { "trait_type": "Scale Animation", "value": "',
             animationDurationFeDisplacementMap,
-            '" }, { "trait_type": "Key Time", "value": "',
+            '" }, { "trait_type": "Key Time", "value": ',
             keyTime,
-            '" }, '
+            ' }, '
         );
         return (
             staticFeDisplacementMapElement,
@@ -560,9 +560,9 @@ contract Mercurial is ERC721, LinearVRGDA, ReentrancyGuard {
         attributes = string.concat(
             '{ "trait_type": "Base Frequency", "value": "',
             baseFrequency,
-            '" }, { "trait_type": "Octaves", "value": "',
+            '" }, { "trait_type": "Octaves", "value": ',
             numOctaves,
-            '" }, '
+            ' }, '
         );
 
         return (partOne, attributes, nonce);
