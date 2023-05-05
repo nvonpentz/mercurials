@@ -31,25 +31,25 @@ contract Mercurial is ERC721, LinearVRGDA, ReentrancyGuard {
     constructor()
         ERC721("Mercurials", "MERC")
         LinearVRGDA(
-            // Target price
+            // Target price, 0.001 Ether
             0.001e18,
-            // Price decay percent
+            // Price decay percent, 5%
             0.05e18,
-            // Per time unit
+            // Per time unit, 1 day
             1e18
         )
     {}
 
     /// @notice Mint a new token
     /// @param tokenId The token ID to mint
-    /// @param blockHash TODO
+    /// @param blockHash The hash of the parent block number rounded down
+    /// to the nearest multiple of 5
     function mint(
         uint256 tokenId,
         bytes32 blockHash
     ) external payable nonReentrant {
-        // Do not mint if transaction is late by checking the user supplied
-        // token ID and blockhash match the current token ID and
-        // blockhash
+        // Don't mint if the user supplied token ID and blockHash
+        // don't match the current values
         require(
             blockHash ==
                 blockhash((block.number - 1) - ((block.number - 1) % 5)),
@@ -81,7 +81,8 @@ contract Mercurial is ERC721, LinearVRGDA, ReentrancyGuard {
     /// @return id The token ID of the next token
     /// @return uri The token URI of the next token
     /// @return price The price of the next token
-    /// @return blockHash TODO
+    /// @return blockHash The hash of the parent block number rounded down to
+    /// the nearest multiple of 5
     /// @return ttl The time to live, in blocks, of the next token
     function nextToken()
         external
@@ -103,10 +104,10 @@ contract Mercurial is ERC721, LinearVRGDA, ReentrancyGuard {
         // Calculate the current price according to VRGDA rules
         price = getVRGDAPrice(toDaysWadUnsafe(block.timestamp - startTime), id);
 
-        // TODO
+        // Calculate the block hash corresponding to the next token
         blockHash = blockhash((block.number - 1) - ((block.number - 1) % 5));
 
-        // TODO
+        // Calculate the time to live
         ttl = 5 - ((block.number - 1) % 5);
 
         return (id, uri, price, blockHash, ttl);
@@ -123,7 +124,7 @@ contract Mercurial is ERC721, LinearVRGDA, ReentrancyGuard {
             );
     }
 
-    /// @notice Generate the seed for a given token ID
+    /// @notice Generates the seed for a given token ID
     /// @param tokenId The token ID to generate the seed for
     /// @return seed The seed for the given token ID
     function generateSeed(uint256 tokenId) public view returns (uint256) {
@@ -142,13 +143,13 @@ contract Mercurial is ERC721, LinearVRGDA, ReentrancyGuard {
             );
     }
 
-    // @notice TODO
+    // @notice Returns the token URI for a given token ID
     function tokenURI(
         uint256 tokenId
     ) public view override returns (string memory) {
         require(
             _exists(tokenId),
-            "ERC721Metadata: URI query for nonexistent token"
+            "Token does not exist."
         );
         uint256 seed = seeds[tokenId];
         return generateTokenUri(seed, tokenId);
@@ -168,6 +169,7 @@ contract Mercurial is ERC721, LinearVRGDA, ReentrancyGuard {
         return ((rand % (max - min)) + min, nonce);
     }
 
+    /// @notice Generates a random value that is either true or false
     function generateRandomBool(
         uint256 seed,
         uint256 nonce
