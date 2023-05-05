@@ -219,4 +219,10 @@ contract MercurialTest is Test {
         uint256 expectedBalanceAfter = balanceBefore - price;
         assertEq(address(this).balance, expectedBalanceAfter);
     }
+
+    function testTokenUri() public {
+        // Should revert if token does not exist
+        vm.expectRevert("Token does not exist.");
+        mercurial.tokenURI(0);
+    }
 }

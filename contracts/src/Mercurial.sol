@@ -147,10 +147,7 @@ contract Mercurial is ERC721, LinearVRGDA, ReentrancyGuard {
     function tokenURI(
         uint256 tokenId
     ) public view override returns (string memory) {
-        require(
-            _exists(tokenId),
-            "Token does not exist."
-        );
+        require(_exists(tokenId), "Token does not exist.");
         uint256 seed = seeds[tokenId];
         return generateTokenUri(seed, tokenId);
     }
