@@ -239,7 +239,7 @@ contract Mercurial is ERC721, LinearVRGDA, ReentrancyGuard {
             numOctaves.toString(),
             '" seed="',
             seedForSvg.toString(),
-            '" result="turbulenceResult"/>'
+            '" />'
         );
 
         return (feTurbulence, numOctaves.toString(), baseFrequency, nonce);
@@ -330,7 +330,7 @@ contract Mercurial is ERC721, LinearVRGDA, ReentrancyGuard {
         feDiffuseLightingElement = string.concat(
             '<feDiffuseLighting lighting-color="#fff" diffuseConstant="',
             diffuseConstant.toString(),
-            '" result="diffuseResult" surfaceScale="',
+            '" surfaceScale="',
             surfaceScale.toString(),
             '"><feDistantLight elevation="',
             elevation.toString(),
@@ -458,19 +458,21 @@ contract Mercurial is ERC721, LinearVRGDA, ReentrancyGuard {
 
         // Create the static and animated feDisplacementMap elements
         animatedFeDisplacementMapElement = string.concat(
-            '<feDisplacementMap result="displacementResult"><animate attributeName="scale" values="',
+            '<feDisplacementMap><animate attributeName="scale" ',
+            'values="',
             scaleValues,
             '" keyTimes="0; ',
             keyTime,
             '; 1" dur="',
             animationDurationFeDisplacementMap,
-            '" repeatCount="indefinite" result="displacementResult" calcMode="spline" keySplines="0.3 0 0.7 1; 0.3 0 0.7 1"/>'
+            '" repeatCount="indefinite" calcMode="spline" keySplines="0.3 0 0.7 1; 0.3 0 0.7 1"/>'
+            "</feDisplacementMap>"
         );
 
         staticFeDisplacementMapElement = string.concat(
             '<feDisplacementMap scale="',
             scaleStart,
-            '" result="displacementResult"/>'
+            '" />'
         );
 
         attributes = string.concat(
@@ -514,7 +516,7 @@ contract Mercurial is ERC721, LinearVRGDA, ReentrancyGuard {
         animatedFeColorMatrixElement = string.concat(
             '<animate attributeName="values" from="0" to="360" dur="',
             animationDurationHueRotate.toString(),
-            's" repeatCount="indefinite" result="colorMatrixResult"/>'
+            's" repeatCount="indefinite"/>'
         );
         attributes = string.concat(
             '{ "trait_type": "Hue Rotate Animation", "value": "',
