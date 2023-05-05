@@ -286,10 +286,10 @@ contract Mercurial is ERC721, LinearVRGDA, ReentrancyGuard {
         }
 
         feCompositeElements = string.concat(
-            '<feComposite in="rotateResult" in2="colorChannelResult" operator="',
+            '<feComposite in="b" in2="c" operator="',
             operator,
-            '" result="compositeResult2"/>',
-            '<feComposite in="compositeResult2" in2="compositeResult2" operator="arithmetic" k1="1" k2="1" k3="1" k4="',
+            '" result="d"/>',
+            '<feComposite in="d" in2="d" operator="arithmetic" k1="1" k2="1" k3="1" k4="',
             k4,
             '"/>'
         );
@@ -595,7 +595,7 @@ contract Mercurial is ERC721, LinearVRGDA, ReentrancyGuard {
             nonce
         ) = generateFeColorMatrixForInversionElement(seed, nonce);
         partTwo = string.concat(
-            '<feColorMatrix type="matrix" result="colorChannelResult" values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 1 0 0 0 0"/>',
+            '<feColorMatrix type="matrix" result="c" values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 1 0 0 0 0"/>',
             // Add inside-out effect and flatness effect
             feCompositeElements,
             // Light
@@ -654,7 +654,7 @@ contract Mercurial is ERC721, LinearVRGDA, ReentrancyGuard {
         svgImage = string.concat(
             partOne,
             staticFeDisplacementMapElement,
-            '<feColorMatrix type="hueRotate" result="rotateResult"/>',
+            '<feColorMatrix type="hueRotate" result="b"/>',
             partTwo
         );
 
@@ -662,7 +662,7 @@ contract Mercurial is ERC721, LinearVRGDA, ReentrancyGuard {
         svgAnimation = string.concat(
             partOne,
             animatedFeDisplacementMapElement,
-            '<feColorMatrix type="hueRotate" result="rotateResult">',
+            '<feColorMatrix type="hueRotate" result="b">',
             animatedFeColorMatrixElement,
             "</feColorMatrix>",
             partTwo
