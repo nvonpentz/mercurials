@@ -50,10 +50,11 @@ contract Mercurial is ERC721, LinearVRGDA, ReentrancyGuard {
         // Do not mint if transaction is late by checking the user supplied
         // token ID and blockhash match the current token ID and
         // blockhash
-        bytes32 expectedBlockHash = blockhash(
-            (block.number - 1) - ((block.number - 1) % 5)
+        require(
+            blockHash ==
+                blockhash((block.number - 1) - ((block.number - 1) % 5)),
+            "Invalid or expired blockhash"
         );
-        require(blockHash == expectedBlockHash, "Invalid or expired blockhash");
         require(tokenId == totalSold, "Invalid or expired token ID");
 
         // Validate the purchase request against the VRGDA rules.
@@ -141,8 +142,8 @@ contract Mercurial is ERC721, LinearVRGDA, ReentrancyGuard {
                 )
             )
         );
-        ttl = 5 - ((block.number - 1) % 5);
 
+        ttl = 5 - ((block.number - 1) % 5);
         return (seed, ttl);
     }
 
