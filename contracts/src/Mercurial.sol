@@ -458,8 +458,7 @@ contract Mercurial is ERC721, LinearVRGDA, ReentrancyGuard {
 
         // Create the static and animated feDisplacementMap elements
         animatedFeDisplacementMapElement = string.concat(
-            '<feDisplacementMap result="displacementResult"><animate attributeName="scale" ',
-            'values="',
+            '<feDisplacementMap result="displacementResult"><animate attributeName="scale" values="',
             scaleValues,
             '" keyTimes="0; ',
             keyTime,
