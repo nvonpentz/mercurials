@@ -287,8 +287,7 @@ contract Mercurial is ERC721, LinearVRGDA, ReentrancyGuard {
         feCompositeElements = string.concat(
             '<feComposite in="b" in2="c" operator="',
             operator,
-            '" result="d"/>',
-            '<feComposite in="d" in2="d" operator="arithmetic" k1="1" k2="1" k3="1" k4="',
+            '" result="d"/><feComposite in="d" in2="d" operator="arithmetic" k1="1" k2="1" k3="1" k4="',
             k4,
             '"/>'
         );
