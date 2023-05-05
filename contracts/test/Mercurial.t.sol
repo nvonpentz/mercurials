@@ -151,41 +151,71 @@ contract MercurialTest is Test {
 
     function testGenerateSeed() public {
         uint256 seed1;
-        uint256 ttl1;
         uint256 seed2;
-        uint256 ttl2;
 
         // Token should be the same within one interval (5 blocks)
         uint expectedSeedFirstFiveBlocksTokenIdZero = 47325194593512000241468536448559833359437483699567969619987864577538981999987;
 
         vm.roll(1);
-        (seed1, ttl1) = mercurial.generateSeed(0);
-        (seed2, ttl2) = mercurial.generateSeed(1);
+        seed1 = mercurial.generateSeed(0);
+        seed2 = mercurial.generateSeed(1);
         assertEq(seed1, expectedSeedFirstFiveBlocksTokenIdZero);
         assertTrue(seed1 != seed2);
 
         vm.roll(2);
-        (seed1, ttl1) = mercurial.generateSeed(0);
+        seed1 = mercurial.generateSeed(0);
         assertEq(seed1, expectedSeedFirstFiveBlocksTokenIdZero);
 
         vm.roll(3);
-        (seed1, ttl1) = mercurial.generateSeed(0);
+        seed1 = mercurial.generateSeed(0);
         assertEq(seed1, expectedSeedFirstFiveBlocksTokenIdZero);
 
         vm.roll(4);
-        (seed1, ttl1) = mercurial.generateSeed(0);
+        seed1 = mercurial.generateSeed(0);
         assertEq(seed1, expectedSeedFirstFiveBlocksTokenIdZero);
 
         vm.roll(5);
-        (seed1, ttl1) = mercurial.generateSeed(0);
+        seed1 = mercurial.generateSeed(0);
         assertEq(seed1, expectedSeedFirstFiveBlocksTokenIdZero);
 
         vm.roll(6);
-        (seed1, ttl1) = mercurial.generateSeed(0);
+        seed1 = mercurial.generateSeed(0);
         assertTrue(seed1 != expectedSeedFirstFiveBlocksTokenIdZero);
 
         vm.roll(7);
-        (seed1, ttl1) = mercurial.generateSeed(0);
+        seed1 = mercurial.generateSeed(0);
+    }
+
+    function testGenerateSeedTTL() public {
+        uint256 ttl1;
+
+        vm.roll(1);
+        ttl1 = mercurial.generateSeedTTL();
+        assertEq(ttl1, 5);
+
+        vm.roll(2);
+        ttl1 = mercurial.generateSeedTTL();
+        assertEq(ttl1, 4);
+
+        vm.roll(3);
+        ttl1 = mercurial.generateSeedTTL();
+        assertEq(ttl1, 3);
+
+        vm.roll(4);
+        ttl1 = mercurial.generateSeedTTL();
+        assertEq(ttl1, 2);
+
+        vm.roll(5);
+        ttl1 = mercurial.generateSeedTTL();
+        assertEq(ttl1, 1);
+
+        vm.roll(6);
+        ttl1 = mercurial.generateSeedTTL();
+        assertEq(ttl1, 5);
+
+        vm.roll(7);
+        ttl1 = mercurial.generateSeedTTL();
+        assertEq(ttl1, 4);
     }
 
     function testCannotReceiveETH() public {

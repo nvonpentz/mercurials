@@ -142,6 +142,7 @@ contract Mercurial is ERC721, LinearVRGDA, ReentrancyGuard {
             );
     }
 
+    /// @notice TODO
     function generateSeedTTL() public view returns (uint256) {
         return 5 - ((block.number - 1) % 5);
     }
