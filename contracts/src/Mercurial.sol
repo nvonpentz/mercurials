@@ -608,9 +608,7 @@ contract Mercurial is ERC721, LinearVRGDA, ReentrancyGuard {
             feDiffuseLightingElement,
             // Invert the colors half the time
             feColorMatrixForInversionElement,
-            "</filter>",
-            '<rect width="350" height="350" filter="url(#a)"/>',
-            "</svg>"
+            '</filter><rect width="350" height="350" filter="url(#a)"/></svg>'
         );
 
         attributes = string.concat(
