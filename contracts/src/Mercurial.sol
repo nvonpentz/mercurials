@@ -362,7 +362,11 @@ contract Mercurial is ERC721, LinearVRGDA, ReentrancyGuard {
     )
         internal
         pure
-        returns (string memory feColorMatrixForInversionElement, bool inverted, uint256)
+        returns (
+            string memory feColorMatrixForInversionElement,
+            bool inverted,
+            uint256
+        )
     {
         // Apply the inversion half the time
         (inverted, nonce) = generateRandomBool(seed, nonce);
@@ -453,9 +457,9 @@ contract Mercurial is ERC721, LinearVRGDA, ReentrancyGuard {
             "s"
         );
 
-        uint256 keyTime;
-        (keyTime, nonce) = generateRandom(3, 8, seed, nonce);
-        string memory keyTimeStr = string.concat("0.", keyTime.toString());
+        uint256 random;
+        (random, nonce) = generateRandom(3, 8, seed, nonce);
+        string memory keyTime = string.concat("0.", random.toString());
 
         // Create the static and animated feDisplacementMap elements
         animatedFeDisplacementMapElement = string.concat(
@@ -463,7 +467,7 @@ contract Mercurial is ERC721, LinearVRGDA, ReentrancyGuard {
             'values="',
             scaleValues,
             '" keyTimes="0; ',
-            keyTimeStr,
+            keyTime,
             '; 1" dur="',
             animationDurationFeDisplacementMap,
             '" repeatCount="indefinite" result="displacementResult" calcMode="spline" keySplines="0.3 0 0.7 1; 0.3 0 0.7 1"/>'
@@ -482,7 +486,7 @@ contract Mercurial is ERC721, LinearVRGDA, ReentrancyGuard {
             '" }, { "trait_type": "Scale Animation", "value": "',
             animationDurationFeDisplacementMap,
             '" }, { "trait_type": "Key Time", "value": "',
-            keyTimeStr,
+            keyTime,
             '" }, '
         );
         return (
@@ -673,7 +677,7 @@ contract Mercurial is ERC721, LinearVRGDA, ReentrancyGuard {
             animatedFeDisplacementMapElement,
             '<feColorMatrix type="hueRotate" result="rotateResult">',
             animatedFeColorMatrixElement,
-            '</feColorMatrix>',
+            "</feColorMatrix>",
             partTwo
         );
 
