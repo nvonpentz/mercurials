@@ -69,7 +69,7 @@ contract Mercurial is ERC721, LinearVRGDA, ReentrancyGuard {
         totalSold += 1;
 
         // Generate the seed and store it
-        (uint256 seed, ) = generateSeed(tokenId);
+        uint256 seed = generateSeed(tokenId);
         seeds[tokenId] = seed;
 
         // Refund the user any ETH they spent over the current price of the NFT.
@@ -98,18 +98,17 @@ contract Mercurial is ERC721, LinearVRGDA, ReentrancyGuard {
         // Coveniently, the next token ID is also the total sold.
         id = totalSold;
 
-        // Fetch the current seed and it's TTL
-        uint256 seed;
-        (seed, ttl) = generateSeed(id);
-
         // Generate the token URI using the seed
-        uri = generateTokenUri(seed, id);
+        uri = generateTokenUri(generateSeed(id), id);
 
         // Calculate the current price according to VRGDA rules
         price = getVRGDAPrice(toDaysWadUnsafe(block.timestamp - startTime), id);
 
         // TODO
         blockHash = blockhash((block.number - 1) - ((block.number - 1) % 5));
+
+        // Fetch the current seed and it's TTL
+        ttl = generateSeedTTL();
 
         return (id, uri, price, blockHash, ttl);
     }
@@ -128,13 +127,12 @@ contract Mercurial is ERC721, LinearVRGDA, ReentrancyGuard {
     /// @notice Generate the seed for a given token ID
     /// @param tokenId The token ID to generate the seed for
     /// @return seed The seed for the given token ID
-    /// @return ttl The number of blocks before this seed expires
     function generateSeed(
         uint256 tokenId
-    ) public view returns (uint256 seed, uint256 ttl) {
+    ) public view returns (uint256) {
         // Seed is calculated as the hash of current token ID with the parent
         // block rounded down to the nearest 5.
-        seed = uint256(
+        return uint256(
             keccak256(
                 abi.encodePacked(
                     blockhash((block.number - 1) - ((block.number - 1) % 5)),
@@ -142,9 +140,10 @@ contract Mercurial is ERC721, LinearVRGDA, ReentrancyGuard {
                 )
             )
         );
+    }
 
-        ttl = 5 - ((block.number - 1) % 5);
-        return (seed, ttl);
+    function generateSeedTTL() public view returns (uint256) {
+        return 5 - ((block.number - 1) % 5);
     }
 
     // @notice TODO
