@@ -201,9 +201,9 @@ contract Mercurial is ERC721, LinearVRGDA, ReentrancyGuard {
         uint256 random;
         (random, nonce) = generateRandom(50, 301, seed, nonce);
         if (random < 100) {
-            baseFrequency = string.concat("0.00", random.toString());
+            baseFrequency = string.concat(".00", random.toString());
         } else {
-            baseFrequency = string.concat("0.0", random.toString());
+            baseFrequency = string.concat(".0", random.toString());
         }
 
         return (baseFrequency, nonce);
@@ -244,8 +244,9 @@ contract Mercurial is ERC721, LinearVRGDA, ReentrancyGuard {
             numOctaves.toString(),
             '" seed="',
             seedForSvg.toString(),
-            '" result="turbulenceResult"/> '
+            '" result="turbulenceResult"/>'
         );
+
         return (feTurbulence, numOctaves.toString(), baseFrequency, nonce);
     }
 
@@ -268,9 +269,9 @@ contract Mercurial is ERC721, LinearVRGDA, ReentrancyGuard {
         string memory k4;
         (random, nonce) = generateRandom(0, 51, seed, nonce);
         if (random < 10) {
-            k4 = string.concat("0.0", random.toString());
+            k4 = string.concat(".0", random.toString());
         } else {
-            k4 = string.concat("0.", random.toString());
+            k4 = string.concat(".", random.toString());
         }
 
         // Make k4 negative half the time
@@ -332,7 +333,7 @@ contract Mercurial is ERC721, LinearVRGDA, ReentrancyGuard {
         (elevation, nonce) = generateRandom(3, 21, seed, nonce);
 
         feDiffuseLightingElement = string.concat(
-            '<feDiffuseLighting lighting-color="white" diffuseConstant="',
+            '<feDiffuseLighting lighting-color="#fff" diffuseConstant="',
             diffuseConstant.toString(),
             '" result="diffuseResult" surfaceScale="',
             surfaceScale.toString(),
@@ -517,13 +518,12 @@ contract Mercurial is ERC721, LinearVRGDA, ReentrancyGuard {
             '<animate attributeName="values" from="0" to="360" ',
             'dur="',
             animationDurationHueRotate.toString(),
-            's" ',
-            'repeatCount="indefinite" result="colorMatrixResult"/>'
+            's" repeatCount="indefinite" result="colorMatrixResult"/>'
         );
         attributes = string.concat(
             '{ "trait_type": "Hue Rotate Animation", "value": "',
             animationDurationHueRotate.toString(),
-            's" }'
+            's" }' // No comma here because this is the last attribute.
         );
 
         return (animatedFeColorMatrixElement, attributes, nonce);
