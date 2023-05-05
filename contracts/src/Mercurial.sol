@@ -514,8 +514,7 @@ contract Mercurial is ERC721, LinearVRGDA, ReentrancyGuard {
         );
 
         animatedFeColorMatrixElement = string.concat(
-            '<animate attributeName="values" from="0" to="360" ',
-            'dur="',
+            '<animate attributeName="values" from="0" to="360" dur="',
             animationDurationHueRotate.toString(),
             's" repeatCount="indefinite" result="colorMatrixResult"/>'
         );
