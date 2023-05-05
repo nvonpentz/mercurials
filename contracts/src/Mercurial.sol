@@ -106,8 +106,8 @@ contract Mercurial is ERC721, LinearVRGDA, ReentrancyGuard {
         // TODO
         blockHash = blockhash((block.number - 1) - ((block.number - 1) % 5));
 
-        // Fetch the current seed and it's TTL
-        ttl = generateSeedTTL();
+        // TODO
+        ttl = 5 - ((block.number - 1) % 5);
 
         return (id, uri, price, blockHash, ttl);
     }
@@ -140,11 +140,6 @@ contract Mercurial is ERC721, LinearVRGDA, ReentrancyGuard {
                     )
                 )
             );
-    }
-
-    /// @notice TODO
-    function generateSeedTTL() public view returns (uint256) {
-        return 5 - ((block.number - 1) % 5);
     }
 
     // @notice TODO

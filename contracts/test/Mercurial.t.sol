@@ -186,38 +186,6 @@ contract MercurialTest is Test {
         seed1 = mercurial.generateSeed(0);
     }
 
-    function testGenerateSeedTTL() public {
-        uint256 ttl1;
-
-        vm.roll(1);
-        ttl1 = mercurial.generateSeedTTL();
-        assertEq(ttl1, 5);
-
-        vm.roll(2);
-        ttl1 = mercurial.generateSeedTTL();
-        assertEq(ttl1, 4);
-
-        vm.roll(3);
-        ttl1 = mercurial.generateSeedTTL();
-        assertEq(ttl1, 3);
-
-        vm.roll(4);
-        ttl1 = mercurial.generateSeedTTL();
-        assertEq(ttl1, 2);
-
-        vm.roll(5);
-        ttl1 = mercurial.generateSeedTTL();
-        assertEq(ttl1, 1);
-
-        vm.roll(6);
-        ttl1 = mercurial.generateSeedTTL();
-        assertEq(ttl1, 5);
-
-        vm.roll(7);
-        ttl1 = mercurial.generateSeedTTL();
-        assertEq(ttl1, 4);
-    }
-
     function testCannotReceiveETH() public {
         vm.expectRevert("Cannot receive ETH");
         // Send 1 wei to the contract
