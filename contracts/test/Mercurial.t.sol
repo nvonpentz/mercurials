@@ -44,11 +44,11 @@ contract MercurialTest is Test {
         (tokenId, svg, price, hash, ttl) = mercurial.nextToken();
 
         // Attempt to mint with incorrect token ID
-        vm.expectRevert("Invalid or expired token ID");
+        vm.expectRevert("Invalid token ID");
         mercurial.mint{value: price}(tokenId + 1, hash);
 
         // Attempt to mint with incorrect hash
-        vm.expectRevert("Invalid or expired blockhash");
+        vm.expectRevert("Invalid blockhash");
         mercurial.mint{value: price}(tokenId, blockhash(block.number));
 
         // Attempt to mint with too little ETH
@@ -113,7 +113,7 @@ contract MercurialTest is Test {
         vm.roll(6);
         (, , price, , ttl) = mercurial.nextToken();
         assertEq(ttl, 5);
-        vm.expectRevert("Invalid or expired blockhash");
+        vm.expectRevert("Invalid blockhash");
         mercurial.mint{value: price}(tokenId + 4, hash);
     }
 
@@ -149,44 +149,44 @@ contract MercurialTest is Test {
         assertEq(mercurial.ownerOf(tokenId), address(0xdead));
     }
 
-    // function testGenerateSeed() public {
-    //     uint256 seed1;
-    //     uint256 ttl1;
-    //     uint256 seed2;
-    //     uint256 ttl2;
+    function testGenerateSeed() public {
+        uint256 seed1;
+        uint256 ttl1;
+        uint256 seed2;
+        uint256 ttl2;
 
-    //     // Token should be the same within one interval (5 blocks)
-    //     uint expectedSeedFirstFiveBlocksTokenIdZero = 47325194593512000241468536448559833359437483699567969619987864577538981999987;
+        // Token should be the same within one interval (5 blocks)
+        uint expectedSeedFirstFiveBlocksTokenIdZero = 47325194593512000241468536448559833359437483699567969619987864577538981999987;
 
-    //     vm.roll(1);
-    //     (seed1, ttl1) = mercurial.generateSeed(0);
-    //     (seed2, ttl2) = mercurial.generateSeed(1);
-    //     assertEq(seed1, expectedSeedFirstFiveBlocksTokenIdZero);
-    //     assertTrue(seed1 != seed2);
+        vm.roll(1);
+        (seed1, ttl1) = mercurial.generateSeed(0);
+        (seed2, ttl2) = mercurial.generateSeed(1);
+        assertEq(seed1, expectedSeedFirstFiveBlocksTokenIdZero);
+        assertTrue(seed1 != seed2);
 
-    //     vm.roll(2);
-    //     (seed1, ttl1) = mercurial.generateSeed(0);
-    //     assertEq(seed1, expectedSeedFirstFiveBlocksTokenIdZero);
+        vm.roll(2);
+        (seed1, ttl1) = mercurial.generateSeed(0);
+        assertEq(seed1, expectedSeedFirstFiveBlocksTokenIdZero);
 
-    //     vm.roll(3);
-    //     (seed1, ttl1) = mercurial.generateSeed(0);
-    //     assertEq(seed1, expectedSeedFirstFiveBlocksTokenIdZero);
+        vm.roll(3);
+        (seed1, ttl1) = mercurial.generateSeed(0);
+        assertEq(seed1, expectedSeedFirstFiveBlocksTokenIdZero);
 
-    //     vm.roll(4);
-    //     (seed1, ttl1) = mercurial.generateSeed(0);
-    //     assertEq(seed1, expectedSeedFirstFiveBlocksTokenIdZero);
+        vm.roll(4);
+        (seed1, ttl1) = mercurial.generateSeed(0);
+        assertEq(seed1, expectedSeedFirstFiveBlocksTokenIdZero);
 
-    //     vm.roll(5);
-    //     (seed1, ttl1) = mercurial.generateSeed(0);
-    //     assertEq(seed1, expectedSeedFirstFiveBlocksTokenIdZero);
+        vm.roll(5);
+        (seed1, ttl1) = mercurial.generateSeed(0);
+        assertEq(seed1, expectedSeedFirstFiveBlocksTokenIdZero);
 
-    //     vm.roll(6);
-    //     (seed1, ttl1) = mercurial.generateSeed(0);
-    //     assertTrue(seed1 != expectedSeedFirstFiveBlocksTokenIdZero);
+        vm.roll(6);
+        (seed1, ttl1) = mercurial.generateSeed(0);
+        assertTrue(seed1 != expectedSeedFirstFiveBlocksTokenIdZero);
 
-    //     vm.roll(7);
-    //     (seed1, ttl1) = mercurial.generateSeed(0);
-    // }
+        vm.roll(7);
+        (seed1, ttl1) = mercurial.generateSeed(0);
+    }
 
     function testCannotReceiveETH() public {
         vm.expectRevert("Cannot receive ETH");

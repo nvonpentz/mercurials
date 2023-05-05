@@ -53,9 +53,9 @@ contract Mercurial is ERC721, LinearVRGDA, ReentrancyGuard {
         require(
             blockHash ==
                 blockhash((block.number - 1) - ((block.number - 1) % 5)),
-            "Invalid or expired blockhash"
+            "Invalid blockhash"
         );
-        require(tokenId == totalSold, "Invalid or expired token ID");
+        require(tokenId == totalSold, "Invalid token ID");
 
         // Validate the purchase request against the VRGDA rules.
         uint256 price = getCurrentVRGDAPrice();
@@ -126,19 +126,20 @@ contract Mercurial is ERC721, LinearVRGDA, ReentrancyGuard {
     /// @notice Generate the seed for a given token ID
     /// @param tokenId The token ID to generate the seed for
     /// @return seed The seed for the given token ID
-    function generateSeed(
-        uint256 tokenId
-    ) public view returns (uint256) {
+    function generateSeed(uint256 tokenId) public view returns (uint256) {
         // Seed is calculated as the hash of current token ID with the parent
         // block rounded down to the nearest 5.
-        return uint256(
-            keccak256(
-                abi.encodePacked(
-                    blockhash((block.number - 1) - ((block.number - 1) % 5)),
-                    tokenId
+        return
+            uint256(
+                keccak256(
+                    abi.encodePacked(
+                        blockhash(
+                            (block.number - 1) - ((block.number - 1) % 5)
+                        ),
+                        tokenId
+                    )
                 )
-            )
-        );
+            );
     }
 
     function generateSeedTTL() public view returns (uint256) {
