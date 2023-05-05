@@ -349,7 +349,7 @@ contract Mercurial is ERC721, LinearVRGDA, ReentrancyGuard {
             surfaceScale.toString(),
             ' }, { "trait_type": "Elevation", "value": ',
             elevation.toString(),
-            ' },'
+            " },"
         );
 
         return (feDiffuseLightingElement, attributes, nonce);
@@ -487,7 +487,7 @@ contract Mercurial is ERC721, LinearVRGDA, ReentrancyGuard {
             animationDurationFeDisplacementMap,
             '" }, { "trait_type": "Key Time", "value": ',
             keyTime,
-            ' }, '
+            " }, "
         );
         return (
             staticFeDisplacementMapElement,
@@ -562,7 +562,7 @@ contract Mercurial is ERC721, LinearVRGDA, ReentrancyGuard {
             baseFrequency,
             '" }, { "trait_type": "Octaves", "value": ',
             numOctaves,
-            ' }, '
+            " }, "
         );
 
         return (partOne, attributes, nonce);
