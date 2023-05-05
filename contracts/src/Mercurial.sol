@@ -466,7 +466,6 @@ contract Mercurial is ERC721, LinearVRGDA, ReentrancyGuard {
             '; 1" dur="',
             animationDurationFeDisplacementMap,
             '" repeatCount="indefinite" result="displacementResult" calcMode="spline" keySplines="0.3 0 0.7 1; 0.3 0 0.7 1"/>'
-            "</feDisplacementMap>"
         );
 
         staticFeDisplacementMapElement = string.concat(
