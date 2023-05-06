@@ -389,11 +389,7 @@ contract Mercurial is ERC721, LinearVRGDA, ReentrancyGuard {
     function generateScale(
         uint256 seed,
         uint256 nonce
-    )
-        internal
-        pure
-        returns (string memory scaleStart, string memory scaleValues, uint256)
-    {
+    ) internal pure returns (string memory scaleValues, uint256) {
         uint256 start;
         bool startNegative;
         uint256 end;
@@ -418,7 +414,7 @@ contract Mercurial is ERC721, LinearVRGDA, ReentrancyGuard {
                 endNegative = deltaNegative;
             }
         }
-        scaleStart = intToString(start, startNegative);
+        string memory scaleStart = intToString(start, startNegative);
 
         scaleValues = string.concat(
             scaleStart,
@@ -429,7 +425,7 @@ contract Mercurial is ERC721, LinearVRGDA, ReentrancyGuard {
             ";"
         );
 
-        return (scaleStart, scaleValues, nonce);
+        return (scaleValues, nonce);
     }
 
     /// @notice Generates feDisplacementMap SVG element
@@ -445,11 +441,9 @@ contract Mercurial is ERC721, LinearVRGDA, ReentrancyGuard {
             uint256
         )
     {
-        // Generate initial scale value (scaleStart) for static image and animation,
-        // and start and end values for animated image (scaleValues)
-        string memory scaleStart;
+        // Generate scale values for the animation
         string memory scaleValues;
-        (scaleStart, scaleValues, nonce) = generateScale(seed, nonce);
+        (scaleValues, nonce) = generateScale(seed, nonce);
 
         // Generate an animation duration for the scale effect
         uint256 animationDurationFeDisplacementMapUint;
@@ -624,13 +618,8 @@ contract Mercurial is ERC721, LinearVRGDA, ReentrancyGuard {
         uint256 seed,
         uint256 tokenId
     ) internal pure returns (string memory tokenUri) {
-        // Generate the code for the static SVG, the code for the
-        // animated SVG, and the attributes for the metadata.
-        (
-            // string memory svgImage,
-            string memory svg,
-            string memory attributes
-        ) = generateSvg(seed);
+        // Generate the code for the SVG
+        (string memory svg, string memory attributes) = generateSvg(seed);
 
         // Create token URI from base64 encoded metadata JSON
         tokenUri = string.concat(
