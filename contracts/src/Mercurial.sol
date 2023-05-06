@@ -362,7 +362,6 @@ contract Mercurial is ERC721, LinearVRGDA, ReentrancyGuard {
         returns (
             string memory feColorMatrixForInversionElement,
             string memory feColorMatrixForInversionAttributes,
-            // bool inverted,
             uint256
         )
     {
@@ -470,15 +469,13 @@ contract Mercurial is ERC721, LinearVRGDA, ReentrancyGuard {
         string memory keyTime = string.concat("0.", random.toString());
 
         animatedFeDisplacementMapElement = string.concat(
-            '<feDisplacementMap><animate attributeName="scale" ',
-            'values="',
+            '<feDisplacementMap><animate attributeName="scale" values="',
             scaleValues,
             '" keyTimes="0; ',
             keyTime,
             '; 1" dur="',
             animationDurationFeDisplacementMap,
-            '" repeatCount="indefinite" calcMode="spline" keySplines="0.3 0 0.7 1; 0.3 0 0.7 1"/>'
-            "</feDisplacementMap>"
+            '" repeatCount="indefinite" calcMode="spline" keySplines="0.3 0 0.7 1; 0.3 0 0.7 1"/></feDisplacementMap>'
         );
 
         attributes = string.concat(
