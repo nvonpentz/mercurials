@@ -425,7 +425,7 @@ contract Mercurial is ERC721, LinearVRGDA, ReentrancyGuard {
         internal
         pure
         returns (
-            string memory staticFeDisplacementMapElement,
+            // string memory staticFeDisplacementMapElement,
             string memory animatedFeDisplacementMapElement,
             string memory attributes,
             uint256
@@ -467,11 +467,11 @@ contract Mercurial is ERC721, LinearVRGDA, ReentrancyGuard {
             "</feDisplacementMap>"
         );
 
-        staticFeDisplacementMapElement = string.concat(
-            '<feDisplacementMap scale="',
-            scaleStart,
-            '" />'
-        );
+        // staticFeDisplacementMapElement = string.concat(
+        //     '<feDisplacementMap scale="',
+        //     scaleStart,
+        //     '" />'
+        // );
 
         attributes = string.concat(
             '{ "trait_type": "Scale", "value": "',
@@ -483,7 +483,7 @@ contract Mercurial is ERC721, LinearVRGDA, ReentrancyGuard {
             " }, "
         );
         return (
-            staticFeDisplacementMapElement,
+            // staticFeDisplacementMapElement,
             animatedFeDisplacementMapElement,
             attributes,
             nonce
@@ -617,23 +617,22 @@ contract Mercurial is ERC721, LinearVRGDA, ReentrancyGuard {
     function generateSvgPartThree(
         string memory partOne,
         string memory partTwo,
-        // string memory attributes,
         uint256 nonce,
         uint256 seed
     )
         internal
         pure
         returns (
-            string memory svgImage,
+            // string memory svgImage,
             string memory svgAnimation,
             string memory
         )
     {
-        string memory staticFeDisplacementMapElement;
+        // string memory staticFeDisplacementMapElement;
         string memory animatedFeDisplacementMapElement;
         string memory feDisplacementMapAttributes;
         (
-            staticFeDisplacementMapElement,
+            // staticFeDisplacementMapElement,
             animatedFeDisplacementMapElement,
             feDisplacementMapAttributes,
             nonce
@@ -648,12 +647,12 @@ contract Mercurial is ERC721, LinearVRGDA, ReentrancyGuard {
         ) = generateFeColorMatrixHueRotateElement(seed, nonce);
 
         // Image
-        svgImage = string.concat(
-            partOne,
-            staticFeDisplacementMapElement,
-            '<feColorMatrix type="hueRotate" result="b"/>',
-            partTwo
-        );
+        // svgImage = string.concat(
+        //     partOne,
+        //     staticFeDisplacementMapElement,
+        //     '<feColorMatrix type="hueRotate" result="b"/>',
+        //     partTwo
+        // );
 
         // Animation
         svgAnimation = string.concat(
@@ -666,7 +665,7 @@ contract Mercurial is ERC721, LinearVRGDA, ReentrancyGuard {
         );
 
         return (
-            svgImage,
+            // svgImage,
             svgAnimation,
             string.concat(feDisplacementMapAttributes, feColorMatrixAttributes)
         );
@@ -679,7 +678,7 @@ contract Mercurial is ERC721, LinearVRGDA, ReentrancyGuard {
         internal
         pure
         returns (
-            string memory svgImage,
+            // string memory svgImage,
             string memory svgAnimation,
             string memory attributes
         )
@@ -692,7 +691,8 @@ contract Mercurial is ERC721, LinearVRGDA, ReentrancyGuard {
         string memory partTwoAttributes;
         (partOne, partOneAttributes, nonce) = generateSVGPartOne(seed);
         (partTwo, partTwoAttributes, nonce) = generateSVGPartTwo(seed, nonce);
-        (svgImage, svgAnimation, attributes) = generateSvgPartThree(
+        // (svgImage, svgAnimation, attributes) = generateSvgPartThree(
+        (svgAnimation, attributes) = generateSvgPartThree(
             partOne,
             partTwo,
             nonce,
@@ -705,7 +705,8 @@ contract Mercurial is ERC721, LinearVRGDA, ReentrancyGuard {
             attributes
         );
 
-        return (svgImage, svgAnimation, attributes);
+        // return (svgImage, svgAnimation, attributes);
+        return (svgAnimation, attributes);
     }
 
     /// @notice Generates the entire SVG
@@ -716,7 +717,7 @@ contract Mercurial is ERC721, LinearVRGDA, ReentrancyGuard {
         // Generate the code for the static SVG, the code for the
         // animated SVG, and the attributes for the metadata.
         (
-            string memory svgImage,
+            // string memory svgImage,
             string memory svgAnimation,
             string memory attributes
         ) = generateSvg(seed);
@@ -730,9 +731,10 @@ contract Mercurial is ERC721, LinearVRGDA, ReentrancyGuard {
                         '{ "name": "Mercurial #',
                         tokenId.toString(),
                         '", "description": "On chain generative art project.", "image": "data:image/svg+xml;base64,',
-                        Base64.encode(bytes(svgImage)),
-                        '", "animation_url": "data:image/svg+xml;base64,',
+                        // Base64.encode(bytes(svgImage)),
                         Base64.encode(bytes(svgAnimation)),
+                        // '", "animation_url": "data:image/svg+xml;base64,',
+                        // Base64.encode(bytes(svgAnimation)),
                         '", "attributes": [ ',
                         attributes,
                         " ] }"
