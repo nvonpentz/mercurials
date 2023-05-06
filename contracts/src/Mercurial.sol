@@ -29,7 +29,7 @@ contract Mercurial is ERC721, LinearVRGDA, ReentrancyGuard {
 
     // @notice Sets the VRGDA params, and the ERC721 name and symbol
     constructor()
-        ERC721("Mercurials", "MERC")
+        ERC721("Mercurials (Test)", "MERC")
         LinearVRGDA(
             // Target price, 0.001 Ether
             0.001e18,
@@ -187,22 +187,6 @@ contract Mercurial is ERC721, LinearVRGDA, ReentrancyGuard {
         return value.toString();
     }
 
-    /// @notice Generates a baseFrequency string for a feTurbulence element
-    function generateBaseFrequency(
-        uint256 seed,
-        uint256 nonce
-    ) internal pure returns (string memory baseFrequency, uint256) {
-        uint256 random;
-        (random, nonce) = generateRandom(50, 301, seed, nonce);
-        if (random < 100) {
-            baseFrequency = string.concat("0.00", random.toString());
-        } else {
-            baseFrequency = string.concat("0.0", random.toString());
-        }
-
-        return (baseFrequency, nonce);
-    }
-
     /// @notice Generates the feTurbulence SVG element
     function generateFeTurbulenceElement(
         uint256 seed,
@@ -210,16 +194,27 @@ contract Mercurial is ERC721, LinearVRGDA, ReentrancyGuard {
     )
         internal
         pure
-        returns (string memory feTurbulence, string memory attributes, uint256)
+        returns (string memory element, string memory attributes, uint256)
     {
+        uint256 random;
+
+        // Generate a random value to use for the baseFrequency attribute
+        (random, nonce) = generateRandom(50, 301, seed, nonce);
         string memory baseFrequency;
-        (baseFrequency, nonce) = generateBaseFrequency(seed, nonce);
+        if (random < 100) {
+            baseFrequency = string.concat("0.00", random.toString());
+        } else {
+            baseFrequency = string.concat("0.0", random.toString());
+        }
 
-        uint256 numOctaves;
-        (numOctaves, nonce) = generateRandom(1, 4, seed, 0);
+        // Generate a random value to use for the numOctaves attribute
+        string memory numOctaves;
+        (random, nonce) = generateRandom(1, 4, seed, 0);
+        numOctaves = random.toString();
 
-        uint256 seedForSvg;
-        (seedForSvg, nonce) = generateRandom(
+        // Generate a random value to use for the seed attribute of the SVG
+        string memory seedForSvg;
+        (random, nonce) = generateRandom(
             0,
             // Note: 65535 is the max value for the seed attribute of
             // the feTurbulence SVG element.
@@ -227,25 +222,29 @@ contract Mercurial is ERC721, LinearVRGDA, ReentrancyGuard {
             seed,
             nonce
         );
-        feTurbulence = string.concat(
+        seedForSvg = random.toString();
+
+        // Create the SVG element
+        element = string.concat(
             '<feTurbulence baseFrequency="',
             baseFrequency,
             '" numOctaves="',
-            numOctaves.toString(),
+            numOctaves,
             '" seed="',
-            seedForSvg.toString(),
+            seedForSvg,
             '" />'
         );
 
+        // Create the attributes
         attributes = string.concat(
             '{ "trait_type": "Base Frequency", "value": ',
             baseFrequency,
             ' }, { "trait_type": "Octaves", "value": ',
-            numOctaves.toString(),
+            numOctaves,
             " }, "
         );
 
-        return (feTurbulence, attributes, nonce);
+        return (element, attributes, nonce);
     }
 
     /// @notice Generates feComposite elements
@@ -255,15 +254,11 @@ contract Mercurial is ERC721, LinearVRGDA, ReentrancyGuard {
     )
         internal
         pure
-        returns (
-            string memory feCompositeElements,
-            string memory attributes,
-            uint256
-        )
+        returns (string memory elements, string memory attributes, uint256)
     {
         uint256 random;
 
-        // k4
+        // Generate a random value for the k4 attribute
         string memory k4;
         (random, nonce) = generateRandom(0, 51, seed, nonce);
         if (random < 10) {
@@ -288,7 +283,8 @@ contract Mercurial is ERC721, LinearVRGDA, ReentrancyGuard {
             }
         }
 
-        feCompositeElements = string.concat(
+        // Create the feComposite elements
+        elements = string.concat(
             '<feComposite in="b" in2="c" operator="',
             operator,
             '" result="d"/><feComposite in="d" in2="d" operator="arithmetic" k1="1" k2="1" k3="1" k4="',
@@ -296,6 +292,7 @@ contract Mercurial is ERC721, LinearVRGDA, ReentrancyGuard {
             '"/>'
         );
 
+        // Create the attributes
         attributes = string.concat(
             '{ "trait_type": "K4", "value": ',
             k4,
@@ -303,7 +300,8 @@ contract Mercurial is ERC721, LinearVRGDA, ReentrancyGuard {
             operator,
             '" }, '
         );
-        return (feCompositeElements, attributes, nonce);
+
+        return (elements, attributes, nonce);
     }
 
     /// @notice Generates the feDiffuseLighting SVG element
@@ -313,43 +311,48 @@ contract Mercurial is ERC721, LinearVRGDA, ReentrancyGuard {
     )
         internal
         pure
-        returns (
-            string memory feDiffuseLightingElement,
-            string memory attributes,
-            uint256
-        )
+        returns (string memory element, string memory attributes, uint256)
     {
-        uint256 diffuseConstant;
-        (diffuseConstant, nonce) = generateRandom(1, 4, seed, nonce);
+        uint256 random;
+        // Generate a random value from 1 up to 4 for the diffuse constant.
+        string memory diffuseConstant;
+        (random, nonce) = generateRandom(1, 4, seed, nonce);
+        diffuseConstant = random.toString();
 
-        // 10 is the largest surface scale rendered on mobile devices
-        uint256 surfaceScale;
-        (surfaceScale, nonce) = generateRandom(5, 11, seed, nonce);
+        // Generate a random value from 5 up to 11 for the surfaceScale.
+        string memory surfaceScale;
+        // Note: 10 is the largest surface scale rendered on mobile devices
+        (random, nonce) = generateRandom(5, 11, seed, nonce);
+        surfaceScale = random.toString();
 
-        uint256 elevation;
-        (elevation, nonce) = generateRandom(3, 21, seed, nonce);
+        // Generate a random value from 3 up to 21 for the elevation.
+        string memory elevation;
+        (random, nonce) = generateRandom(3, 21, seed, nonce);
+        elevation = random.toString();
 
-        feDiffuseLightingElement = string.concat(
+        // Create the feDiffuseLighting element
+        element = string.concat(
             '<feDiffuseLighting lighting-color="#fff" diffuseConstant="',
-            diffuseConstant.toString(),
+            diffuseConstant,
             '" surfaceScale="',
-            surfaceScale.toString(),
+            surfaceScale,
             '"><feDistantLight elevation="',
-            elevation.toString(),
+            elevation,
             '"/></feDiffuseLighting>'
         );
 
+        // Create the attributes
         attributes = string.concat(
             '{ "trait_type": "Diffuse Constant", "value": ',
-            diffuseConstant.toString(),
+            diffuseConstant,
             ' }, { "trait_type": "Surface Scale", "value": ',
-            surfaceScale.toString(),
+            surfaceScale,
             ' }, { "trait_type": "Elevation", "value": ',
-            elevation.toString(),
+            elevation,
             " },"
         );
 
-        return (feDiffuseLightingElement, attributes, nonce);
+        return (element, attributes, nonce);
     }
 
     /// @notice Generates the feColorMatrix SVG element for (maybe) inverting the colors
@@ -359,30 +362,22 @@ contract Mercurial is ERC721, LinearVRGDA, ReentrancyGuard {
     )
         internal
         pure
-        returns (
-            string memory feColorMatrixForInversionElement,
-            string memory feColorMatrixForInversionAttributes,
-            uint256
-        )
+        returns (string memory element, string memory attributes, uint256)
     {
-        // Apply the inversion half the time
-        bool inverted;
-        (inverted, nonce) = generateRandomBool(seed, nonce);
-        if (inverted) {
-            feColorMatrixForInversionElement = '<feColorMatrix type="matrix" values="-1 0 0 0 1 0 -1 0 0 1 0 0 -1 0 1 0 0 0 1 0"/>';
+        // Apply the inversion half the time.
+        bool invert;
+        (invert, nonce) = generateRandomBool(seed, nonce);
+        if (invert) {
+            element = '<feColorMatrix type="matrix" values="-1 0 0 0 1 0 -1 0 0 1 0 0 -1 0 1 0 0 0 1 0"/>';
         }
 
-        feColorMatrixForInversionAttributes = string.concat(
+        attributes = string.concat(
             '{ "trait_type": "Inverted", "value": ',
-            inverted ? "true" : "false",
+            invert ? "true" : "false",
             " } " // No comma here because this is the last attribute.
         );
 
-        return (
-            feColorMatrixForInversionElement,
-            feColorMatrixForInversionAttributes,
-            nonce
-        );
+        return (element, attributes, nonce);
     }
 
     /// @notice Generates the scale values for the feDisplacementMap SVG element
@@ -390,18 +385,23 @@ contract Mercurial is ERC721, LinearVRGDA, ReentrancyGuard {
         uint256 seed,
         uint256 nonce
     ) internal pure returns (string memory scaleValues, uint256) {
+        // Generate a start value from -200 through 200.
         uint256 start;
         bool startNegative;
-        uint256 end;
-        bool endNegative;
         (start, nonce) = generateRandom(0, 201, seed, nonce);
         (startNegative, nonce) = generateRandomBool(seed, nonce);
 
+        // Generate a delta value from 50 up to 251, or -50 up to -250 to add
+        // to the start value to get the middle value.
         uint256 delta;
         bool deltaNegative;
-        (delta, nonce) = generateRandom(50, 250, seed, nonce);
+        (delta, nonce) = generateRandom(50, 251, seed, nonce);
         (deltaNegative, nonce) = generateRandomBool(seed, nonce);
 
+        // Based on the start and delta values, add start and delta together to
+        // get the middle value.
+        uint256 end;
+        bool endNegative;
         if (startNegative == deltaNegative) {
             end = start + delta;
             endNegative = startNegative;
@@ -414,8 +414,11 @@ contract Mercurial is ERC721, LinearVRGDA, ReentrancyGuard {
                 endNegative = deltaNegative;
             }
         }
+
+        // Convert the start value to a string representation
         string memory scaleStart = intToString(start, startNegative);
 
+        // Concatenate the start, middle, and end values of the scale animation
         scaleValues = string.concat(
             scaleStart,
             ";",
@@ -435,94 +438,83 @@ contract Mercurial is ERC721, LinearVRGDA, ReentrancyGuard {
     )
         internal
         pure
-        returns (
-            string memory feDisplacementMapElement,
-            string memory feDisplacementMapAttributes,
-            uint256
-        )
+        returns (string memory element, string memory attributes, uint256)
     {
-        // Generate scale values for the animation
+        // Generate scale values for the animation.
         string memory scaleValues;
         (scaleValues, nonce) = generateScale(seed, nonce);
 
-        // Generate an animation duration for the scale effect
-        uint256 animationDurationFeDisplacementMapUint;
-        (animationDurationFeDisplacementMapUint, nonce) = generateRandom(
-            1,
-            81,
-            seed,
-            nonce
-        );
-        string memory animationDurationFeDisplacementMap = string.concat(
-            animationDurationFeDisplacementMapUint.toString(),
-            "s"
-        );
-
+        // Generate a random value between 1 and 80 to be the scale animation
+        // duration in seconds.
         uint256 random;
+        (random, nonce) = generateRandom(1, 81, seed, nonce);
+
+        // Convert to string and append 's' to represent seconds in the SVG.
+        string memory animationDuration = string.concat(random.toString(), "s");
+
+        // Generate a random number from 3 up to 8 to be the middle keyTime value.
         (random, nonce) = generateRandom(3, 8, seed, nonce);
         string memory keyTime = string.concat("0.", random.toString());
 
-        feDisplacementMapElement = string.concat(
+        element = string.concat(
             '<feDisplacementMap><animate attributeName="scale" values="',
             scaleValues,
             '" keyTimes="0; ',
             keyTime,
             '; 1" dur="',
-            animationDurationFeDisplacementMap,
+            animationDuration,
             '" repeatCount="indefinite" calcMode="spline" keySplines="0.3 0 0.7 1; 0.3 0 0.7 1"/></feDisplacementMap>'
         );
 
-        feDisplacementMapAttributes = string.concat(
+        attributes = string.concat(
             '{ "trait_type": "Scale", "value": "',
             scaleValues,
             '" }, { "trait_type": "Scale Animation", "value": "',
-            animationDurationFeDisplacementMap,
+            animationDuration,
             '" }, { "trait_type": "Key Time", "value": ',
             keyTime,
             " }, "
         );
-        return (feDisplacementMapElement, feDisplacementMapAttributes, nonce);
+        return (element, attributes, nonce);
     }
 
-    /// @notice TODO
+    /// @notice Generates the feColorMatrix element used for the rotation animation
     function generateFeColorMatrixHueRotateElement(
         uint256 seed,
         uint256 nonce
     )
         internal
         pure
-        returns (
-            string memory feColorMatrixElement,
-            string memory feColorMatrixAttributes,
-            uint256
-        )
+        returns (string memory element, string memory attributes, uint256)
     {
-        uint256 animationDurationHueRotate;
-        (animationDurationHueRotate, nonce) = generateRandom(
-            1,
-            25,
-            seed,
-            nonce
-        );
+        // Generate a value from 1 to 25 to be the duration of the animation
+        uint256 random;
+        (random, nonce) = generateRandom(1, 25, seed, nonce);
+        string memory animationDuration = random.toString();
 
-        feColorMatrixElement = string.concat(
+        // Create the feColorMatrix element with the <animate> element inside
+        element = string.concat(
             '<feColorMatrix type="hueRotate" result="b"><animate attributeName="values" from="0" to="360" dur="',
-            animationDurationHueRotate.toString(),
+            animationDuration,
             's" repeatCount="indefinite"/></feColorMatrix>'
         );
-        feColorMatrixAttributes = string.concat(
+
+        // Save the animation duration
+        attributes = string.concat(
             '{ "trait_type": "Hue Rotate Animation", "value": "',
-            animationDurationHueRotate.toString(),
+            animationDuration,
             's" }, '
         );
 
-        return (feColorMatrixElement, feColorMatrixAttributes, nonce);
+        return (element, attributes, nonce);
     }
 
-    function generateSvgP1(
+    /// @notice Generates the first part of the SVG
+    function generateSvgPartOne(
         uint256 seed,
         uint256 nonce
     ) internal pure returns (string memory svg, string memory attributes) {
+        // Generate the feTurbulence element
         string memory feTurbulenceElement;
         string memory feTurbulenceAttributes;
         (
@@ -531,6 +523,7 @@ contract Mercurial is ERC721, LinearVRGDA, ReentrancyGuard {
             nonce
         ) = generateFeTurbulenceElement(seed, nonce);
 
+        // Generate teh feDisplacementMap element
         string memory feDisplacementMapElement;
         string memory feDisplacementMapAttributes;
         (
@@ -539,12 +532,14 @@ contract Mercurial is ERC721, LinearVRGDA, ReentrancyGuard {
             nonce
         ) = generateFeDisplacementMapElement(seed, nonce);
 
+        // Concatenate the two elements with the SVG start
         svg = string.concat(
             '<svg width="350" height="350" version="1.1" viewBox="0 0 350 350" xmlns="http://www.w3.org/2000/svg"><filter id="a">',
             feTurbulenceElement,
             feDisplacementMapElement
         );
 
+        // Concatenate the attributes
         attributes = string.concat(
             feTurbulenceAttributes,
             feDisplacementMapAttributes
@@ -558,8 +553,10 @@ contract Mercurial is ERC721, LinearVRGDA, ReentrancyGuard {
     ) internal pure returns (string memory svg, string memory attributes) {
         uint256 nonce;
 
-        (svg, attributes) = generateSvgP1(seed, nonce);
+        // Generate the first part of the SVG in a separate function
+        (svg, attributes) = generateSvgPartOne(seed, nonce);
 
+        // Generate the feColorMatrix element
         string memory feColorMatrixElement;
         string memory feColorMatrixAttributes;
         (
@@ -568,6 +565,7 @@ contract Mercurial is ERC721, LinearVRGDA, ReentrancyGuard {
             nonce
         ) = generateFeColorMatrixHueRotateElement(seed, nonce);
 
+        // Generate the feCompositeElements
         string memory feCompositeElements;
         string memory feCompositeAttributes;
         (
@@ -576,14 +574,16 @@ contract Mercurial is ERC721, LinearVRGDA, ReentrancyGuard {
             nonce
         ) = generateFeCompositeElements(seed, nonce);
 
-        string memory feDiffuseLightingAttributes;
+        // Generate the feDiffuseLighting element
         string memory feDiffuseLightingElement;
+        string memory feDiffuseLightingAttributes;
         (
             feDiffuseLightingElement,
             feDiffuseLightingAttributes,
             nonce
         ) = generateFeDiffuseLightingElement(seed, nonce);
 
+        // Generate the feColorMatrix element used for inverting colors
         string memory feColorMatrixForInversionElement;
         string memory feColorMatrixForInversionAttributes;
         (
@@ -592,6 +592,7 @@ contract Mercurial is ERC721, LinearVRGDA, ReentrancyGuard {
             nonce
         ) = generateFeColorMatrixForInversionElement(seed, nonce);
 
+        // Concatenate all the SVG elements creating the final SVG
         svg = string.concat(
             svg,
             feColorMatrixElement,
@@ -602,6 +603,7 @@ contract Mercurial is ERC721, LinearVRGDA, ReentrancyGuard {
             '</filter><rect width="350" height="350" filter="url(#a)"/></svg>'
         );
 
+        // Concatenate all the attributes
         attributes = string.concat(
             attributes,
             feColorMatrixAttributes,
