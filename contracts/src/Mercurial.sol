@@ -544,8 +544,7 @@ contract Mercurial is ERC721, LinearVRGDA, ReentrancyGuard {
         ) = generateFeTurbulenceElement(seed, nonce);
 
         partOne = string.concat(
-            '<svg width="350" height="350" version="1.1" viewBox="0 0 350 350" xmlns="http://www.w3.org/2000/svg">',
-            '<filter id="a">',
+            '<svg width="350" height="350" version="1.1" viewBox="0 0 350 350" xmlns="http://www.w3.org/2000/svg"><filter id="a">',
             feTurbulenceElement
         );
 
