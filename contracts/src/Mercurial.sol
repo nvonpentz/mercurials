@@ -549,9 +549,9 @@ contract Mercurial is ERC721, LinearVRGDA, ReentrancyGuard {
         );
 
         attributes = string.concat(
-            '{ "trait_type": "Base Frequency", "value": "',
+            '{ "trait_type": "Base Frequency", "value": ',
             baseFrequency,
-            '" }, { "trait_type": "Octaves", "value": ',
+            ' }, { "trait_type": "Octaves", "value": ',
             numOctaves,
             " }, "
         );
@@ -605,9 +605,9 @@ contract Mercurial is ERC721, LinearVRGDA, ReentrancyGuard {
         attributes = string.concat(
             feCompositeAttributes,
             feDiffuseLightingAttributes,
-            '{ "trait_type": "Inverted", "value": "',
-            inverted ? "Yes" : "No",
-            '" }, '
+            '{ "trait_type": "Inverted", "value": ',
+            inverted ? "true" : "false",
+            " }, "
         );
 
         return (partTwo, attributes, nonce);
