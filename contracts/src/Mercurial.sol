@@ -418,14 +418,13 @@ contract Mercurial is ERC721, LinearVRGDA, ReentrancyGuard {
     }
 
     /// @notice Generates feDisplacementMap SVG element
-    function generateFeDisplacementMapAttributes(
+    function generateFeDisplacementMapElement(
         uint256 seed,
         uint256 nonce
     )
         internal
         pure
         returns (
-            // string memory staticFeDisplacementMapElement,
             string memory animatedFeDisplacementMapElement,
             string memory attributes,
             uint256
@@ -623,20 +622,17 @@ contract Mercurial is ERC721, LinearVRGDA, ReentrancyGuard {
         internal
         pure
         returns (
-            // string memory svgImage,
             string memory svgAnimation,
             string memory
         )
     {
-        // string memory staticFeDisplacementMapElement;
-        string memory animatedFeDisplacementMapElement;
+        string memory feDisplacementMapElement;
         string memory feDisplacementMapAttributes;
         (
-            // staticFeDisplacementMapElement,
-            animatedFeDisplacementMapElement,
+            feDisplacementMapElement,
             feDisplacementMapAttributes,
             nonce
-        ) = generateFeDisplacementMapAttributes(seed, nonce);
+        ) = generateFeDisplacementMapElement(seed, nonce);
 
         string memory animatedFeColorMatrixElement;
         string memory feColorMatrixAttributes;
@@ -657,7 +653,7 @@ contract Mercurial is ERC721, LinearVRGDA, ReentrancyGuard {
         // Animation
         svgAnimation = string.concat(
             partOne,
-            animatedFeDisplacementMapElement,
+            feDisplacementMapElement,
             '<feColorMatrix type="hueRotate" result="b">',
             animatedFeColorMatrixElement,
             "</feColorMatrix>",
@@ -691,7 +687,6 @@ contract Mercurial is ERC721, LinearVRGDA, ReentrancyGuard {
         string memory partTwoAttributes;
         (partOne, partOneAttributes, nonce) = generateSVGPartOne(seed);
         (partTwo, partTwoAttributes, nonce) = generateSVGPartTwo(seed, nonce);
-        // (svgImage, svgAnimation, attributes) = generateSvgPartThree(
         (svgAnimation, attributes) = generateSvgPartThree(
             partOne,
             partTwo,

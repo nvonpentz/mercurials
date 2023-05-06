@@ -58,11 +58,11 @@ const Home: NextPage = () => {
 
   const extractSVGFromTokenURI = (tokenURI: string) => {
     const metadata = extractMetadataFromTokenURI(tokenURI);
-    if (!metadata.animation_url) {
+    if (!metadata.image) {
       return "";
     }
 
-    return atob(metadata.animation_url.split(",")[1]);
+    return atob(metadata.image.split(",")[1]);
   };
 
   const extractTraitsFromTokenURI = (tokenURI: string) => {
