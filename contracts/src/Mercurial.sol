@@ -674,7 +674,7 @@ contract Mercurial is ERC721, LinearVRGDA, ReentrancyGuard {
     }
 
     /// @notice Generates the raw SVG code and the attributes
-    function generateSVG(
+    function generateSvg(
         uint256 seed
     )
         internal
@@ -720,7 +720,7 @@ contract Mercurial is ERC721, LinearVRGDA, ReentrancyGuard {
             string memory svgImage,
             string memory svgAnimation,
             string memory attributes
-        ) = generateSVG(seed);
+        ) = generateSvg(seed);
 
         // Create token URI from base64 encoded metadata JSON
         tokenUri = string.concat(
