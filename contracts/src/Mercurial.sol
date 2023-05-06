@@ -436,8 +436,8 @@ contract Mercurial is ERC721, LinearVRGDA, ReentrancyGuard {
         internal
         pure
         returns (
-            string memory animatedFeDisplacementMapElement,
-            string memory attributes,
+            string memory feDisplacementMapElement,
+            string memory feDisplacementMapAttributes,
             uint256
         )
     {
@@ -462,7 +462,7 @@ contract Mercurial is ERC721, LinearVRGDA, ReentrancyGuard {
         (random, nonce) = generateRandom(3, 8, seed, nonce);
         string memory keyTime = string.concat("0.", random.toString());
 
-        animatedFeDisplacementMapElement = string.concat(
+        feDisplacementMapElement = string.concat(
             '<feDisplacementMap><animate attributeName="scale" values="',
             scaleValues,
             '" keyTimes="0; ',
@@ -472,7 +472,7 @@ contract Mercurial is ERC721, LinearVRGDA, ReentrancyGuard {
             '" repeatCount="indefinite" calcMode="spline" keySplines="0.3 0 0.7 1; 0.3 0 0.7 1"/></feDisplacementMap>'
         );
 
-        attributes = string.concat(
+        feDisplacementMapAttributes = string.concat(
             '{ "trait_type": "Scale", "value": "',
             scaleValues,
             '" }, { "trait_type": "Scale Animation", "value": "',
@@ -481,7 +481,7 @@ contract Mercurial is ERC721, LinearVRGDA, ReentrancyGuard {
             keyTime,
             " }, "
         );
-        return (animatedFeDisplacementMapElement, attributes, nonce);
+        return (feDisplacementMapElement, feDisplacementMapAttributes, nonce);
     }
 
     /// @notice TODO
@@ -493,7 +493,7 @@ contract Mercurial is ERC721, LinearVRGDA, ReentrancyGuard {
         pure
         returns (
             string memory feColorMatrixElement,
-            string memory attributes,
+            string memory feColorMatrixAttributes,
             uint256
         )
     {
@@ -510,13 +510,13 @@ contract Mercurial is ERC721, LinearVRGDA, ReentrancyGuard {
             animationDurationHueRotate.toString(),
             's" repeatCount="indefinite"/></feColorMatrix>'
         );
-        attributes = string.concat(
+        feColorMatrixAttributes = string.concat(
             '{ "trait_type": "Hue Rotate Animation", "value": "',
             animationDurationHueRotate.toString(),
             's" }, '
         );
 
-        return (feColorMatrixElement, attributes, nonce);
+        return (feColorMatrixElement, feColorMatrixAttributes, nonce);
     }
 
     function generateSvgP1(
