@@ -237,11 +237,11 @@ contract Mercurial is ERC721, LinearVRGDA, ReentrancyGuard {
 
         // Create the attributes
         attributes = string.concat(
-            '{ "trait_type": "Base Frequency", "value": ',
+            '{ "trait_type": "Base Frequency", "value": "',
             baseFrequency,
-            ' }, { "trait_type": "Octaves", "value": ',
+            '" }, { "trait_type": "Octaves", "value": "',
             numOctaves,
-            " }, "
+            '" }, '
         );
 
         return (element, attributes, nonce);
@@ -294,9 +294,9 @@ contract Mercurial is ERC721, LinearVRGDA, ReentrancyGuard {
 
         // Create the attributes
         attributes = string.concat(
-            '{ "trait_type": "K4", "value": ',
+            '{ "trait_type": "K4", "value": "',
             k4,
-            ' }, { "trait_type": "Composite Operator", "value": "',
+            '" }, { "trait_type": "Composite Operator", "value": "',
             operator,
             '" }, '
         );
@@ -343,13 +343,13 @@ contract Mercurial is ERC721, LinearVRGDA, ReentrancyGuard {
 
         // Create the attributes
         attributes = string.concat(
-            '{ "trait_type": "Diffuse Constant", "value": ',
+            '{ "trait_type": "Diffuse Constant", "value": "',
             diffuseConstant,
-            ' }, { "trait_type": "Surface Scale", "value": ',
+            '" }, { "trait_type": "Surface Scale", "value": "',
             surfaceScale,
-            ' }, { "trait_type": "Elevation", "value": ',
+            '" }, { "trait_type": "Elevation", "value": "',
             elevation,
-            " },"
+            '" },'
         );
 
         return (element, attributes, nonce);
@@ -471,9 +471,9 @@ contract Mercurial is ERC721, LinearVRGDA, ReentrancyGuard {
             scaleValues,
             '" }, { "trait_type": "Scale Animation", "value": "',
             animationDuration,
-            '" }, { "trait_type": "Key Time", "value": ',
+            '" }, { "trait_type": "Key Time", "value": "',
             keyTime,
-            " }, "
+            '" }, '
         );
         return (element, attributes, nonce);
     }
