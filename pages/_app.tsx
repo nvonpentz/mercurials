@@ -14,7 +14,9 @@ import { publicProvider } from "wagmi/providers/public";
 import { useEffect, useState } from "react";
 
 const { chains, provider, webSocketProvider } = configureChains(
-  process.env.NEXT_PUBLIC_ENV === "production" ? [goerli] : [goerli, polygon, foundry],
+  process.env.NEXT_PUBLIC_ENV === "production"
+    ? [goerli]
+    : [goerli, polygon, foundry],
   [
     alchemyProvider({
       apiKey: process.env.NEXT_PUBLIC_ALCHEMY_API_KEY ?? "",
