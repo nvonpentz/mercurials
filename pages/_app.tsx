@@ -7,14 +7,14 @@ import {
   getDefaultWallets,
 } from "@rainbow-me/rainbowkit";
 import { configureChains, createClient, WagmiConfig } from "wagmi";
-import { goerli, foundry } from "wagmi/chains";
+import { goerli, polygon, foundry } from "wagmi/chains";
 import { alchemyProvider } from "wagmi/providers/alchemy";
 import { jsonRpcProvider } from "wagmi/providers/jsonRpc";
 import { publicProvider } from "wagmi/providers/public";
 import { useEffect, useState } from "react";
 
 const { chains, provider, webSocketProvider } = configureChains(
-  process.env.NEXT_PUBLIC_ENV === "production" ? [goerli] : [goerli, foundry],
+  process.env.NEXT_PUBLIC_ENV === "production" ? [goerli] : [goerli, polygon, foundry],
   [
     alchemyProvider({
       apiKey: process.env.NEXT_PUBLIC_ALCHEMY_API_KEY ?? "",
