@@ -592,6 +592,11 @@ contract Mercurial is ERC721, LinearVRGDA, ReentrancyGuard {
             nonce
         ) = generateFeColorMatrixForInversionElement(seed, nonce);
 
+        // Generate rotation
+        uint rotation; 
+        (rotation, nonce) = generateRandom(0, 4, seed, nonce);
+        rotation = rotation * 90;
+
         // Concatenate all the SVG elements creating the final SVG
         svg = string.concat(
             svg,
@@ -600,7 +605,7 @@ contract Mercurial is ERC721, LinearVRGDA, ReentrancyGuard {
             feCompositeElements,
             feDiffuseLightingElement,
             feColorMatrixForInversionElement,
-            '</filter><rect width="350" height="350" filter="url(#a)"/></svg>'
+            '</filter><rect width="350" height="350" filter="url(#a)" transform="rotate(', rotation.toString(), ' 175 175)"/></svg>'
         );
 
         // Concatenate all the attributes
@@ -609,6 +614,7 @@ contract Mercurial is ERC721, LinearVRGDA, ReentrancyGuard {
             feColorMatrixAttributes,
             feCompositeAttributes,
             feDiffuseLightingAttributes,
+            '{ "trait_type": "Rotation", "value": "', rotation.toString(), '" }, ',
             feColorMatrixForInversionAttributes
         );
 
