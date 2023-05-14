@@ -209,7 +209,7 @@ contract Mercurial is ERC721, LinearVRGDA, ReentrancyGuard {
 
         // Generate a random value to use for the numOctaves attribute
         string memory numOctaves;
-        (random, nonce) = generateRandom(1, 5, seed, 0);
+        (random, nonce) = generateRandom(1, 6, seed, 0);
         numOctaves = random.toString();
 
         // Generate a random value to use for the seed attribute of the SVG
