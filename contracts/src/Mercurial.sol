@@ -6,8 +6,8 @@ import {Base64} from "openzeppelin-contracts/contracts/utils/Base64.sol";
 import {Strings} from "openzeppelin-contracts/contracts/utils/Strings.sol";
 import {ReentrancyGuard} from "openzeppelin-contracts/contracts/security/ReentrancyGuard.sol";
 import {LinearVRGDA} from "VRGDAs/LinearVRGDA.sol";
-import {toDaysWadUnsafe} from "solmate/utils/SignedWadMath.sol";
 import {SafeTransferLib} from "solmate/utils/SafeTransferLib.sol";
+import {toDaysWadUnsafe} from "solmate/utils/SignedWadMath.sol";
 
 contract Mercurial is ERC721, LinearVRGDA, ReentrancyGuard {
     using Strings for uint256;
@@ -631,7 +631,7 @@ contract Mercurial is ERC721, LinearVRGDA, ReentrancyGuard {
                     string.concat(
                         '{ "name": "Mercurial #',
                         tokenId.toString(),
-                        '", "description": "On chain generative art project.", "image": "data:image/svg+xml;base64,',
+                        '", "description": "Mercurials is an on-chain generative art project.", "image": "data:image/svg+xml;base64,',
                         Base64.encode(bytes(svg)),
                         '", "attributes": [ ',
                         attributes,
