@@ -199,7 +199,7 @@ contract Mercurial is ERC721, LinearVRGDA, ReentrancyGuard {
         uint256 random;
 
         // Generate a random value to use for the baseFrequency attribute
-        (random, nonce) = generateRandom(50, 301, seed, nonce);
+        (random, nonce) = generateRandom(50, 351, seed, nonce);
         string memory baseFrequency;
         if (random < 100) {
             baseFrequency = string.concat("0.00", random.toString());
@@ -209,7 +209,7 @@ contract Mercurial is ERC721, LinearVRGDA, ReentrancyGuard {
 
         // Generate a random value to use for the numOctaves attribute
         string memory numOctaves;
-        (random, nonce) = generateRandom(1, 4, seed, 0);
+        (random, nonce) = generateRandom(1, 5, seed, 0);
         numOctaves = random.toString();
 
         // Generate a random value to use for the seed attribute of the SVG
@@ -534,7 +534,7 @@ contract Mercurial is ERC721, LinearVRGDA, ReentrancyGuard {
 
         // Concatenate the two elements with the SVG start
         svg = string.concat(
-            '<svg width="350" height="350" version="1.1" viewBox="0 0 350 350" xmlns="http://www.w3.org/2000/svg"><filter id="a">',
+            '<svg width="350" height="350" version="1.1" viewBox="25 25 300 300" xmlns="http://www.w3.org/2000/svg"><filter id="a">',
             feTurbulenceElement,
             feDisplacementMapElement
         );
