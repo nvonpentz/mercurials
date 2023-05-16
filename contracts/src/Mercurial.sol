@@ -199,7 +199,7 @@ contract Mercurial is ERC721, LinearVRGDA, ReentrancyGuard {
         uint256 random;
 
         // Generate a random value to use for the baseFrequency attribute
-        (random, nonce) = generateRandom(50, 351, seed, nonce);
+        (random, nonce) = generateRandom(50, 301, seed, nonce);
         string memory baseFrequency;
         if (random < 100) {
             baseFrequency = string.concat("0.00", random.toString());
