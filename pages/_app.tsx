@@ -12,6 +12,7 @@ import { alchemyProvider } from "wagmi/providers/alchemy";
 import { jsonRpcProvider } from "wagmi/providers/jsonRpc";
 import { publicProvider } from "wagmi/providers/public";
 import { useEffect, useState } from "react";
+import { Analytics } from '@vercel/analytics/react';
 
 const { chains, provider, webSocketProvider } = configureChains(
   process.env.NEXT_PUBLIC_ENV === "production"
@@ -61,6 +62,7 @@ function MyApp({ Component, pageProps }: AppProps) {
             })}
           >
             <Component {...pageProps} />
+            <Analytics />
           </RainbowKitProvider>
         </WagmiConfig>
       ) : null}
