@@ -198,9 +198,8 @@ contract Mercurial is ERC721, LinearVRGDA, ReentrancyGuard {
         pure
         returns (string memory element, string memory attributes, uint256)
     {
-        uint256 random;
-
         // Generate a random value to use for the baseFrequency attribute.
+        uint256 random;
         (random, nonce) = generateRandom(50, 301, seed, nonce);
         string memory baseFrequency;
         if (random < 100) {
@@ -275,8 +274,10 @@ contract Mercurial is ERC721, LinearVRGDA, ReentrancyGuard {
         (randomBool, nonce) = generateRandomBool(seed, nonce);
         if (randomBool) {
             k4 = string.concat("-", k4);
+            // If k4 is negative, always use the "out" operator.
             operator = "out";
         } else {
+            // Otherwise use the "over" operator half the time.
             (randomBool, nonce) = generateRandomBool(seed, nonce);
             if (randomBool) {
                 operator = "out";
