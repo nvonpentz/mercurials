@@ -10,14 +10,14 @@ class MyDocument extends Document {
     return (
       <Html>
         <Head>
-          <meta name="description" content="Mercurials is an on-chain generative art project built on Ethereum." />
+          <meta name="description" content="Mercurials is an on-chain generative art algorithm run on Ethereum." />
           <meta name="viewport" content="width=device-width, initial-scale=1" />
           <meta property="og:title" content="Mercurials" />
           <meta property="og:type" content="website" />
           <meta property="og:url" content="https://mercurials.wtf" />
           <meta
             property="og:description"
-            content="Mercurials is an on-chain generative art project built on Ethereum."
+            content="Mercurials is an on-chain generative art algorithm run on Ethereum."
           />
           <meta property="og:image" content="https://mercurials.wtf/og-image.png" />
           <link rel="icon" href="/favicon.ico" />

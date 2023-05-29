@@ -9,7 +9,11 @@ import {LinearVRGDA} from "VRGDAs/LinearVRGDA.sol";
 import {SafeTransferLib} from "solmate/utils/SafeTransferLib.sol";
 import {toDaysWadUnsafe} from "solmate/utils/SignedWadMath.sol";
 
-contract Mercurial is ERC721, LinearVRGDA, ReentrancyGuard {
+/// @title Mercurials NFT
+/// @author FrankieIsLost <frankie@paradigm.xyz>
+/// @author transmissions11 <t11s@paradigm.xyz>
+/// @notice An experimental decentralized art factory by Justin Roiland and Paradigm.
+contract Mercurials is ERC721, LinearVRGDA, ReentrancyGuard {
     using Strings for uint256;
 
     event TokenMinted(
