@@ -487,9 +487,9 @@ contract Mercurial is ERC721, LinearVRGDA, ReentrancyGuard {
         pure
         returns (string memory element, string memory attributes, uint256)
     {
-        // Generate a value from 1 to 25 to be the duration of the animation
+        // Generate a value from 1 to 21 to be the duration of the animation
         uint256 random;
-        (random, nonce) = generateRandom(1, 25, seed, nonce);
+        (random, nonce) = generateRandom(1, 21, seed, nonce);
         string memory animationDuration = random.toString();
 
         // Create the feColorMatrix element with the <animate> element inside
