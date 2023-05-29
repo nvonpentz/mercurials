@@ -5,7 +5,7 @@ import "forge-std/Test.sol";
 import "../src/Mercurial.sol";
 import {Base64} from "openzeppelin-contracts/contracts/utils/Base64.sol";
 
-contract MercurialTest is Test {
+contract MercurialTest is Test, Mercurial {
     Mercurial mercurial;
     using Strings for uint256;
 
@@ -156,33 +156,33 @@ contract MercurialTest is Test {
         uint expectedSeedFirstFiveBlocksTokenIdZero = 47325194593512000241468536448559833359437483699567969619987864577538981999987;
 
         vm.roll(1);
-        seed1 = mercurial.generateSeed(0);
-        seed2 = mercurial.generateSeed(1);
+        seed1 = generateSeed(0);
+        seed2 = generateSeed(1);
         assertEq(seed1, expectedSeedFirstFiveBlocksTokenIdZero);
         assertTrue(seed1 != seed2);
 
         vm.roll(2);
-        seed1 = mercurial.generateSeed(0);
+        seed1 = generateSeed(0);
         assertEq(seed1, expectedSeedFirstFiveBlocksTokenIdZero);
 
         vm.roll(3);
-        seed1 = mercurial.generateSeed(0);
+        seed1 = generateSeed(0);
         assertEq(seed1, expectedSeedFirstFiveBlocksTokenIdZero);
 
         vm.roll(4);
-        seed1 = mercurial.generateSeed(0);
+        seed1 = generateSeed(0);
         assertEq(seed1, expectedSeedFirstFiveBlocksTokenIdZero);
 
         vm.roll(5);
-        seed1 = mercurial.generateSeed(0);
+        seed1 = generateSeed(0);
         assertEq(seed1, expectedSeedFirstFiveBlocksTokenIdZero);
 
         vm.roll(6);
-        seed1 = mercurial.generateSeed(0);
+        seed1 = generateSeed(0);
         assertTrue(seed1 != expectedSeedFirstFiveBlocksTokenIdZero);
 
         vm.roll(7);
-        seed1 = mercurial.generateSeed(0);
+        seed1 = generateSeed(0);
     }
 
     function testCannotReceiveETH() public {
