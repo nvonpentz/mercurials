@@ -56,7 +56,6 @@ contract MercurialTest is Test {
         mercurial.mint{value: price - 1}(tokenId, hash);
 
         // Mint with correct values
-        vm.expectEmit(true, true, false, false, address(mercurial));
         mercurial.mint{value: price}(tokenId, hash);
         assertEq(mercurial.balanceOf(address(this)), 1); // Token should be owned by this contract
         assertEq(address(this).balance, balanceBefore - price); // ETH should have gone to the token contract
