@@ -10,27 +10,56 @@ import {SafeTransferLib} from "solmate/utils/SafeTransferLib.sol";
 import {toDaysWadUnsafe} from "solmate/utils/SignedWadMath.sol";
 
 /// @title Mercurials NFT
-/// @author FrankieIsLost <frankie@paradigm.xyz>
-/// @author transmissions11 <t11s@paradigm.xyz>
-/// @notice An experimental decentralized art factory by Justin Roiland and Paradigm.
+/// @author nvonpentz
+/// @notice An on-chain generative art auction.
 contract Mercurials is ERC721, LinearVRGDA, ReentrancyGuard {
+    // ----------------- TYPES -----------------
     using Strings for uint256;
 
+    // ----------------- STATE VARIABLES -----------------
+    /// @notice The total number of tokens sold, also used as the next token ID
+    uint256 public totalSold;
+    /// @notice The time at which the auction starts
+    uint256 public immutable startTime = block.timestamp;
+    /// @notice The seed used to generate the token's attributes
+    mapping(uint256 => uint256) public seeds;
+    uint256 private constant BASE_FREQUENCY_MIN = 50;
+    uint256 private constant BASE_FREQUENCY_MAX = 301;
+    uint256 private constant NUM_OCTAVES_MIN = 1;
+    uint256 private constant NUM_OCTAVES_MAX = 6;
+    uint256 private constant SEED_FOR_SVG_MIN = 0;
+    // 65535 is the max value for the seed attribute of
+    // the feTurbulence SVG element.
+    uint256 private constant SEED_FOR_SVG_MAX = 65536;
+    uint256 private constant K4_MIN = 0;
+    uint256 private constant K4_MAX = 51;
+    uint256 private constant DIFFUSE_CONSTANT_MIN = 1;
+    uint256 private constant DIFFUSE_CONSTANT_MAX = 4;
+    uint256 private constant SURFACE_SCALE_MIN = 5;
+    uint256 private constant SURFACE_SCALE_MAX = 11;
+    uint256 private constant ELEVATION_MIN = 3;
+    uint256 private constant ELEVATION_MAX = 21;
+    uint256 private constant SCALE_MIN = 0;
+    uint256 private constant SCALE_MAX = 201;
+    uint256 private constant SCALE_DELTA_MIN = 50;
+    uint256 private constant SCALE_DELTA_MAX = 251;
+    uint256 private constant SCALE_ANIMATION_MIN = 1;
+    uint256 private constant SCALE_ANIMATION_MAX = 81;
+    uint256 private constant KEY_TIME_MIN = 3;
+    uint256 private constant KEY_TIME_MAX = 8;
+    uint256 private constant HUE_ROTATE_ANIMATION_MIN = 1;
+    uint256 private constant HUE_ROTATE_ANIMATION_MAX = 21;
+    uint256 private constant ROTATION_MIN = 0;
+    uint256 private constant ROTATION_MAX = 4;
+
+    // ----------------- EVENTS -----------------
     event TokenMinted(
         uint256 indexed tokenId,
         address indexed owner,
         uint256 price
     );
 
-    /// @notice The total number of tokens sold, also used as the next token ID
-    uint256 public totalSold;
-
-    /// @notice The time at which the auction starts
-    uint256 public immutable startTime = block.timestamp;
-
-    /// @notice The seed used to generate the token's attributes
-    mapping(uint256 => uint256) public seeds;
-
+    // ----------------- FUNCTIONS -----------------
     // @notice Sets the VRGDA params, and the ERC721 name and symbol
     constructor()
         ERC721("Mercurials (Test)", "MERC")
@@ -204,7 +233,12 @@ contract Mercurials is ERC721, LinearVRGDA, ReentrancyGuard {
     {
         // Generate a random value to use for the baseFrequency attribute.
         uint256 random;
-        (random, nonce) = generateRandom(50, 301, seed, nonce);
+        (random, nonce) = generateRandom(
+            BASE_FREQUENCY_MIN,
+            BASE_FREQUENCY_MAX,
+            seed,
+            nonce
+        );
         string memory baseFrequency;
         if (random < 100) {
             baseFrequency = string.concat("0.00", random.toString());
@@ -214,16 +248,21 @@ contract Mercurials is ERC721, LinearVRGDA, ReentrancyGuard {
 
         // Generate a random value to use for the numOctaves attribute.
         string memory numOctaves;
-        (random, nonce) = generateRandom(1, 6, seed, 0);
+        (random, nonce) = generateRandom(
+            NUM_OCTAVES_MIN,
+            NUM_OCTAVES_MAX,
+            seed,
+            nonce
+        );
         numOctaves = random.toString();
 
         // Generate a random value to use for the seed attribute of the SVG.
         string memory seedForSvg;
         (random, nonce) = generateRandom(
-            0,
+            SEED_FOR_SVG_MIN,
             // Note: 65535 is the max value for the seed attribute of
             // the feTurbulence SVG element.
-            65536,
+            SEED_FOR_SVG_MAX,
             seed,
             nonce
         );
@@ -265,7 +304,7 @@ contract Mercurials is ERC721, LinearVRGDA, ReentrancyGuard {
 
         // Generate a random value for the k4 attribute.
         string memory k4;
-        (random, nonce) = generateRandom(0, 51, seed, nonce);
+        (random, nonce) = generateRandom(K4_MIN, K4_MAX, seed, nonce);
         if (random < 10) {
             k4 = string.concat("0.0", random.toString());
         } else {
@@ -323,18 +362,33 @@ contract Mercurials is ERC721, LinearVRGDA, ReentrancyGuard {
         // Generate a random value for the diffuse constant.
         uint256 random;
         string memory diffuseConstant;
-        (random, nonce) = generateRandom(1, 4, seed, nonce);
+        (random, nonce) = generateRandom(
+            DIFFUSE_CONSTANT_MIN,
+            DIFFUSE_CONSTANT_MAX,
+            seed,
+            nonce
+        );
         diffuseConstant = random.toString();
 
         // Generate a random value for the surfaceScale.
         string memory surfaceScale;
         // Note: 10 is the largest surface scale rendered on mobile devices.
-        (random, nonce) = generateRandom(5, 11, seed, nonce);
+        (random, nonce) = generateRandom(
+            SURFACE_SCALE_MIN,
+            SURFACE_SCALE_MAX,
+            seed,
+            nonce
+        );
         surfaceScale = random.toString();
 
         // Generate a random value for the elevation.
         string memory elevation;
-        (random, nonce) = generateRandom(3, 21, seed, nonce);
+        (random, nonce) = generateRandom(
+            ELEVATION_MIN,
+            ELEVATION_MAX,
+            seed,
+            nonce
+        );
         elevation = random.toString();
 
         // Create the feDiffuseLighting element.
@@ -395,14 +449,19 @@ contract Mercurials is ERC721, LinearVRGDA, ReentrancyGuard {
         // Generate a random start value.
         uint256 start;
         bool startNegative;
-        (start, nonce) = generateRandom(0, 201, seed, nonce);
+        (start, nonce) = generateRandom(SCALE_MIN, SCALE_MAX, seed, nonce);
         (startNegative, nonce) = generateRandomBool(seed, nonce);
 
         // Generate a negative or positive delta value to add
         // to the start value to get the middle value.
         uint256 delta;
         bool deltaNegative;
-        (delta, nonce) = generateRandom(50, 251, seed, nonce);
+        (delta, nonce) = generateRandom(
+            SCALE_DELTA_MIN,
+            SCALE_DELTA_MAX,
+            seed,
+            nonce
+        );
         (deltaNegative, nonce) = generateRandomBool(seed, nonce);
 
         // Based on the start and delta values, add start and delta together to
@@ -453,13 +512,23 @@ contract Mercurials is ERC721, LinearVRGDA, ReentrancyGuard {
 
         // Generate a random value for the scale animation duration in seconds.
         uint256 random;
-        (random, nonce) = generateRandom(1, 81, seed, nonce);
+        (random, nonce) = generateRandom(
+            SCALE_ANIMATION_MIN,
+            SCALE_ANIMATION_MAX,
+            seed,
+            nonce
+        );
 
         // Convert to string and append 's' to represent seconds in the SVG.
         string memory animationDuration = string.concat(random.toString(), "s");
 
         // Generate a random number to be the middle keyTime value.
-        (random, nonce) = generateRandom(3, 8, seed, nonce);
+        (random, nonce) = generateRandom(
+            KEY_TIME_MIN,
+            KEY_TIME_MAX,
+            seed,
+            nonce
+        );
         string memory keyTime = string.concat("0.", random.toString());
 
         element = string.concat(
@@ -495,7 +564,12 @@ contract Mercurials is ERC721, LinearVRGDA, ReentrancyGuard {
     {
         // Generate a value to be the duration of the animation
         uint256 random;
-        (random, nonce) = generateRandom(1, 21, seed, nonce);
+        (random, nonce) = generateRandom(
+            HUE_ROTATE_ANIMATION_MIN,
+            HUE_ROTATE_ANIMATION_MAX,
+            seed,
+            nonce
+        );
         string memory animationDuration = random.toString();
 
         // Create the feColorMatrix element with the <animate> element inside.
@@ -600,7 +674,12 @@ contract Mercurials is ERC721, LinearVRGDA, ReentrancyGuard {
 
         // Generate rotation.
         uint256 rotation;
-        (rotation, nonce) = generateRandom(0, 4, seed, nonce);
+        (rotation, nonce) = generateRandom(
+            ROTATION_MIN,
+            ROTATION_MAX,
+            seed,
+            nonce
+        );
         rotation = rotation * 90;
 
         // Concatenate all the SVG elements creating the final SVG.
