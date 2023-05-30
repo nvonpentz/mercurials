@@ -13,22 +13,24 @@ import {toDaysWadUnsafe} from "solmate/utils/SignedWadMath.sol";
 /// @author nvonpentz
 /// @notice An on-chain generative art auction.
 contract Mercurials is ERC721, LinearVRGDA, ReentrancyGuard {
-    // ----------------- TYPES -----------------
+    // ====================== TYPES ======================
     using Strings for uint256;
 
-    // ----------------- STATE VARIABLES -----------------
+    // ================= STATE VARIABLES =================
     /// @notice The total number of tokens sold, also used as the next token ID
     uint256 public totalSold;
     /// @notice The time at which the auction starts
     uint256 public immutable startTime = block.timestamp;
     /// @notice The seed used to generate the token's attributes
     mapping(uint256 => uint256) public seeds;
+
+    // Constants for the the minimum and maximum values for randomly generated attributes
     uint256 private constant BASE_FREQUENCY_MIN = 50;
     uint256 private constant BASE_FREQUENCY_MAX = 301;
     uint256 private constant NUM_OCTAVES_MIN = 1;
     uint256 private constant NUM_OCTAVES_MAX = 6;
     uint256 private constant SEED_FOR_SVG_MIN = 0;
-    // 65535 is the max value for the seed attribute of
+    // Note: 65535 is the max value for the seed attribute of
     // the feTurbulence SVG element.
     uint256 private constant SEED_FOR_SVG_MAX = 65536;
     uint256 private constant K4_MIN = 0;
@@ -52,14 +54,14 @@ contract Mercurials is ERC721, LinearVRGDA, ReentrancyGuard {
     uint256 private constant ROTATION_MIN = 0;
     uint256 private constant ROTATION_MAX = 4;
 
-    // ----------------- EVENTS -----------------
+    // ===================== EVENTS =====================
     event TokenMinted(
         uint256 indexed tokenId,
         address indexed owner,
         uint256 price
     );
 
-    // ----------------- FUNCTIONS -----------------
+    // ==================== FUNCTIONS ====================
     // @notice Sets the VRGDA params, and the ERC721 name and symbol
     constructor()
         ERC721("Mercurials (Test)", "MERC")
