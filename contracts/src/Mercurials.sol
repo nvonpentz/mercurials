@@ -16,14 +16,15 @@ contract Mercurials is ERC721, LinearVRGDA, ReentrancyGuard {
     // ====================== TYPES ======================
     using Strings for uint256;
 
-    // ================= STATE VARIABLES =================
+    // ============== PUBLIC STATE VARIABLES =============
     /// @notice The total number of tokens sold, also used as the next token ID
     uint256 public totalSold;
     /// @notice The time at which the auction starts
     uint256 public immutable startTime = block.timestamp;
     /// @notice The seed used to generate the token's attributes
     mapping(uint256 => uint256) public seeds;
-    // Constants for the the minimum and maximum values for randomly generated attributes
+
+    // ==================== CONSTANTS ====================
     uint256 private constant BASE_FREQUENCY_MIN = 50;
     uint256 private constant BASE_FREQUENCY_MAX = 301;
     uint256 private constant NUM_OCTAVES_MIN = 1;
@@ -60,7 +61,7 @@ contract Mercurials is ERC721, LinearVRGDA, ReentrancyGuard {
         uint256 price
     );
 
-    // ==================== FUNCTIONS ====================
+    // ================== CONSTRUCTOR ===================
     // @notice Sets the VRGDA parameters, and the ERC721 name and symbol
     constructor()
         ERC721("Mercurials (Test)", "MERC")
@@ -74,6 +75,7 @@ contract Mercurials is ERC721, LinearVRGDA, ReentrancyGuard {
         )
     {}
 
+    // ============== EXTERNAL FUNCTIONS ================
     /// @notice Mints a new token
     /// @param tokenId The token ID to mint
     /// @param blockHash The hash of the parent block number rounded down
@@ -147,6 +149,7 @@ contract Mercurials is ERC721, LinearVRGDA, ReentrancyGuard {
         return (id, uri, price, blockHash, ttl);
     }
 
+    // =============== PUBLIC FUNCTIONS =================
     // @notice Returns the token URI for a given token ID
     function tokenURI(
         uint256 tokenId
@@ -156,6 +159,7 @@ contract Mercurials is ERC721, LinearVRGDA, ReentrancyGuard {
         return generateTokenUri(seed, tokenId);
     }
 
+    // =============== INTERNAL FUNCTIONS ================
     /// @notice Calculates the current price of the token based according to VRGDA rules
     function getCurrentVRGDAPrice() internal view returns (uint256) {
         // Note: By using toDaysWadUnsafe(block.timestamp - startTime) we are
