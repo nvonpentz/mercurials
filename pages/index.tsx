@@ -90,7 +90,7 @@ const Home: NextPage = () => {
     <div className={styles.container}>
       <div className={styles.column}>
         <Head>
-          <title>Mercurials - NFT</title>
+          <title>Mercurials NFT</title>
         </Head>
         <Navbar chainId={chain.id} address={address} />
         <main className={styles.main}>
