@@ -23,7 +23,6 @@ contract Mercurials is ERC721, LinearVRGDA, ReentrancyGuard {
     uint256 public immutable startTime = block.timestamp;
     /// @notice The seed used to generate the token's attributes
     mapping(uint256 => uint256) public seeds;
-
     // Constants for the the minimum and maximum values for randomly generated attributes
     uint256 private constant BASE_FREQUENCY_MIN = 50;
     uint256 private constant BASE_FREQUENCY_MAX = 301;
@@ -62,7 +61,7 @@ contract Mercurials is ERC721, LinearVRGDA, ReentrancyGuard {
     );
 
     // ==================== FUNCTIONS ====================
-    // @notice Sets the VRGDA params, and the ERC721 name and symbol
+    // @notice Sets the VRGDA parameters, and the ERC721 name and symbol
     constructor()
         ERC721("Mercurials (Test)", "MERC")
         LinearVRGDA(
@@ -75,7 +74,7 @@ contract Mercurials is ERC721, LinearVRGDA, ReentrancyGuard {
         )
     {}
 
-    /// @notice Mint a new token
+    /// @notice Mints a new token
     /// @param tokenId The token ID to mint
     /// @param blockHash The hash of the parent block number rounded down
     /// to the nearest multiple of 5
@@ -591,52 +590,43 @@ contract Mercurials is ERC721, LinearVRGDA, ReentrancyGuard {
         return (element, attributes, nonce);
     }
 
-    /// @notice Generates the first part of the SVG
-    function generateSvgPartOne(
-        uint256 seed,
-        uint256 nonce
-    ) internal pure returns (string memory svg, string memory attributes) {
-        // Generate the feTurbulence element.
-        string memory feTurbulenceElement;
-        string memory feTurbulenceAttributes;
-        (
-            feTurbulenceElement,
-            feTurbulenceAttributes,
-            nonce
-        ) = generateFeTurbulenceElement(seed, nonce);
-
-        // Generate the feDisplacementMap element.
-        string memory feDisplacementMapElement;
-        string memory feDisplacementMapAttributes;
-        (
-            feDisplacementMapElement,
-            feDisplacementMapAttributes,
-            nonce
-        ) = generateFeDisplacementMapElement(seed, nonce);
-
-        // Concatenate the two elements with the SVG start.
-        svg = string.concat(
-            '<svg width="350" height="350" version="1.1" viewBox="25 25 300 300" xmlns="http://www.w3.org/2000/svg"><filter id="a">',
-            feTurbulenceElement,
-            feDisplacementMapElement
-        );
-
-        // Concatenate the attributes.
-        attributes = string.concat(
-            feTurbulenceAttributes,
-            feDisplacementMapAttributes
-        );
-
-        return (svg, attributes);
-    }
-
     function generateSvg(
         uint256 seed
     ) internal pure returns (string memory svg, string memory attributes) {
         uint256 nonce;
+        // Use block scoping to avoid stack too deep errors.
+        {
+            // Generate the feTurbulence element.
+            string memory feTurbulenceElement;
+            string memory feTurbulenceAttributes;
+            (
+                feTurbulenceElement,
+                feTurbulenceAttributes,
+                nonce
+            ) = generateFeTurbulenceElement(seed, nonce);
 
-        // Generate the first part of the SVG in a separate function.
-        (svg, attributes) = generateSvgPartOne(seed, nonce);
+            // Generate the feDisplacementMap element.
+            string memory feDisplacementMapElement;
+            string memory feDisplacementMapAttributes;
+            (
+                feDisplacementMapElement,
+                feDisplacementMapAttributes,
+                nonce
+            ) = generateFeDisplacementMapElement(seed, nonce);
+
+            // Concatenate the two elements with the SVG start.
+            svg = string.concat(
+                '<svg width="350" height="350" version="1.1" viewBox="25 25 300 300" xmlns="http://www.w3.org/2000/svg"><filter id="a">',
+                feTurbulenceElement,
+                feDisplacementMapElement
+            );
+
+            // Concatenate the attributes.
+            attributes = string.concat(
+                feTurbulenceAttributes,
+                feDisplacementMapAttributes
+            );
+        }
 
         // Generate the feColorMatrix element.
         string memory feColorMatrixElement;
@@ -647,7 +637,7 @@ contract Mercurials is ERC721, LinearVRGDA, ReentrancyGuard {
             nonce
         ) = generateFeColorMatrixHueRotateElement(seed, nonce);
 
-        // Generate the feCompositeElements.
+        // Generate the feComposite elements.
         string memory feCompositeElements;
         string memory feCompositeAttributes;
         (
@@ -674,7 +664,7 @@ contract Mercurials is ERC721, LinearVRGDA, ReentrancyGuard {
             nonce
         ) = generateFeColorMatrixForInversionElement(seed, nonce);
 
-        // Generate rotation.
+        // Generate the rotation.
         uint256 rotation;
         (rotation, nonce) = generateRandom(
             ROTATION_MIN,
