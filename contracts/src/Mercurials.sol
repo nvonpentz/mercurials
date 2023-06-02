@@ -31,10 +31,10 @@ contract Mercurials is ERC721, LinearVRGDA, ReentrancyGuard {
     uint256 private constant BASE_FREQUENCY_MAX = 301;
     uint256 private constant NUM_OCTAVES_MIN = 1;
     uint256 private constant NUM_OCTAVES_MAX = 6;
-    uint256 private constant SEED_FOR_SVG_MIN = 0;
+    uint256 private constant SVG_SEED_MIN = 0;
     // Note: 65535 is the max value for the seed attribute of
     // the feTurbulence SVG element.
-    uint256 private constant SEED_FOR_SVG_MAX = 65536;
+    uint256 private constant SVG_SEED_MAX = 65536;
     uint256 private constant K4_MIN = 0;
     uint256 private constant K4_MAX = 51;
     uint256 private constant DIFFUSE_CONSTANT_MIN = 1;
@@ -266,10 +266,10 @@ contract Mercurials is ERC721, LinearVRGDA, ReentrancyGuard {
         // Generate a random value to use for the seed attribute of the SVG.
         string memory seedForSvg;
         (random, nonce) = generateRandom(
-            SEED_FOR_SVG_MIN,
+            SVG_SEED_MIN,
             // Note: 65535 is the max value for the seed attribute of
             // the feTurbulence SVG element.
-            SEED_FOR_SVG_MAX,
+            SVG_SEED_MAX,
             seed,
             nonce
         );
