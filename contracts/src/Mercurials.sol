@@ -19,8 +19,10 @@ contract Mercurials is ERC721, LinearVRGDA, ReentrancyGuard {
     // ============== PUBLIC STATE VARIABLES =============
     /// @notice The total number of tokens sold, also used as the next token ID
     uint256 public totalSold;
+
     /// @notice The time at which the auction starts
     uint256 public immutable startTime = block.timestamp;
+
     /// @notice The seed used to generate the token's attributes
     mapping(uint256 => uint256) public seeds;
 
@@ -711,10 +713,10 @@ contract Mercurials is ERC721, LinearVRGDA, ReentrancyGuard {
         uint256 seed,
         uint256 tokenId
     ) internal pure returns (string memory tokenUri) {
-        // Generate the code for the SVG.
+        // Generate the SVG markup
         (string memory svg, string memory attributes) = generateSvg(seed);
 
-        // Create token URI from base64 encoded metadata JSON.
+        // Create token URI from base64 encoded metadata JSON string.
         tokenUri = string.concat(
             "data:application/json;base64,",
             Base64.encode(
@@ -722,7 +724,7 @@ contract Mercurials is ERC721, LinearVRGDA, ReentrancyGuard {
                     string.concat(
                         '{ "name": "Mercurial #',
                         tokenId.toString(),
-                        '", "description": "Mercurials is an on-chain generative art project.", "image": "data:image/svg+xml;base64,',
+                        '", "description": "An abstract art piece generated on-chain.", "image": "data:image/svg+xml;base64,',
                         Base64.encode(bytes(svg)),
                         '", "attributes": [ ',
                         attributes,
