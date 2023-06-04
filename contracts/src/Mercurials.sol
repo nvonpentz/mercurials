@@ -110,7 +110,9 @@ contract Mercurials is ERC721, LinearVRGDA, ReentrancyGuard {
         seeds[tokenId] = generateSeed(tokenId);
 
         // Refund the user any ETH they spent over the current price of the NFT.
-        SafeTransferLib.safeTransferETH(msg.sender, msg.value - price);
+        if (msg.value > price) {
+            SafeTransferLib.safeTransferETH(msg.sender, msg.value - price);
+        }
     }
 
     /// @notice Returns information about the next token that can be minted.
