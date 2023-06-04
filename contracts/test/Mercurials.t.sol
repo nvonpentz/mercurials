@@ -65,6 +65,11 @@ contract MercurialsTest is Test, Mercurials {
         balanceBefore = address(this).balance;
         (tokenId, svg, price, hash, ttl) = mercurials.nextToken();
         mercurials.mint{value: price + 1}(tokenId, hash);
+
+        // Validate token ownership, balance and total sold again after minting with extra ETH
+        assertEq(mercurials.balanceOf(address(this)), 2); // 2 tokens should be owned by this contract now
+        assertEq(address(this).balance, balanceBefore - price); // ETH should have gone to the token contract
+        assertEq(mercurials.totalSold(), 2); // Total supply should be 2 now
     }
 
     function testMintWithOldButNotExpiredDetails() public {
