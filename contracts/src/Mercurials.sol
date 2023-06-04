@@ -66,7 +66,7 @@ contract Mercurials is ERC721, LinearVRGDA, ReentrancyGuard {
     // ================== CONSTRUCTOR ===================
     // @notice Sets the VRGDA parameters, and the ERC721 name and symbol
     constructor()
-        ERC721("Mercurials (Test)", "MERC")
+        ERC721("Mercurials", "MERC")
         LinearVRGDA(
             // Target price, 0.001 Ether
             0.001e18,
