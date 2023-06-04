@@ -20,7 +20,7 @@ contract Mercurials is ERC721, LinearVRGDA, ReentrancyGuard {
     /// @notice The total number of tokens sold, also used as the next token ID
     uint256 public totalSold;
 
-    /// @notice The time at which the auction starts
+    /// @notice The time at which the auction started
     uint256 public immutable startTime = block.timestamp;
 
     /// @notice The seed used to generate the token's attributes
@@ -159,8 +159,7 @@ contract Mercurials is ERC721, LinearVRGDA, ReentrancyGuard {
         uint256 tokenId
     ) public view override returns (string memory) {
         require(_exists(tokenId), "Token does not exist.");
-        uint256 seed = seeds[tokenId];
-        return generateTokenUri(seed, tokenId);
+        return generateTokenUri(seeds[tokenId], tokenId);
     }
 
     // =============== INTERNAL FUNCTIONS ================
