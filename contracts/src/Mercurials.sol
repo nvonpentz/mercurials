@@ -600,6 +600,8 @@ contract Mercurials is ERC721, LinearVRGDA, ReentrancyGuard {
     function generateSvg(
         uint256 seed
     ) internal pure returns (string memory svg, string memory attributes) {
+        // Nonce is used to generate random numbers and is incremented after
+        // each use.
         uint256 nonce;
         // Use block scoping to avoid stack too deep errors.
         {
@@ -681,7 +683,7 @@ contract Mercurials is ERC721, LinearVRGDA, ReentrancyGuard {
         );
         rotation = rotation * 90;
 
-        // Concatenate all the SVG elements creating the final SVG.
+        // Concatenate all the SVG elements creating the complete SVG.
         svg = string.concat(
             svg,
             feColorMatrixElement,
@@ -709,7 +711,7 @@ contract Mercurials is ERC721, LinearVRGDA, ReentrancyGuard {
         return (svg, attributes);
     }
 
-    /// @notice Generates the entire SVG
+    /// @notice Generates the token URI for a given token ID
     function generateTokenUri(
         uint256 seed,
         uint256 tokenId
@@ -717,7 +719,8 @@ contract Mercurials is ERC721, LinearVRGDA, ReentrancyGuard {
         // Generate the SVG markup
         (string memory svg, string memory attributes) = generateSvg(seed);
 
-        // Create token URI from base64 encoded metadata JSON string.
+        // Create the token URI by base64 encoding the SVG markup, creating the
+        // JSON metadata, and then base64 encoding that as a data URI.
         tokenUri = string.concat(
             "data:application/json;base64,",
             Base64.encode(
