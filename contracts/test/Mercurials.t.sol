@@ -229,4 +229,48 @@ contract MercurialsTest is Test, Mercurials {
         vm.expectRevert("Token does not exist.");
         mercurials.tokenURI(0);
     }
+
+    function testGenerateRandom() public {
+        uint256 nonce = 0;
+        uint256 seed = 0;
+        uint256 min = 0;
+        uint256 max = 10;
+        uint256 random;
+        (random, nonce) = generateRandom(min, max, seed, nonce);
+
+        // Nonce should be incremented
+        assertLt(random, max);
+        assertEq(nonce, 1);
+
+        // Nonce should be incremented
+        (random, nonce) = generateRandom(min, max, seed, nonce);
+        assertLt(random, max);
+        assertEq(nonce, 2);
+    }
+
+    function testGenerateRandomBool() public {
+        uint256 nonce = 0;
+        uint256 seed = 0;
+        bool random;
+        (random, nonce) = generateRandomBool(seed, nonce);
+
+        // Nonce should be incremented
+        assertEq(nonce, 1);
+
+        // Nonce should be incremented
+        (random, nonce) = generateRandomBool(seed, nonce);
+        assertEq(nonce, 2);
+    }
+
+    function testIntToString() public {
+        // Positive
+        assertEq(intToString(0, false), "0");
+        assertEq(intToString(1, false), "1");
+        assertEq(intToString(10, false), "10");
+
+        // Negative
+        assertEq(intToString(0, true), "-0");
+        assertEq(intToString(1, true), "-1");
+        assertEq(intToString(10, true), "-10");
+    }
 }

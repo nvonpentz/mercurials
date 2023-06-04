@@ -194,6 +194,7 @@ contract Mercurials is ERC721, LinearVRGDA, ReentrancyGuard {
     }
 
     /// @notice Generates a psuedo-random number from min (inclusive) to max (exclusive)
+    /// @dev Callers must ensure that min < max
     /// @param seed The seed to use for the random number (the same across multiple calls)
     /// @param nonce The nonce to use for the random number (different between calls)
     function generateRandom(
