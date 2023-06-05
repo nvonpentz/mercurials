@@ -276,7 +276,7 @@ contract MercurialsTest is Test, Mercurials {
         assertEq(intToString(10, false), "10");
 
         // Negative
-        assertEq(intToString(0, true), "-0");
+        assertEq(intToString(0, true), "0");
         assertEq(intToString(1, true), "-1");
         assertEq(intToString(10, true), "-10");
     }

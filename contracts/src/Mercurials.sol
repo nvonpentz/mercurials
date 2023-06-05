@@ -225,7 +225,7 @@ contract Mercurials is ERC721, LinearVRGDA, ReentrancyGuard {
         uint256 value,
         bool isNegative
     ) internal pure returns (string memory) {
-        if (isNegative) {
+        if (isNegative && value != 0) {
             return string.concat("-", value.toString());
         }
         return value.toString();
