@@ -103,12 +103,16 @@ contract Mercurials is ERC721, LinearVRGDA, ReentrancyGuard {
 
         // Short circuit if the user supplied token ID doesn't match the current
         // value because it means the user would get an unexpected token.
-        if (tokenId != totalSold) {
+        uint256 totalSoldMemory = totalSold;
+        if (tokenId != totalSoldMemory) {
             revert InvalidTokenId();
         }
 
         // Ensure enough funds were sent.
-        uint256 price = getCurrentVRGDAPrice();
+        uint256 price = getVRGDAPrice(
+            toDaysWadUnsafe(block.timestamp - startTime),
+            totalSoldMemory
+        );
         if (msg.value < price) {
             revert InsufficientFunds();
         }
@@ -175,17 +179,6 @@ contract Mercurials is ERC721, LinearVRGDA, ReentrancyGuard {
     }
 
     // =============== INTERNAL FUNCTIONS ================
-    /// @notice Calculates the current price of the token based according to VRGDA rules
-    function getCurrentVRGDAPrice() internal view returns (uint256) {
-        // Note: By using toDaysWadUnsafe(block.timestamp - startTime) we are
-        // establishing that 1 "unit of time" is 1 day.
-        return
-            getVRGDAPrice(
-                toDaysWadUnsafe(block.timestamp - startTime),
-                totalSold
-            );
-    }
-
     /// @notice Generates the seed for a given token ID
     /// @param tokenId The token ID to generate the seed for
     /// @return seed The seed for the given token ID

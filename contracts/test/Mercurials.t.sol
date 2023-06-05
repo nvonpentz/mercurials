@@ -31,24 +31,22 @@ contract MercurialsTest is Test, Mercurials {
         );
     }
 
-    // Token tests
     function testNextToken() public {
-        uint256 tokenId1;
-        uint256 tokenId2;
-        string memory svg1;
-        string memory svg2;
-        uint256 price1;
-        uint256 price2;
-        bytes32 hash1;
-        bytes32 hash2;
-        uint256 ttl1;
-        uint256 ttl2;
-
-        // Verify default vaules
-        (tokenId1, svg1, price1, hash1, ttl1) = mercurials.nextToken();
+        // Verify default values
+        (
+            uint tokenId1,
+            string memory svg1,
+            uint256 price1,
+            bytes32 hash1,
+            uint256 ttl1
+        ) = mercurials.nextToken();
         assertEq(tokenId1, 0, "Token ID should be 0");
         assertGt(bytes(svg1).length, 0, "SVG should not be empty");
-        assertGt(price1, 0, "Price should be greater than 0");
+        assertEq(
+            price1,
+            0.001052631578947368 ether,
+            "Price should be about 0.00105 ETH"
+        );
         assertEq(
             hash1,
             blockhash(block.number - 1),
@@ -57,39 +55,81 @@ contract MercurialsTest is Test, Mercurials {
         assertEq(ttl1, 5, "TTL should be 5");
 
         // Increase block number by 1
-        // Token ID, SVG, price, and hash should all be the same, TTL should be
-        // 1 less
         vm.roll(block.number + 1);
-        (tokenId2, svg2, price2, hash2, ttl2) = mercurials.nextToken();
+        (
+            uint tokenId2,
+            string memory svg2,
+            uint256 price2,
+            bytes32 hash2,
+            uint256 ttl2
+        ) = mercurials.nextToken();
         assertEq(tokenId1, tokenId2, "Token ID should be the same");
         assertEq(svg1, svg2, "SVG should be the same");
         assertEq(price1, price2, "Price should be the same");
         assertEq(hash1, hash2, "Hash should be the same");
-        assertEq(ttl2, 4, "TTL should be 4");
+        assertEq(ttl1 - 1, ttl2, "TTL should be 1 less");
 
         // Increase block number by 4, so the token expires
-        // Token ID, price and should all be the same, SVG should be different,
-        // hash should be different, TTL should be 5
         vm.roll(block.number + 4);
-        (tokenId1, svg1, price1, hash1, ttl1) = mercurials.nextToken();
-        assertEq(tokenId1, tokenId2, "Token ID should be the same");
-        assertEq(price1, price2, "Price should be the same");
-        assertTrue(hash1 != hash2, "Hash should be different");
-        assertEq(ttl1, 5, "TTL should be 5");
-        assertTrue(
-            keccak256(bytes(svg1)) != keccak256(bytes(svg2)),
+        (
+            uint tokenId3,
+            string memory svg3,
+            uint256 price3,
+            bytes32 hash3,
+            uint256 ttl3
+        ) = mercurials.nextToken();
+        assertEq(tokenId2, tokenId3, "Token ID should be the same");
+        assertEq(price2, price3, "Price should be the same");
+        assertFalse(
+            keccak256(bytes(svg2)) == keccak256(bytes(svg3)),
             "SVG should be different"
         );
+        assertFalse(hash2 == hash3, "Hash should be different");
+        assertEq(ttl3, 5, "TTL should be 5");
 
         // Increase timestamp
-        // Price should decrease, everything else should be the same
         vm.warp(block.timestamp + 1 days);
-        (tokenId2, svg2, price2, hash2, ttl2) = mercurials.nextToken();
-        assertTrue(price1 > price2, "Price should be less than previous price");
-        assertEq(tokenId1, tokenId2, "Token ID should be the same");
-        assertEq(hash1, hash2, "Hash should be the same");
-        assertEq(ttl1, ttl2, "TTL should be the same");
-        assertEq(svg1, svg2, "SVG should be the same");
+        (
+            uint tokenId4,
+            string memory svg4,
+            uint256 price4,
+            bytes32 hash4,
+            uint256 ttl4
+        ) = mercurials.nextToken();
+        assertEq(tokenId3, tokenId4, "Token ID should be the same");
+        assertEq(svg3, svg4, "SVG should be the same");
+        assertLt(price4, price3, "Price should be less");
+        assertEq(price4, 0.001 ether);
+        assertEq(hash3, hash4, "Hash should be the same");
+        assertEq(ttl3, ttl4, "TTL should be the same");
+
+        // Mint a token
+        mercurials.mint{value: price4}(tokenId4, hash4);
+        (
+            uint tokenId5,
+            string memory svg5,
+            uint256 price5,
+            bytes32 hash5,
+            uint256 ttl5
+        ) = mercurials.nextToken();
+        assertEq(tokenId5, tokenId4 + 1, "Token ID should be 1 more");
+        assertGt(price5, price4, "Price should be greater");
+        assertEq(
+            price5,
+            0.001052631578947368 ether,
+            "Price should be about 0.00105 ETH"
+        );
+        assertFalse(
+            keccak256(bytes(svg4)) == keccak256(bytes(svg5)),
+            "SVG should be different"
+        );
+        assertEq(hash4, hash5, "Hash should be the same");
+        assertEq(ttl4, ttl5, "TTL should be the same");
+
+        // After 10 years without a sale, the price is zero
+        vm.warp(block.timestamp + 365 days * 10);
+        (, , uint256 price6, , ) = mercurials.nextToken();
+        assertEq(price6, 0, "Price should be 0");
     }
 
     function testMint() public {
@@ -367,54 +407,6 @@ contract MercurialsTest is Test, Mercurials {
             address(0xdead),
             "Incorrect owner after transfer"
         );
-    }
-
-    function testGetCurrentVRGDAPrice() public {
-        // Use test contract for Mercurials implementation in order to test
-        // the internal function.
-        mercurials = this;
-
-        // Verify price is ~0.00105 ETH with default values.
-        assertEq(
-            block.timestamp,
-            startTime,
-            "startTime should be block.timestamp"
-        );
-        uint256 price1 = getCurrentVRGDAPrice();
-        assertEq(
-            price1,
-            0.001052631578947368 ether,
-            "Price should be about 0.00105 ETH"
-        );
-
-        // Verify price goes up after a sale.
-        uint256 tokenId;
-        string memory svg;
-        uint256 price;
-        bytes32 hash;
-        uint256 ttl;
-        (tokenId, svg, price, hash, ttl) = mercurials.nextToken();
-        mercurials.mint{value: price}(tokenId, hash);
-        uint256 price2 = getCurrentVRGDAPrice();
-        assertTrue(price2 > price1, "Price should go up after a sale");
-
-        // Verify price goes down as time passes without a sale.
-        vm.warp(startTime + 2 days);
-        uint256 price3 = getCurrentVRGDAPrice();
-        assertTrue(
-            price3 < price2,
-            "Price should go down as time passes without a sale"
-        );
-        assertEq(price3, 0.001 ether);
-
-        // After 10 years without a sale, the price is zero (not negative).
-        vm.warp(startTime + 10 * 356 days);
-        uint256 price4 = getCurrentVRGDAPrice();
-        assertTrue(
-            price4 < price3,
-            "Price should go down as time passes without a sale"
-        );
-        assertEq(price4, 0 ether);
     }
 
     function testGenerateSeed() public {
