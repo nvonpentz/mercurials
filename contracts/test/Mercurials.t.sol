@@ -13,8 +13,15 @@ contract MercurialsTest is Test, Mercurials {
         mercurials = new Mercurials();
     }
 
-    // Can receive Ether in case of overpayment
     receive() external payable {}
+
+    function testCannotReceiveETH() public {
+        vm.expectRevert("Cannot receive ETH");
+        // Send 1 wei to the contract
+        (bool success, ) = address(mercurials).call{value: 1}("");
+        assertEq(address(mercurials).balance, 0);
+        assertEq(success, false);
+    }
 
     // Token tests
     function testNextToken() public {
@@ -183,6 +190,67 @@ contract MercurialsTest is Test, Mercurials {
         }
     }
 
+    function testOverpaymentRefund() public {
+        uint256 tokenId;
+        string memory svg;
+        uint256 price;
+        bytes32 hash;
+        uint256 ttl;
+
+        // Get values for mint
+        (tokenId, svg, price, hash, ttl) = mercurials.nextToken();
+
+        // Mint with more ETH than the required price
+        uint256 overpaymentAmount = 10 ether;
+        uint256 totalPayment = price + overpaymentAmount;
+
+        uint256 balanceBefore = address(this).balance;
+        mercurials.mint{value: totalPayment}(tokenId, hash);
+
+        // Check that the NFT has been minted successfully
+        assertEq(mercurials.balanceOf(address(this)), 1);
+        assertEq(mercurials.ownerOf(tokenId), address(this));
+
+        // Verify that the overpayment amount has been refunded
+        uint256 expectedBalanceAfter = balanceBefore - price;
+        assertEq(address(this).balance, expectedBalanceAfter);
+    }
+
+    function testTokenUri() public {
+        // Get values for mint
+        uint256 tokenId;
+        string memory svg;
+        uint256 price;
+        bytes32 hash;
+        uint256 ttl;
+        (tokenId, svg, price, hash, ttl) = mercurials.nextToken();
+
+        // Should revert since token does not exist yet
+        vm.expectRevert(Mercurials.TokenDoesNotExist.selector);
+        mercurials.tokenURI(0);
+
+        // Mint
+        mercurials.mint{value: price}(tokenId, hash);
+
+        // Fetch the token URI
+        string memory tokenUri = mercurials.tokenURI(tokenId);
+        string
+            memory expectedTokenUri = "data:application/json;base64,eyAibmFtZSI6ICJNZXJjdXJpYWwgIzAiLCAiZGVzY3JpcHRpb24iOiAiQW4gYWJzdHJhY3QgYXJ0IHBpZWNlIGdlbmVyYXRlZCBvbi1jaGFpbi4iLCAiaW1hZ2UiOiAiZGF0YTppbWFnZS9zdmcreG1sO2Jhc2U2NCxQSE4yWnlCM2FXUjBhRDBpTXpVd0lpQm9aV2xuYUhROUlqTTFNQ0lnZG1WeWMybHZiajBpTVM0eElpQjJhV1YzUW05NFBTSXlOU0F5TlNBek1EQWdNekF3SWlCNGJXeHVjejBpYUhSMGNEb3ZMM2QzZHk1M015NXZjbWN2TWpBd01DOXpkbWNpUGp4bWFXeDBaWElnYVdROUltRWlQanhtWlZSMWNtSjFiR1Z1WTJVZ1ltRnpaVVp5WlhGMVpXNWplVDBpTUM0d01UQXdJaUJ1ZFcxUFkzUmhkbVZ6UFNJMElpQnpaV1ZrUFNJeE9Ea3dOaUlnTHo0OFptVkVhWE53YkdGalpXMWxiblJOWVhBK1BHRnVhVzFoZEdVZ1lYUjBjbWxpZFhSbFRtRnRaVDBpYzJOaGJHVWlJSFpoYkhWbGN6MGlNams3TFRFMk1qc3lPVHNpSUd0bGVWUnBiV1Z6UFNJd095QXdMalk3SURFaUlHUjFjajBpTkRoeklpQnlaWEJsWVhSRGIzVnVkRDBpYVc1a1pXWnBibWwwWlNJZ1kyRnNZMDF2WkdVOUluTndiR2x1WlNJZ2EyVjVVM0JzYVc1bGN6MGlNQzR6SURBZ01DNDNJREU3SURBdU15QXdJREF1TnlBeElpOCtQQzltWlVScGMzQnNZV05sYldWdWRFMWhjRDQ4Wm1WRGIyeHZjazFoZEhKcGVDQjBlWEJsUFNKb2RXVlNiM1JoZEdVaUlISmxjM1ZzZEQwaVlpSStQR0Z1YVcxaGRHVWdZWFIwY21saWRYUmxUbUZ0WlQwaWRtRnNkV1Z6SWlCbWNtOXRQU0l3SWlCMGJ6MGlNell3SWlCa2RYSTlJalJ6SWlCeVpYQmxZWFJEYjNWdWREMGlhVzVrWldacGJtbDBaU0l2UGp3dlptVkRiMnh2Y2sxaGRISnBlRDQ4Wm1WRGIyeHZjazFoZEhKcGVDQjBlWEJsUFNKdFlYUnlhWGdpSUhKbGMzVnNkRDBpWXlJZ2RtRnNkV1Z6UFNJd0lEQWdNQ0F3SURBZ01DQXdJREFnTUNBd0lEQWdNQ0F3SURBZ01DQXhJREFnTUNBd0lEQWlMejQ4Wm1WRGIyMXdiM05wZEdVZ2FXNDlJbUlpSUdsdU1qMGlZeUlnYjNCbGNtRjBiM0k5SW05MWRDSWdjbVZ6ZFd4MFBTSmtJaTgrUEdabFEyOXRjRzl6YVhSbElHbHVQU0prSWlCcGJqSTlJbVFpSUc5d1pYSmhkRzl5UFNKaGNtbDBhRzFsZEdsaklpQnJNVDBpTVNJZ2F6STlJakVpSUdzelBTSXhJaUJyTkQwaUxUQXVNRGdpTHo0OFptVkVhV1ptZFhObFRHbG5hSFJwYm1jZ2JHbG5hSFJwYm1jdFkyOXNiM0k5SWlObVptWWlJR1JwWm1aMWMyVkRiMjV6ZEdGdWREMGlNU0lnYzNWeVptRmpaVk5qWVd4bFBTSTVJajQ4Wm1WRWFYTjBZVzUwVEdsbmFIUWdaV3hsZG1GMGFXOXVQU0l4TmlJdlBqd3ZabVZFYVdabWRYTmxUR2xuYUhScGJtYytQQzltYVd4MFpYSStQSEpsWTNRZ2QybGtkR2c5SWpNMU1DSWdhR1ZwWjJoMFBTSXpOVEFpSUdacGJIUmxjajBpZFhKc0tDTmhLU0lnZEhKaGJuTm1iM0p0UFNKeWIzUmhkR1VvT1RBZ01UYzFJREUzTlNraUx6NDhMM04yWno0PSIsICJhdHRyaWJ1dGVzIjogWyB7ICJ0cmFpdF90eXBlIjogIkJhc2UgRnJlcXVlbmN5IiwgInZhbHVlIjogIjAuMDEwMCIgfSwgeyAidHJhaXRfdHlwZSI6ICJPY3RhdmVzIiwgInZhbHVlIjogIjQiIH0sIHsgInRyYWl0X3R5cGUiOiAiU2NhbGUiLCAidmFsdWUiOiAiMjk7LTE2MjsyOTsiIH0sIHsgInRyYWl0X3R5cGUiOiAiU2NhbGUgQW5pbWF0aW9uIiwgInZhbHVlIjogIjQ4cyIgfSwgeyAidHJhaXRfdHlwZSI6ICJLZXkgVGltZSIsICJ2YWx1ZSI6ICIwLjYiIH0sIHsgInRyYWl0X3R5cGUiOiAiSHVlIFJvdGF0ZSBBbmltYXRpb24iLCAidmFsdWUiOiAiNHMiIH0sIHsgInRyYWl0X3R5cGUiOiAiSzQiLCAidmFsdWUiOiAiLTAuMDgiIH0sIHsgInRyYWl0X3R5cGUiOiAiQ29tcG9zaXRlIE9wZXJhdG9yIiwgInZhbHVlIjogIm91dCIgfSwgeyAidHJhaXRfdHlwZSI6ICJEaWZmdXNlIENvbnN0YW50IiwgInZhbHVlIjogIjEiIH0sIHsgInRyYWl0X3R5cGUiOiAiU3VyZmFjZSBTY2FsZSIsICJ2YWx1ZSI6ICI5IiB9LCB7ICJ0cmFpdF90eXBlIjogIkVsZXZhdGlvbiIsICJ2YWx1ZSI6ICIxNiIgfSx7ICJ0cmFpdF90eXBlIjogIlJvdGF0aW9uIiwgInZhbHVlIjogIjkwIiB9LCB7ICJ0cmFpdF90eXBlIjogIkludmVydGVkIiwgInZhbHVlIjogZmFsc2UgfSAgXSB9";
+        assertEq(
+            keccak256(abi.encodePacked(tokenUri)),
+            keccak256(abi.encodePacked(expectedTokenUri))
+        );
+
+        // Mint again and verify the token URI has changed
+        (tokenId, svg, price, hash, ttl) = mercurials.nextToken();
+        mercurials.mint{value: price}(tokenId, hash);
+        tokenUri = mercurials.tokenURI(tokenId);
+        assertTrue(
+            keccak256(abi.encodePacked(tokenUri)) !=
+                keccak256(abi.encodePacked(expectedTokenUri))
+        );
+    }
+
     function testTransfer() public {
         uint256 tokenId;
         string memory svg;
@@ -235,67 +303,6 @@ contract MercurialsTest is Test, Mercurials {
 
         vm.roll(7);
         seed1 = generateSeed(0);
-    }
-
-    function testCannotReceiveETH() public {
-        vm.expectRevert("Cannot receive ETH");
-        // Send 1 wei to the contract
-        (bool success, ) = address(mercurials).call{value: 1}("");
-        assertEq(address(mercurials).balance, 0);
-        assertEq(success, false);
-    }
-
-    function testOverpaymentRefund() public {
-        uint256 tokenId;
-        string memory svg;
-        uint256 price;
-        bytes32 hash;
-        uint256 ttl;
-
-        // Get values for mint
-        (tokenId, svg, price, hash, ttl) = mercurials.nextToken();
-
-        // Mint with more ETH than the required price
-        uint256 overpaymentAmount = 10 ether;
-        uint256 totalPayment = price + overpaymentAmount;
-
-        uint256 balanceBefore = address(this).balance;
-        mercurials.mint{value: totalPayment}(tokenId, hash);
-
-        // Check that the NFT has been minted successfully
-        assertEq(mercurials.balanceOf(address(this)), 1);
-        assertEq(mercurials.ownerOf(tokenId), address(this));
-
-        // Verify that the overpayment amount has been refunded
-        uint256 expectedBalanceAfter = balanceBefore - price;
-        assertEq(address(this).balance, expectedBalanceAfter);
-    }
-
-    function testTokenUri() public {
-        // Get values for mint
-        uint256 tokenId;
-        string memory svg;
-        uint256 price;
-        bytes32 hash;
-        uint256 ttl;
-        (tokenId, svg, price, hash, ttl) = mercurials.nextToken();
-
-        // Should revert since token does not exist yet
-        vm.expectRevert(Mercurials.TokenDoesNotExist.selector);
-        mercurials.tokenURI(0);
-
-        // Mint
-        mercurials.mint{value: price}(tokenId, hash);
-
-        // Fetch the token URI
-        string memory tokenUri = mercurials.tokenURI(tokenId);
-        string memory expectedTokenUri = 'data:application/json;base64,eyAibmFtZSI6ICJNZXJjdXJpYWwgIzAiLCAiZGVzY3JpcHRpb24iOiAiQW4gYWJzdHJhY3QgYXJ0IHBpZWNlIGdlbmVyYXRlZCBvbi1jaGFpbi4iLCAiaW1hZ2UiOiAiZGF0YTppbWFnZS9zdmcreG1sO2Jhc2U2NCxQSE4yWnlCM2FXUjBhRDBpTXpVd0lpQm9aV2xuYUhROUlqTTFNQ0lnZG1WeWMybHZiajBpTVM0eElpQjJhV1YzUW05NFBTSXlOU0F5TlNBek1EQWdNekF3SWlCNGJXeHVjejBpYUhSMGNEb3ZMM2QzZHk1M015NXZjbWN2TWpBd01DOXpkbWNpUGp4bWFXeDBaWElnYVdROUltRWlQanhtWlZSMWNtSjFiR1Z1WTJVZ1ltRnpaVVp5WlhGMVpXNWplVDBpTUM0d01UQXdJaUJ1ZFcxUFkzUmhkbVZ6UFNJMElpQnpaV1ZrUFNJeE9Ea3dOaUlnTHo0OFptVkVhWE53YkdGalpXMWxiblJOWVhBK1BHRnVhVzFoZEdVZ1lYUjBjbWxpZFhSbFRtRnRaVDBpYzJOaGJHVWlJSFpoYkhWbGN6MGlNams3TFRFMk1qc3lPVHNpSUd0bGVWUnBiV1Z6UFNJd095QXdMalk3SURFaUlHUjFjajBpTkRoeklpQnlaWEJsWVhSRGIzVnVkRDBpYVc1a1pXWnBibWwwWlNJZ1kyRnNZMDF2WkdVOUluTndiR2x1WlNJZ2EyVjVVM0JzYVc1bGN6MGlNQzR6SURBZ01DNDNJREU3SURBdU15QXdJREF1TnlBeElpOCtQQzltWlVScGMzQnNZV05sYldWdWRFMWhjRDQ4Wm1WRGIyeHZjazFoZEhKcGVDQjBlWEJsUFNKb2RXVlNiM1JoZEdVaUlISmxjM1ZzZEQwaVlpSStQR0Z1YVcxaGRHVWdZWFIwY21saWRYUmxUbUZ0WlQwaWRtRnNkV1Z6SWlCbWNtOXRQU0l3SWlCMGJ6MGlNell3SWlCa2RYSTlJalJ6SWlCeVpYQmxZWFJEYjNWdWREMGlhVzVrWldacGJtbDBaU0l2UGp3dlptVkRiMnh2Y2sxaGRISnBlRDQ4Wm1WRGIyeHZjazFoZEhKcGVDQjBlWEJsUFNKdFlYUnlhWGdpSUhKbGMzVnNkRDBpWXlJZ2RtRnNkV1Z6UFNJd0lEQWdNQ0F3SURBZ01DQXdJREFnTUNBd0lEQWdNQ0F3SURBZ01DQXhJREFnTUNBd0lEQWlMejQ4Wm1WRGIyMXdiM05wZEdVZ2FXNDlJbUlpSUdsdU1qMGlZeUlnYjNCbGNtRjBiM0k5SW05MWRDSWdjbVZ6ZFd4MFBTSmtJaTgrUEdabFEyOXRjRzl6YVhSbElHbHVQU0prSWlCcGJqSTlJbVFpSUc5d1pYSmhkRzl5UFNKaGNtbDBhRzFsZEdsaklpQnJNVDBpTVNJZ2F6STlJakVpSUdzelBTSXhJaUJyTkQwaUxUQXVNRGdpTHo0OFptVkVhV1ptZFhObFRHbG5hSFJwYm1jZ2JHbG5hSFJwYm1jdFkyOXNiM0k5SWlObVptWWlJR1JwWm1aMWMyVkRiMjV6ZEdGdWREMGlNU0lnYzNWeVptRmpaVk5qWVd4bFBTSTVJajQ4Wm1WRWFYTjBZVzUwVEdsbmFIUWdaV3hsZG1GMGFXOXVQU0l4TmlJdlBqd3ZabVZFYVdabWRYTmxUR2xuYUhScGJtYytQQzltYVd4MFpYSStQSEpsWTNRZ2QybGtkR2c5SWpNMU1DSWdhR1ZwWjJoMFBTSXpOVEFpSUdacGJIUmxjajBpZFhKc0tDTmhLU0lnZEhKaGJuTm1iM0p0UFNKeWIzUmhkR1VvT1RBZ01UYzFJREUzTlNraUx6NDhMM04yWno0PSIsICJhdHRyaWJ1dGVzIjogWyB7ICJ0cmFpdF90eXBlIjogIkJhc2UgRnJlcXVlbmN5IiwgInZhbHVlIjogIjAuMDEwMCIgfSwgeyAidHJhaXRfdHlwZSI6ICJPY3RhdmVzIiwgInZhbHVlIjogIjQiIH0sIHsgInRyYWl0X3R5cGUiOiAiU2NhbGUiLCAidmFsdWUiOiAiMjk7LTE2MjsyOTsiIH0sIHsgInRyYWl0X3R5cGUiOiAiU2NhbGUgQW5pbWF0aW9uIiwgInZhbHVlIjogIjQ4cyIgfSwgeyAidHJhaXRfdHlwZSI6ICJLZXkgVGltZSIsICJ2YWx1ZSI6ICIwLjYiIH0sIHsgInRyYWl0X3R5cGUiOiAiSHVlIFJvdGF0ZSBBbmltYXRpb24iLCAidmFsdWUiOiAiNHMiIH0sIHsgInRyYWl0X3R5cGUiOiAiSzQiLCAidmFsdWUiOiAiLTAuMDgiIH0sIHsgInRyYWl0X3R5cGUiOiAiQ29tcG9zaXRlIE9wZXJhdG9yIiwgInZhbHVlIjogIm91dCIgfSwgeyAidHJhaXRfdHlwZSI6ICJEaWZmdXNlIENvbnN0YW50IiwgInZhbHVlIjogIjEiIH0sIHsgInRyYWl0X3R5cGUiOiAiU3VyZmFjZSBTY2FsZSIsICJ2YWx1ZSI6ICI5IiB9LCB7ICJ0cmFpdF90eXBlIjogIkVsZXZhdGlvbiIsICJ2YWx1ZSI6ICIxNiIgfSx7ICJ0cmFpdF90eXBlIjogIlJvdGF0aW9uIiwgInZhbHVlIjogIjkwIiB9LCB7ICJ0cmFpdF90eXBlIjogIkludmVydGVkIiwgInZhbHVlIjogZmFsc2UgfSAgXSB9';
-
-        // Mint again and verify the token URI has changed
-        (tokenId, svg, price, hash, ttl) = mercurials.nextToken();
-        mercurials.mint{value: price}(tokenId, hash);
-        string memory tokenUri2 = mercurials.tokenURI(tokenId);
-        assertTrue(keccak256(abi.encodePacked(tokenUri2)) != keccak256(abi.encodePacked(tokenUri)));
     }
 
     function testGenerateRandom() public {
