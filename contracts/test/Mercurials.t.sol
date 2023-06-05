@@ -13,6 +13,7 @@ contract MercurialsTest is Test, Mercurials {
         mercurials = new Mercurials();
     }
 
+    // Can receive Ether in case of overpayment
     receive() external payable {}
 
     // Token tests
@@ -279,5 +280,40 @@ contract MercurialsTest is Test, Mercurials {
         assertEq(intToString(0, true), "0");
         assertEq(intToString(1, true), "-1");
         assertEq(intToString(10, true), "-10");
+    }
+}
+
+contract MercurialsReentrancyTest is Test {
+    Mercurials mercurials;
+    uint256 public tokenId;
+    bytes32 public hash;
+    uint256 public price;
+
+    function setUp() public {
+        mercurials = new Mercurials();
+        (tokenId, , price, hash, ) = mercurials.nextToken();
+    }
+
+    // This fallback function will be called in the middle of the mint operation
+    fallback() external payable {
+        vm.expectRevert("ReentrancyGuard: reentrant call");
+        mercurials.mint{value: price}(tokenId, hash);
+    }
+
+    function testMintReentrancyAttack() public {
+        uint256 balanceBefore = address(this).balance;
+        uint256 tokenBalanceBefore = mercurials.balanceOf(address(this));
+
+        // Mint with more ETH than the required price
+        uint256 overpaymentAmount = 1 ether;
+        uint256 totalPayment = price + overpaymentAmount;
+        vm.expectRevert("ETH_TRANSFER_FAILED");
+        mercurials.mint{value: totalPayment}(tokenId, hash);
+
+        // Check that balance has not changed
+        assertEq(address(this).balance, balanceBefore);
+
+        // Check that the NFT has not been minted
+        assertEq(mercurials.balanceOf(address(this)), tokenBalanceBefore);
     }
 }
