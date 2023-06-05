@@ -31,14 +31,15 @@ contract MercurialsTest is Test, Mercurials {
 
         // Verify default vaules
         (tokenId1, svg1, price1, hash1, ttl1) = mercurials.nextToken();
-        assertEq(tokenId1, 0); // tokenId1 should start at 0
-        assertGt(bytes(svg1).length, 0); // SVG should be non-empty
-        assertGt(price1, 0); // price1 should be greater than 0
-        assertEq(hash1, blockhash(block.number - 1)); // hash1 should be the previous blockhash
-        assertEq(ttl1, 5); // ttl should be 5
+        assertEq(tokenId1, 0);
+        assertGt(bytes(svg1).length, 0);
+        assertGt(price1, 0);
+        assertEq(hash1, blockhash(block.number - 1));
+        assertEq(ttl1, 5);
 
         // Increase block number by 1
-        // Token ID, SVG, price, and hash should all be the same, TTL should be 1 less
+        // Token ID, SVG, price, and hash should all be the same, TTL should be
+        // 1 less
         vm.roll(block.number + 1);
         (tokenId2, svg2, price2, hash2, ttl2) = mercurials.nextToken();
         assertEq(tokenId1, tokenId2);
@@ -93,11 +94,12 @@ contract MercurialsTest is Test, Mercurials {
         vm.expectRevert("Insufficient funds");
         mercurials.mint{value: price - 1}(tokenId, hash);
 
-        // Mint with correct values
+        // Mint with correct values, verify the token is owned by test contract,
+        // ether is sent to the token contract, and the total supply has gone up
         mercurials.mint{value: price}(tokenId, hash);
-        assertEq(mercurials.balanceOf(address(this)), 1); // Token should be owned by this contract
-        assertEq(address(this).balance, balanceBefore - price); // ETH should have gone to the token contract
-        assertEq(mercurials.totalSold(), 1); // Total supply should be 1
+        assertEq(mercurials.balanceOf(address(this)), 1);
+        assertEq(address(this).balance, balanceBefore - price);
+        assertEq(mercurials.totalSold(), 1);
 
         // Attempt to mint again with same token ID
         vm.expectRevert("Invalid token ID");
