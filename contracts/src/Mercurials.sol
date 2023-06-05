@@ -609,6 +609,7 @@ contract Mercurials is ERC721, LinearVRGDA, ReentrancyGuard {
         // Nonce is used to generate random numbers and is incremented after
         // each use.
         uint256 nonce;
+
         // Use block scoping to avoid stack too deep errors.
         {
             // Generate the feTurbulence element.
@@ -734,7 +735,7 @@ contract Mercurials is ERC721, LinearVRGDA, ReentrancyGuard {
                     string.concat(
                         '{ "name": "Mercurial #',
                         tokenId.toString(),
-                        '", "description": "An abstract art piece generated on-chain.", "image": "data:image/svg+xml;base64,',
+                        '", "description": "Abstract art generated on-chain.", "image": "data:image/svg+xml;base64,',
                         Base64.encode(bytes(svg)),
                         '", "attributes": [ ',
                         attributes,
