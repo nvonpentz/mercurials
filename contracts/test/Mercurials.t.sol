@@ -324,9 +324,9 @@ contract MercurialsTest is Test, Mercurials {
 
 contract MercurialsReentrancyTest is Test {
     Mercurials mercurials;
-    uint256 public tokenId;
-    bytes32 public hash;
-    uint256 public price;
+    uint256 internal tokenId;
+    bytes32 internal hash;
+    uint256 internal price;
 
     function setUp() public {
         mercurials = new Mercurials();
