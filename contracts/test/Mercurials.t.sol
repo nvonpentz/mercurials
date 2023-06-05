@@ -18,18 +18,55 @@ contract MercurialsTest is Test, Mercurials {
 
     // Token tests
     function testNextToken() public {
-        uint256 tokenId;
-        string memory svg;
-        uint256 price;
-        bytes32 hash;
-        uint256 ttl;
+        uint256 tokenId1;
+        uint256 tokenId2;
+        string memory svg1;
+        string memory svg2;
+        uint256 price1;
+        uint256 price2;
+        bytes32 hash1;
+        bytes32 hash2;
+        uint256 ttl1;
+        uint256 ttl2;
 
-        (tokenId, svg, price, hash, ttl) = mercurials.nextToken();
-        assertEq(tokenId, 0); // tokenId should start at 0
-        assertGt(bytes(svg).length, 0); // SVG should be non-empty
-        assertGt(price, 0); // price should be greater than 0
-        assertEq(hash, blockhash(block.number - 1)); // hash should be the previous blockhash
-        assertEq(ttl, 5); // ttl should be 5
+        // Verify default vaules
+        (tokenId1, svg1, price1, hash1, ttl1) = mercurials.nextToken();
+        assertEq(tokenId1, 0); // tokenId1 should start at 0
+        assertGt(bytes(svg1).length, 0); // SVG should be non-empty
+        assertGt(price1, 0); // price1 should be greater than 0
+        assertEq(hash1, blockhash(block.number - 1)); // hash1 should be the previous blockhash
+        assertEq(ttl1, 5); // ttl should be 5
+
+        // Increase block number by 1
+        // Token ID, SVG, price, and hash should all be the same, TTL should be 1 less
+        vm.roll(block.number + 1);
+        (tokenId2, svg2, price2, hash2, ttl2) = mercurials.nextToken();
+        assertEq(tokenId1, tokenId2);
+        assertEq(svg1, svg2);
+        assertEq(price1, price2);
+        assertEq(hash1, hash2);
+        assertEq(ttl2, 4);
+
+        // Increase block number by 4, so the token expires
+        // Token ID, price and should all be the same, SVG should be different,
+        // hash should be different, TTL should be 5
+        vm.roll(block.number + 4);
+        (tokenId1, svg1, price1, hash1, ttl1) = mercurials.nextToken();
+        assertEq(tokenId1, tokenId2);
+        assertEq(price1, price2);
+        assertTrue(hash1 != hash2);
+        assertEq(ttl1, 5);
+        assertTrue(keccak256(bytes(svg1)) != keccak256(bytes(svg2)));
+
+        // Increase timestamp
+        // Price should decrease, everything else should be the same
+        vm.warp(block.timestamp + 1 days);
+        (tokenId2, svg2, price2, hash2, ttl2) = mercurials.nextToken();
+        assertTrue(price1 > price2);
+        assertEq(tokenId1, tokenId2);
+        assertEq(hash1, hash2);
+        assertEq(ttl1, ttl2);
+        assertEq(svg1, svg2);
     }
 
     function testMint() public {
@@ -295,7 +332,7 @@ contract MercurialsReentrancyTest is Test {
     }
 
     // This fallback function will be called in the middle of the mint operation
-    fallback() external payable {
+    receive() external payable {
         vm.expectRevert("ReentrancyGuard: reentrant call");
         mercurials.mint{value: price}(tokenId, hash);
     }
