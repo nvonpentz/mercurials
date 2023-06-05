@@ -61,6 +61,10 @@ contract MercurialsTest is Test, Mercurials {
         assertEq(address(this).balance, balanceBefore - price); // ETH should have gone to the token contract
         assertEq(mercurials.totalSold(), 1); // Total supply should be 1
 
+        // Attempt to mint again with same token ID
+        vm.expectRevert("Invalid token ID");
+        mercurials.mint{value: price}(tokenId, hash);
+
         // Mint with too much ETH
         balanceBefore = address(this).balance;
         (tokenId, svg, price, hash, ttl) = mercurials.nextToken();
@@ -133,6 +137,9 @@ contract MercurialsTest is Test, Mercurials {
             (tokenId, svg, price, hash, ttl) = mercurials.nextToken();
             mercurials.mint{value: price}(tokenId, hash);
             vm.roll(blockNumber + 1);
+            assertEq(mercurials.balanceOf(address(this)), i + 1);
+            assertEq(mercurials.ownerOf(tokenId), address(this));
+            assertEq(mercurials.totalSold(), i + 1);
         }
     }
 
