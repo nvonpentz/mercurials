@@ -92,21 +92,22 @@ contract Mercurials is ERC721, LinearVRGDA, ReentrancyGuard {
         uint256 tokenId,
         bytes32 blockHash
     ) external payable nonReentrant {
-        // Don't mint if the user supplied blockHash doesn't match the current
-        // value.
+        // Short circuit if the user supplied blockHash doesn't match the current
+        // value because it means the user would get an unexpected token.
         if (
             blockHash !=
             blockhash((block.number - 1) - ((block.number - 1) % 5))
         ) {
             revert InvalidBlockHash();
         }
-        // Don't mint if the user supplied token ID doesn't match the current
-        // value.
+
+        // Short circuit if the user supplied token ID doesn't match the current
+        // value because it means the user would get an unexpected token.
         if (tokenId != totalSold) {
             revert InvalidTokenId();
         }
 
-        // Validate the purchase request against the VRGDA rules.
+        // Ensure enough funds were sent.
         uint256 price = getCurrentVRGDAPrice();
         if (msg.value < price) {
             revert InsufficientFunds();
@@ -115,11 +116,7 @@ contract Mercurials is ERC721, LinearVRGDA, ReentrancyGuard {
         // Mint the NFT.
         _mint(msg.sender, tokenId);
         emit TokenMinted(tokenId, msg.sender, price);
-
-        // Increment the total sold counter.
         totalSold += 1;
-
-        // Generate the seed and store it.
         seeds[tokenId] = generateSeed(tokenId);
 
         // Refund the user any ETH they spent over the current price of the NFT.
