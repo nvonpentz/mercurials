@@ -305,6 +305,98 @@ contract Mercurials is ERC721, LinearVRGDA, ReentrancyGuard {
         return (element, attributes, nonce);
     }
 
+    /// @notice Generates feDisplacementMap SVG element
+    function generateFeDisplacementMapElement(
+        uint256 seed,
+        uint256 nonce
+    )
+        internal
+        pure
+        returns (string memory element, string memory attributes, uint256)
+    {
+        // Generate scale values for the animation.
+        string memory scaleValues;
+        (scaleValues, nonce) = generateScale(seed, nonce);
+
+        // Generate a random value for the scale animation duration in seconds.
+        uint256 random;
+        (random, nonce) = generateRandom(
+            SCALE_ANIMATION_MIN,
+            SCALE_ANIMATION_MAX,
+            seed,
+            nonce
+        );
+
+        // Convert to string and append 's' to represent seconds in the SVG.
+        string memory animationDuration = string.concat(random.toString(), "s");
+
+        // Generate a random number to be the middle keyTime value.
+        (random, nonce) = generateRandom(
+            KEY_TIME_MIN,
+            KEY_TIME_MAX,
+            seed,
+            nonce
+        );
+        string memory keyTime = string.concat("0.", random.toString());
+
+        element = string.concat(
+            '<feDisplacementMap><animate attributeName="scale" values="',
+            scaleValues,
+            '" keyTimes="0; ',
+            keyTime,
+            '; 1" dur="',
+            animationDuration,
+            '" repeatCount="indefinite" calcMode="spline" keySplines="0.3 0 0.7 1; 0.3 0 0.7 1"/></feDisplacementMap>'
+        );
+
+        attributes = string.concat(
+            '{ "trait_type": "Scale", "value": "',
+            scaleValues,
+            '" }, { "trait_type": "Scale Animation", "value": "',
+            animationDuration,
+            '" }, { "trait_type": "Key Time", "value": "',
+            keyTime,
+            '" }, '
+        );
+        return (element, attributes, nonce);
+    }
+
+    /// @notice Generates the feColorMatrix element used for the rotation animation
+    function generateFeColorMatrixHueRotateElement(
+        uint256 seed,
+        uint256 nonce
+    )
+        internal
+        pure
+        returns (string memory element, string memory attributes, uint256)
+    {
+        // Generate a value to be the duration of the animation
+        uint256 random;
+        (random, nonce) = generateRandom(
+            HUE_ROTATE_ANIMATION_MIN,
+            HUE_ROTATE_ANIMATION_MAX,
+            seed,
+            nonce
+        );
+        string memory animationDuration = random.toString();
+
+        // Create the feColorMatrix element with the <animate> element inside.
+        element = string.concat(
+            '<feColorMatrix type="hueRotate" result="b"><animate attributeName="values" from="0" to="360" dur="',
+            animationDuration,
+            's" repeatCount="indefinite"/></feColorMatrix>'
+        );
+
+        // Save the animation duration.
+        attributes = string.concat(
+            '{ "trait_type": "Hue Rotate Animation", "value": "',
+            animationDuration,
+            's" }, '
+        );
+
+        return (element, attributes, nonce);
+    }
+
     /// @notice Generates feComposite elements
     function generateFeCompositeElements(
         uint256 seed,
@@ -455,6 +547,38 @@ contract Mercurials is ERC721, LinearVRGDA, ReentrancyGuard {
         return (element, attributes, nonce);
     }
 
+    function generateRectElement(
+        uint256 seed,
+        uint256 nonce
+    )
+        internal
+        pure
+        returns (string memory element, string memory attributes, uint256)
+    {
+        // Generate the rotation.
+        uint256 rotation;
+        (rotation, nonce) = generateRandom(
+            ROTATION_MIN,
+            ROTATION_MAX,
+            seed,
+            nonce
+        );
+        rotation = rotation * 90;
+
+        element = string.concat(
+            '</filter><rect width="350" height="350" filter="url(#a)" transform="rotate(',
+            rotation.toString(),
+            ' 175 175)"/></svg>'
+        );
+
+        attributes = string.concat(
+            '{ "trait_type": "Rotation", "value": "',
+            rotation.toString(),
+            '" }, '
+        );
+        return (element, attributes, nonce);
+    }
+
     /// @notice Generates the scale values for the feDisplacementMap SVG element
     function generateScale(
         uint256 seed,
@@ -509,98 +633,6 @@ contract Mercurials is ERC721, LinearVRGDA, ReentrancyGuard {
         );
 
         return (scaleValues, nonce);
-    }
-
-    /// @notice Generates feDisplacementMap SVG element
-    function generateFeDisplacementMapElement(
-        uint256 seed,
-        uint256 nonce
-    )
-        internal
-        pure
-        returns (string memory element, string memory attributes, uint256)
-    {
-        // Generate scale values for the animation.
-        string memory scaleValues;
-        (scaleValues, nonce) = generateScale(seed, nonce);
-
-        // Generate a random value for the scale animation duration in seconds.
-        uint256 random;
-        (random, nonce) = generateRandom(
-            SCALE_ANIMATION_MIN,
-            SCALE_ANIMATION_MAX,
-            seed,
-            nonce
-        );
-
-        // Convert to string and append 's' to represent seconds in the SVG.
-        string memory animationDuration = string.concat(random.toString(), "s");
-
-        // Generate a random number to be the middle keyTime value.
-        (random, nonce) = generateRandom(
-            KEY_TIME_MIN,
-            KEY_TIME_MAX,
-            seed,
-            nonce
-        );
-        string memory keyTime = string.concat("0.", random.toString());
-
-        element = string.concat(
-            '<feDisplacementMap><animate attributeName="scale" values="',
-            scaleValues,
-            '" keyTimes="0; ',
-            keyTime,
-            '; 1" dur="',
-            animationDuration,
-            '" repeatCount="indefinite" calcMode="spline" keySplines="0.3 0 0.7 1; 0.3 0 0.7 1"/></feDisplacementMap>'
-        );
-
-        attributes = string.concat(
-            '{ "trait_type": "Scale", "value": "',
-            scaleValues,
-            '" }, { "trait_type": "Scale Animation", "value": "',
-            animationDuration,
-            '" }, { "trait_type": "Key Time", "value": "',
-            keyTime,
-            '" }, '
-        );
-        return (element, attributes, nonce);
-    }
-
-    /// @notice Generates the feColorMatrix element used for the rotation animation
-    function generateFeColorMatrixHueRotateElement(
-        uint256 seed,
-        uint256 nonce
-    )
-        internal
-        pure
-        returns (string memory element, string memory attributes, uint256)
-    {
-        // Generate a value to be the duration of the animation
-        uint256 random;
-        (random, nonce) = generateRandom(
-            HUE_ROTATE_ANIMATION_MIN,
-            HUE_ROTATE_ANIMATION_MAX,
-            seed,
-            nonce
-        );
-        string memory animationDuration = random.toString();
-
-        // Create the feColorMatrix element with the <animate> element inside.
-        element = string.concat(
-            '<feColorMatrix type="hueRotate" result="b"><animate attributeName="values" from="0" to="360" dur="',
-            animationDuration,
-            's" repeatCount="indefinite"/></feColorMatrix>'
-        );
-
-        // Save the animation duration.
-        attributes = string.concat(
-            '{ "trait_type": "Hue Rotate Animation", "value": "',
-            animationDuration,
-            's" }, '
-        );
-
-        return (element, attributes, nonce);
     }
 
     function generateSvg(
@@ -680,15 +712,9 @@ contract Mercurials is ERC721, LinearVRGDA, ReentrancyGuard {
             nonce
         ) = generateFeColorMatrixForInversionElement(seed, nonce);
 
-        // Generate the rotation.
-        uint256 rotation;
-        (rotation, nonce) = generateRandom(
-            ROTATION_MIN,
-            ROTATION_MAX,
-            seed,
-            nonce
-        );
-        rotation = rotation * 90;
+        string memory rectElement;
+        string memory rectAttributes;
+        (rectElement, rectAttributes, nonce) = generateRectElement(seed, nonce);
 
         // Concatenate all the SVG elements creating the complete SVG.
         svg = string.concat(
@@ -698,9 +724,7 @@ contract Mercurials is ERC721, LinearVRGDA, ReentrancyGuard {
             feCompositeElements,
             feDiffuseLightingElement,
             feColorMatrixForInversionElement,
-            '</filter><rect width="350" height="350" filter="url(#a)" transform="rotate(',
-            rotation.toString(),
-            ' 175 175)"/></svg>'
+            rectElement
         );
 
         // Concatenate all the attributes.
@@ -709,9 +733,7 @@ contract Mercurials is ERC721, LinearVRGDA, ReentrancyGuard {
             feColorMatrixAttributes,
             feCompositeAttributes,
             feDiffuseLightingAttributes,
-            '{ "trait_type": "Rotation", "value": "',
-            rotation.toString(),
-            '" }, ',
+            rectAttributes,
             feColorMatrixForInversionAttributes
         );
 
