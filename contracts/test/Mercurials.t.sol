@@ -268,6 +268,46 @@ contract MercurialsTest is Test, Mercurials {
         assertEq(mercurials.ownerOf(tokenId), address(0xdead));
     }
 
+    function testGetCurrentVRGDAPrice() public {
+        // Use test contract for Mercurials implementation in order to test
+        // the internal function.
+        mercurials = this;
+
+        // Verify price is ~0.00105 ETH with default values.
+        assertEq(block.timestamp, startTime);
+        uint256 price1 = getCurrentVRGDAPrice();
+        assertEq(price1, 0.001052631578947368 ether);
+
+        // Verify price goes up after a sale.
+        uint256 tokenId;
+        string memory svg;
+        uint256 price;
+        bytes32 hash;
+        uint256 ttl;
+        (tokenId, svg, price, hash, ttl) = mercurials.nextToken();
+        mercurials.mint{value: price}(tokenId, hash);
+        uint256 price2 = getCurrentVRGDAPrice();
+        assertTrue(price2 > price1, "Price should go up after a sale");
+
+        // Verify price goes down as time passes without a sale.
+        vm.warp(startTime + 2 days);
+        uint256 price3 = getCurrentVRGDAPrice();
+        assertTrue(
+            price3 < price2,
+            "Price should go down as time passes without a sale"
+        );
+        assertEq(price3, 0.001 ether);
+
+        // After 10 years without a sale, the price is zero (not negative).
+        vm.warp(startTime + 10 * 356 days);
+        uint256 price4 = getCurrentVRGDAPrice();
+        assertTrue(
+            price4 < price3,
+            "Price should go down as time passes without a sale"
+        );
+        assertEq(price4, 0 ether);
+    }
+
     function testGenerateSeed() public {
         uint256 seed1;
         uint256 seed2;
