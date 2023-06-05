@@ -63,6 +63,12 @@ contract Mercurials is ERC721, LinearVRGDA, ReentrancyGuard {
         uint256 price
     );
 
+    // ===================== ERRORS =====================
+    error InvalidBlockHash();
+    error InvalidTokenId();
+    error InsufficientFunds();
+    error TokenDoesNotExist();
+
     // ================== CONSTRUCTOR ===================
     // @notice Sets the VRGDA parameters, and the ERC721 name and symbol
     constructor()
@@ -86,18 +92,25 @@ contract Mercurials is ERC721, LinearVRGDA, ReentrancyGuard {
         uint256 tokenId,
         bytes32 blockHash
     ) external payable nonReentrant {
-        // Don't mint if the user supplied token ID and blockHash
-        // don't match the current values.
-        require(
-            blockHash ==
-                blockhash((block.number - 1) - ((block.number - 1) % 5)),
-            "Invalid blockhash"
-        );
-        require(tokenId == totalSold, "Invalid token ID");
+        // Don't mint if the user supplied blockHash doesn't match the current
+        // value.
+        if (
+            blockHash !=
+            blockhash((block.number - 1) - ((block.number - 1) % 5))
+        ) {
+            revert InvalidBlockHash();
+        }
+        // Don't mint if the user supplied token ID doesn't match the current
+        // value.
+        if (tokenId != totalSold) {
+            revert InvalidTokenId();
+        }
 
         // Validate the purchase request against the VRGDA rules.
         uint256 price = getCurrentVRGDAPrice();
-        require(msg.value >= price, "Insufficient funds");
+        if (msg.value < price) {
+            revert InsufficientFunds();
+        }
 
         // Mint the NFT.
         _mint(msg.sender, tokenId);
@@ -158,7 +171,9 @@ contract Mercurials is ERC721, LinearVRGDA, ReentrancyGuard {
     function tokenURI(
         uint256 tokenId
     ) public view override returns (string memory) {
-        require(_exists(tokenId), "Token does not exist.");
+        if (!_exists(tokenId)) {
+            revert TokenDoesNotExist();
+        }
         return generateTokenUri(seeds[tokenId], tokenId);
     }
 

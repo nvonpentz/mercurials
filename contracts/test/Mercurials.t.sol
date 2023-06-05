@@ -83,15 +83,15 @@ contract MercurialsTest is Test, Mercurials {
         (tokenId, svg, price, hash, ttl) = mercurials.nextToken();
 
         // Attempt to mint with incorrect token ID
-        vm.expectRevert("Invalid token ID");
+        vm.expectRevert(Mercurials.InvalidTokenId.selector);
         mercurials.mint{value: price}(tokenId + 1, hash);
 
         // Attempt to mint with incorrect hash
-        vm.expectRevert("Invalid blockhash");
+        vm.expectRevert(Mercurials.InvalidBlockHash.selector);
         mercurials.mint{value: price}(tokenId, blockhash(block.number));
 
         // Attempt to mint with too little ETH
-        vm.expectRevert("Insufficient funds");
+        vm.expectRevert(Mercurials.InsufficientFunds.selector);
         mercurials.mint{value: price - 1}(tokenId, hash);
 
         // Mint with correct values, verify the token is owned by test contract,
@@ -102,7 +102,7 @@ contract MercurialsTest is Test, Mercurials {
         assertEq(mercurials.totalSold(), 1);
 
         // Attempt to mint again with same token ID
-        vm.expectRevert("Invalid token ID");
+        vm.expectRevert(Mercurials.InvalidTokenId.selector);
         mercurials.mint{value: price}(tokenId, hash);
 
         // Mint with too much ETH
@@ -161,7 +161,7 @@ contract MercurialsTest is Test, Mercurials {
         vm.roll(6);
         (, , price, , ttl) = mercurials.nextToken();
         assertEq(ttl, 5);
-        vm.expectRevert("Invalid blockhash");
+        vm.expectRevert(Mercurials.InvalidBlockHash.selector);
         mercurials.mint{value: price}(tokenId + 4, hash);
     }
 
@@ -273,7 +273,7 @@ contract MercurialsTest is Test, Mercurials {
 
     function testTokenUri() public {
         // Should revert if token does not exist
-        vm.expectRevert("Token does not exist.");
+        vm.expectRevert(Mercurials.TokenDoesNotExist.selector);
         mercurials.tokenURI(0);
     }
 
