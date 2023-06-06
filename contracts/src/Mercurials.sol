@@ -103,6 +103,7 @@ contract Mercurials is ERC721, LinearVRGDA, ReentrancyGuard {
 
         // Short circuit if the user supplied token ID doesn't match the current
         // value because it means the user would get an unexpected token.
+        // Use totalSoldMemory memory variable to prevent multiple reads from state.
         uint256 totalSoldMemory = totalSold;
         if (tokenId != totalSoldMemory) {
             revert InvalidTokenId();
