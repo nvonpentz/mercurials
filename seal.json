@@ -1,0 +1,11 @@
+{
+  "contracts": [
+    {
+      "contract": "contracts/Mercurials.sol",
+      "constructors": [ ],
+      "constructorPayableEthAmount": 0
+    }
+  ],
+  "targetEnvironment": "goerli",
+  "deployerId": "pandasteak"
+}
