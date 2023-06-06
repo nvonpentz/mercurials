@@ -22,6 +22,8 @@
 
 # misc
 contracts/notes.md
+contracts/deploys/mercurials.31337.address.json
+contracts/deploys/mercurials.31337.compilerOutput.json
 
 # debug
 npm-debug.log*
