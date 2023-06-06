@@ -236,8 +236,8 @@ contract Mercurials is ERC721, LinearVRGDA, ReentrancyGuard {
         return value.toString();
     }
 
-    /// @notice Generates the feTurbulence SVG element
-    function generateFeTurbulenceElement(
+    /// @notice Generates the opening svg element, opening filter element, and the feTurbulence element
+    function generateSvgOpenAndFeTurbulenceElement(
         uint256 seed,
         uint256 nonce
     )
@@ -284,7 +284,7 @@ contract Mercurials is ERC721, LinearVRGDA, ReentrancyGuard {
 
         // Create the SVG element
         element = string.concat(
-            '<feTurbulence baseFrequency="',
+            '<svg width="350" height="350" version="1.1" viewBox="25 25 300 300" xmlns="http://www.w3.org/2000/svg"><filter id="a"><feTurbulence baseFrequency="',
             baseFrequency,
             '" numOctaves="',
             numOctaves,
@@ -362,7 +362,7 @@ contract Mercurials is ERC721, LinearVRGDA, ReentrancyGuard {
     }
 
     /// @notice Generates the feColorMatrix element used for the rotation animation
-    function generateFeColorMatrixHueRotateElement(
+    function generateFeColorMatrixElements(
         uint256 seed,
         uint256 nonce
     )
@@ -384,7 +384,7 @@ contract Mercurials is ERC721, LinearVRGDA, ReentrancyGuard {
         element = string.concat(
             '<feColorMatrix type="hueRotate" result="b"><animate attributeName="values" from="0" to="360" dur="',
             animationDuration,
-            's" repeatCount="indefinite"/></feColorMatrix>'
+            's" repeatCount="indefinite"/></feColorMatrix><feColorMatrix type="matrix" result="c" values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 1 0 0 0 0"/>'
         );
 
         // Save the animation duration.
@@ -547,7 +547,9 @@ contract Mercurials is ERC721, LinearVRGDA, ReentrancyGuard {
         return (element, attributes, nonce);
     }
 
-    function generateRectElement(
+    /// @notice Generates the main rect element but also includes the closing filter
+    /// and closing svg tags
+    function generateRectAndSvgClose(
         uint256 seed,
         uint256 nonce
     )
@@ -645,13 +647,13 @@ contract Mercurials is ERC721, LinearVRGDA, ReentrancyGuard {
         // Use block scoping to avoid stack too deep errors.
         {
             // Generate the feTurbulence element.
-            string memory feTurbulenceElement;
+            string memory svgOpenAndFeTurbulenceElement;
             string memory feTurbulenceAttributes;
             (
-                feTurbulenceElement,
+                svgOpenAndFeTurbulenceElement,
                 feTurbulenceAttributes,
                 nonce
-            ) = generateFeTurbulenceElement(seed, nonce);
+            ) = generateSvgOpenAndFeTurbulenceElement(seed, nonce);
 
             // Generate the feDisplacementMap element.
             string memory feDisplacementMapElement;
@@ -662,10 +664,9 @@ contract Mercurials is ERC721, LinearVRGDA, ReentrancyGuard {
                 nonce
             ) = generateFeDisplacementMapElement(seed, nonce);
 
-            // Concatenate the two elements with the SVG start.
+            // Concatenate the two elements with the SVG opening tag, and filter tag.
             svg = string.concat(
-                '<svg width="350" height="350" version="1.1" viewBox="25 25 300 300" xmlns="http://www.w3.org/2000/svg"><filter id="a">',
-                feTurbulenceElement,
+                svgOpenAndFeTurbulenceElement,
                 feDisplacementMapElement
             );
 
@@ -677,13 +678,13 @@ contract Mercurials is ERC721, LinearVRGDA, ReentrancyGuard {
         }
 
         // Generate the feColorMatrix element.
-        string memory feColorMatrixElement;
+        string memory feColorMatrixElements;
         string memory feColorMatrixAttributes;
         (
-            feColorMatrixElement,
+            feColorMatrixElements,
             feColorMatrixAttributes,
             nonce
-        ) = generateFeColorMatrixHueRotateElement(seed, nonce);
+        ) = generateFeColorMatrixElements(seed, nonce);
 
         // Generate the feComposite elements.
         string memory feCompositeElements;
@@ -712,19 +713,21 @@ contract Mercurials is ERC721, LinearVRGDA, ReentrancyGuard {
             nonce
         ) = generateFeColorMatrixForInversionElement(seed, nonce);
 
-        string memory rectElement;
+        string memory rectAndSvgClose;
         string memory rectAttributes;
-        (rectElement, rectAttributes, nonce) = generateRectElement(seed, nonce);
+        (rectAndSvgClose, rectAttributes, nonce) = generateRectAndSvgClose(
+            seed,
+            nonce
+        );
 
         // Concatenate all the SVG elements creating the complete SVG.
         svg = string.concat(
             svg,
-            feColorMatrixElement,
-            '<feColorMatrix type="matrix" result="c" values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 1 0 0 0 0"/>',
+            feColorMatrixElements,
             feCompositeElements,
             feDiffuseLightingElement,
             feColorMatrixForInversionElement,
-            rectElement
+            rectAndSvgClose
         );
 
         // Concatenate all the attributes.
