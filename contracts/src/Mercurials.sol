@@ -92,8 +92,8 @@ contract Mercurials is ERC721, LinearVRGDA, ReentrancyGuard {
         uint256 tokenId,
         bytes32 blockHash
     ) external payable nonReentrant {
-        // Short circuit if the user supplied blockHash doesn't match the current
-        // value because it means the user would get an unexpected token.
+        // Require that the user supplied blockHash matches the current
+        // expected value because otherwise the user would get an unexpected token.
         if (
             blockHash !=
             blockhash((block.number - 1) - ((block.number - 1) % 5))
@@ -101,8 +101,8 @@ contract Mercurials is ERC721, LinearVRGDA, ReentrancyGuard {
             revert InvalidBlockHash();
         }
 
-        // Short circuit if the user supplied token ID doesn't match the current
-        // value because it means the user would get an unexpected token.
+        // Require that the user suppliedtoken ID matches the expected value
+        // value because otherwise user would get an unexpected token.
         // Use totalSoldMemory memory variable to prevent multiple reads from state.
         uint256 totalSoldMemory = totalSold;
         if (tokenId != totalSoldMemory) {
