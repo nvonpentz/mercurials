@@ -92,8 +92,8 @@ contract Mercurials is ERC721, LinearVRGDA, ReentrancyGuard {
         uint256 tokenId,
         bytes32 blockHash
     ) external payable nonReentrant {
-        // Require that the user supplied blockHash matches the current
-        // expected value because otherwise the user would get an unexpected token.
+        // Require that the user-supplied block hash matches the expected block hash
+        // because otherwise the user would get an unexpected token.
         if (
             blockHash !=
             blockhash((block.number - 1) - ((block.number - 1) % 5))
@@ -101,7 +101,7 @@ contract Mercurials is ERC721, LinearVRGDA, ReentrancyGuard {
             revert InvalidBlockHash();
         }
 
-        // Require that the user suppliedtoken ID matches the expected value
+        // Require that the user-supplied token ID matches the expected token ID
         // value because otherwise user would get an unexpected token.
         // Use totalSoldMemory memory variable to prevent multiple reads from state.
         uint256 totalSoldMemory = totalSold;
@@ -130,9 +130,9 @@ contract Mercurials is ERC721, LinearVRGDA, ReentrancyGuard {
         }
     }
 
-    /// @notice Returns information about the next token that can be minted.
+    /// @notice Returns information about the token up for auction.
     /// @dev This function should be called using the `pending` block tag.
-    /// @dev The id and hash should passed as arguments to the `mint` function.
+    /// @dev The id and blockHash should be passed as arguments to the `mint` function.
     /// @return id The token ID of the next token
     /// @return uri The token URI of the next token
     /// @return price The price of the next token
@@ -184,8 +184,9 @@ contract Mercurials is ERC721, LinearVRGDA, ReentrancyGuard {
     /// @param tokenId The token ID to generate the seed for
     /// @return seed The seed for the given token ID
     function generateSeed(uint256 tokenId) internal view returns (uint256) {
-        // Seed is calculated as the hash of current token ID with the parent
-        // block rounded down to the nearest 5.
+        // Seed is calculated as the hash of the current token ID combined with the parent
+        // block rounded down to the nearest 5. This ensures that the seed is
+        // valid for 5 blocks.
         return
             uint256(
                 keccak256(
@@ -199,7 +200,7 @@ contract Mercurials is ERC721, LinearVRGDA, ReentrancyGuard {
             );
     }
 
-    /// @notice Generates a psuedo-random number from min (inclusive) to max (exclusive)
+    /// @notice Generates a pseudo-random number from min (inclusive) to max (exclusive)
     /// @dev Callers must ensure that min < max
     /// @param seed The seed to use for the random number (the same across multiple calls)
     /// @param nonce The nonce to use for the random number (different between calls)
@@ -275,8 +276,6 @@ contract Mercurials is ERC721, LinearVRGDA, ReentrancyGuard {
         string memory seedForSvg;
         (random, nonce) = generateRandom(
             SVG_SEED_MIN,
-            // Note: 65535 is the max value for the seed attribute of
-            // the feTurbulence SVG element.
             SVG_SEED_MAX,
             seed,
             nonce
