@@ -405,6 +405,16 @@ contract MercurialsTest is Test, Mercurials {
         );
     }
 
+    function testName() public {
+        string memory name = mercurials.name();
+        assertEq(name, "Mercurials", "Incorrect name");
+    }
+
+    function testSymbol() public {
+        string memory symbol = mercurials.symbol();
+        assertEq(symbol, "MERC", "Incorrect symbol");
+    }
+
     function testGenerateSeed() public {
         uint256 seed1;
         uint256 seed2;
