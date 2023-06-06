@@ -1,7 +1,7 @@
 {
   "contracts": [
     {
-      "contract": "contracts/Mercurials.sol",
+      "contract": "contracts/src/Mercurials.sol",
       "constructors": [ ],
       "constructorPayableEthAmount": 0
     }
