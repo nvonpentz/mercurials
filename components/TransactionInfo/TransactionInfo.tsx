@@ -24,7 +24,7 @@ const TransactionInfo: React.FC<TransactionInfoProps> = ({
       <div>
         {receipt && (
           <div>
-            Token {mintAttempt?.tokenId} minted successfully! View on {" "}
+            Mercurial #{mintAttempt?.tokenId} minted successfully! View on {" "}
             <a
               href={openSeaLink}
               target="_blank"
