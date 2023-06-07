@@ -749,7 +749,7 @@ contract Mercurials is ERC721, LinearVRGDA, ReentrancyGuard {
         uint256 seed,
         uint256 tokenId
     ) internal pure returns (string memory tokenUri) {
-        // Generate the SVG markup
+        // Generate the SVG markup.
         (string memory svg, string memory attributes) = generateSvg(seed);
 
         // Create the token URI by base64 encoding the SVG markup, creating the
