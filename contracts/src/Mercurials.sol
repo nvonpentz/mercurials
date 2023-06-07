@@ -186,7 +186,7 @@ contract Mercurials is ERC721, LinearVRGDA, ReentrancyGuard {
     function generateSeed(uint256 tokenId) internal view returns (uint256) {
         // Seed is calculated as the hash of the current token ID combined with the parent
         // block rounded down to the nearest 5. This ensures that the seed is
-        // valid for 5 blocks.
+        // the same for 5 blocks.
         return
             uint256(
                 keccak256(
@@ -238,7 +238,8 @@ contract Mercurials is ERC721, LinearVRGDA, ReentrancyGuard {
         return value.toString();
     }
 
-    /// @notice Generates the opening svg element, opening filter element, and the feTurbulence element
+    /// @notice Generates the opening svg tag, opening filter tag, and
+    /// the feTurbulence element
     function generateSvgOpenAndFeTurbulenceElement(
         uint256 seed,
         uint256 nonce
