@@ -78,8 +78,8 @@ contract Mercurials is ERC721, LinearVRGDA, ReentrancyGuard {
             0.001e18,
             // Price decay percent, 5%
             0.05e18,
-            // Per time unit, 1 day
-            1e18
+            // Per time unit, .2 tokens a day or 1 token every 5 days
+            0.2e18
         )
     {}
 

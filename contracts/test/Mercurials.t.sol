@@ -32,7 +32,7 @@ contract MercurialsTest is Test, Mercurials {
     }
 
     function testNextToken() public {
-        // Verify default values
+        // Verify default values (-1 days ahead of schedule)
         (
             uint tokenId1,
             string memory svg1,
@@ -44,7 +44,7 @@ contract MercurialsTest is Test, Mercurials {
         assertGt(bytes(svg1).length, 0, "SVG should not be empty");
         assertEq(
             price1,
-            0.001052631578947368 ether,
+            0.001292355434899816 ether,
             "Price should be about 0.00105 ETH"
         );
         assertEq(
@@ -87,8 +87,8 @@ contract MercurialsTest is Test, Mercurials {
         assertFalse(hash2 == hash3, "Hash should be different");
         assertEq(ttl3, 5, "TTL should be 5");
 
-        // Increase timestamp
-        vm.warp(block.timestamp + 1 days);
+        // Increase timestamp by 1 second (test price sensitivity to time)
+        vm.warp(block.timestamp + 1 seconds);
         (
             uint tokenId4,
             string memory svg4,
@@ -99,37 +99,63 @@ contract MercurialsTest is Test, Mercurials {
         assertEq(tokenId3, tokenId4, "Token ID should be the same");
         assertEq(svg3, svg4, "SVG should be the same");
         assertLt(price4, price3, "Price should be less");
-        assertEq(price4, 0.001 ether);
         assertEq(hash3, hash4, "Hash should be the same");
         assertEq(ttl3, ttl4, "TTL should be the same");
 
-        // Mint a token
-        mercurials.mint{value: price4}(tokenId4, hash4);
-        (
-            uint tokenId5,
-            string memory svg5,
-            uint256 price5,
-            bytes32 hash5,
-            uint256 ttl5
-        ) = mercurials.nextToken();
-        assertEq(tokenId5, tokenId4 + 1, "Token ID should be 1 more");
-        assertGt(price5, price4, "Price should be greater");
+        // Increase timestamp by 5 days - 1 second (+0 days ahead of schedule)
+        vm.warp(block.timestamp + (5 days - 1 seconds));
+        (uint tokenId5, , uint256 price5, bytes32 hash5, ) = mercurials
+            .nextToken();
+        assertEq(price5, 0.001 ether, "Price should be 0");
+
+        // Mint a token (+1 days ahead of schedule)
+        mercurials.mint{value: price5}(tokenId5, hash5);
+        (, , uint256 price6, , ) = mercurials.nextToken();
+        assertEq(price6, 0.001292355434899816 ether, "Price should be 0");
+
+        // Mint 9 tokens (+10 days ahead of schedule)
+        for (uint i = 0; i < 9; i++) {
+            (uint tokenId, , uint256 price, bytes32 hash, ) = mercurials
+                .nextToken();
+            mercurials.mint{value: price}(tokenId, hash);
+        }
+        (, , uint256 price7, , ) = mercurials.nextToken();
         assertEq(
-            price5,
-            0.001052631578947368 ether,
-            "Price should be about 0.00105 ETH"
+            price7,
+            0.012996300231480360 ether,
+            "Price should be 0.012996300231480360"
         );
-        assertFalse(
-            keccak256(bytes(svg4)) == keccak256(bytes(svg5)),
-            "SVG should be different"
+
+        // Mint 10 tokens (+20 days ahead of schedule)
+        for (uint i = 0; i < 10; i++) {
+            (uint tokenId, , uint256 price, bytes32 hash, ) = mercurials
+                .nextToken();
+            mercurials.mint{value: price}(tokenId, hash);
+        }
+        (, , uint256 price8, , ) = mercurials.nextToken();
+        assertEq(
+            price8,
+            0.168903819706776462 ether,
+            "Price should be 0.129963002314803600"
         );
-        assertEq(hash4, hash5, "Hash should be the same");
-        assertEq(ttl4, ttl5, "TTL should be the same");
+
+        // Mint 10 tokens (+30 days ahead of schedule)
+        for (uint i = 0; i < 10; i++) {
+            (uint tokenId, , uint256 price, bytes32 hash, ) = mercurials
+                .nextToken();
+            mercurials.mint{value: price}(tokenId, hash);
+        }
+        (, , uint256 price9, , ) = mercurials.nextToken();
+        assertEq(
+            price9,
+            2.195124751153095951 ether,
+            "Price should be 0.168903819706776462"
+        );
 
         // After 10 years without a sale, the price is zero
         vm.warp(block.timestamp + 365 days * 10);
-        (, , uint256 price6, , ) = mercurials.nextToken();
-        assertEq(price6, 0, "Price should be 0");
+        (, , uint256 price10, , ) = mercurials.nextToken();
+        assertEq(price10, 0, "Price should be 0");
     }
 
     function testMint() public {
