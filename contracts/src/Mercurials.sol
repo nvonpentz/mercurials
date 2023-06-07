@@ -761,7 +761,7 @@ contract Mercurials is ERC721, LinearVRGDA, ReentrancyGuard {
                     string.concat(
                         '{ "name": "Mercurial #',
                         tokenId.toString(),
-                        '", "description": "Abstract art generated on-chain.", "image": "data:image/svg+xml;base64,',
+                        '", "description": "Abstract on-chain generative art", "image": "data:image/svg+xml;base64,',
                         Base64.encode(bytes(svg)),
                         '", "attributes": [ ',
                         attributes,
