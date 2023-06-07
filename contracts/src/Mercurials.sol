@@ -306,6 +306,62 @@ contract Mercurials is ERC721, LinearVRGDA, ReentrancyGuard {
         return (element, attributes, nonce);
     }
 
+    /// @notice Generates the scale values for the feDisplacementMap SVG element
+    function generateScale(
+        uint256 seed,
+        uint256 nonce
+    ) internal pure returns (string memory scaleValues, uint256) {
+        // Generate a random start value.
+        uint256 start;
+        bool startNegative;
+        (start, nonce) = generateRandom(SCALE_MIN, SCALE_MAX, seed, nonce);
+        (startNegative, nonce) = generateRandomBool(seed, nonce);
+
+        // Generate a negative or positive delta value to add
+        // to the start value to get the middle value.
+        uint256 delta;
+        bool deltaNegative;
+        (delta, nonce) = generateRandom(
+            SCALE_DELTA_MIN,
+            SCALE_DELTA_MAX,
+            seed,
+            nonce
+        );
+        (deltaNegative, nonce) = generateRandomBool(seed, nonce);
+
+        // Based on the start and delta values, add start and delta together to
+        // get the middle value.
+        uint256 end;
+        bool endNegative;
+        if (startNegative == deltaNegative) {
+            end = start + delta;
+            endNegative = startNegative;
+        } else {
+            if (start > delta) {
+                end = start - delta;
+                endNegative = startNegative;
+            } else {
+                end = delta - start;
+                endNegative = deltaNegative;
+            }
+        }
+
+        // Convert the start value to a string representation.
+        string memory scaleStart = intToString(start, startNegative);
+
+        // Concatenate the start, middle, and end values of the scale animation.
+        scaleValues = string.concat(
+            scaleStart,
+            ";",
+            intToString(end, endNegative),
+            ";",
+            scaleStart,
+            ";"
+        );
+
+        return (scaleValues, nonce);
+    }
+
     /// @notice Generates feDisplacementMap SVG element
     function generateFeDisplacementMapElement(
         uint256 seed,
@@ -580,62 +636,6 @@ contract Mercurials is ERC721, LinearVRGDA, ReentrancyGuard {
             '" }, '
         );
         return (element, attributes, nonce);
-    }
-
-    /// @notice Generates the scale values for the feDisplacementMap SVG element
-    function generateScale(
-        uint256 seed,
-        uint256 nonce
-    ) internal pure returns (string memory scaleValues, uint256) {
-        // Generate a random start value.
-        uint256 start;
-        bool startNegative;
-        (start, nonce) = generateRandom(SCALE_MIN, SCALE_MAX, seed, nonce);
-        (startNegative, nonce) = generateRandomBool(seed, nonce);
-
-        // Generate a negative or positive delta value to add
-        // to the start value to get the middle value.
-        uint256 delta;
-        bool deltaNegative;
-        (delta, nonce) = generateRandom(
-            SCALE_DELTA_MIN,
-            SCALE_DELTA_MAX,
-            seed,
-            nonce
-        );
-        (deltaNegative, nonce) = generateRandomBool(seed, nonce);
-
-        // Based on the start and delta values, add start and delta together to
-        // get the middle value.
-        uint256 end;
-        bool endNegative;
-        if (startNegative == deltaNegative) {
-            end = start + delta;
-            endNegative = startNegative;
-        } else {
-            if (start > delta) {
-                end = start - delta;
-                endNegative = startNegative;
-            } else {
-                end = delta - start;
-                endNegative = deltaNegative;
-            }
-        }
-
-        // Convert the start value to a string representation.
-        string memory scaleStart = intToString(start, startNegative);
-
-        // Concatenate the start, middle, and end values of the scale animation.
-        scaleValues = string.concat(
-            scaleStart,
-            ";",
-            intToString(end, endNegative),
-            ";",
-            scaleStart,
-            ";"
-        );
-
-        return (scaleValues, nonce);
     }
 
     function generateSvg(
