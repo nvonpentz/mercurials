@@ -45,7 +45,7 @@ contract MercurialsTest is Test, Mercurials {
         assertEq(
             price1,
             0.001292355434899816 ether,
-            "Price should be about 0.00105 ETH"
+            "Price should be about 0.00129 ETH"
         );
         assertEq(
             hash1,
@@ -106,12 +106,12 @@ contract MercurialsTest is Test, Mercurials {
         vm.warp(block.timestamp + (5 days - 1 seconds));
         (uint tokenId5, , uint256 price5, bytes32 hash5, ) = mercurials
             .nextToken();
-        assertEq(price5, 0.001 ether, "Price should be 0");
+        assertEq(price5, 0.001 ether, "Price should be 0.001 ETH");
 
         // Mint a token (+1 days ahead of schedule)
         mercurials.mint{value: price5}(tokenId5, hash5);
         (, , uint256 price6, , ) = mercurials.nextToken();
-        assertEq(price6, 0.001292355434899816 ether, "Price should be 0");
+        assertEq(price6, 0.001292355434899816 ether, "Price should be 0.00129");
 
         // Mint 9 tokens (+10 days ahead of schedule)
         for (uint i = 0; i < 9; i++) {

@@ -9,15 +9,7 @@ interface NavbarProps {
 }
 
 const Navbar: React.FC<NavbarProps> = ({ chainId, address }) => {
-  let openseaLink: string;
-  if (chainId === 5) {
-    openseaLink = `https://testnets.opensea.io/assets/goerli/${address}`;
-  } else if (chainId === 1) {
-    openseaLink = `https://opensea.io/assets/ethereum/${address}`;
-  } else {
-    openseaLink = 'https://opensea.io';
-  }
-
+  const openseaLink = `https://opensea.io/assets/ethereum/${address}`;
   return (
     <nav className={styles.navbar}>
       <ul>
