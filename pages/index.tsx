@@ -38,10 +38,6 @@ const Home: NextPage = () => {
 
   const { data: blockNumber } = useBlockNumber();
 
-  const { data: contractBalance, isError, isLoading } = useBalance({
-    address: address,
-  })
-
   const { data: nextToken, isFetching: readIsFetching } = useContractRead({
     address: address,
     abi: abi,
