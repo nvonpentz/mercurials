@@ -43,7 +43,7 @@ const MintButton: React.FC<MintButtonProps> = ({
     args: [nextToken?.[0], nextToken?.[3]],
     functionName: "mint",
     overrides: {
-      gasLimit: ethers.BigNumber.from(100000),
+      gasLimit: ethers.BigNumber.from(150000),
       value: nextToken?.[2],
     },
   });
