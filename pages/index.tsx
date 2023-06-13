@@ -38,6 +38,10 @@ const Home: NextPage = () => {
 
   const { data: blockNumber } = useBlockNumber();
 
+  const { data: contractBalance, isError, isLoading } = useBalance({
+    address: address,
+  })
+
   const { data: nextToken, isFetching: readIsFetching } = useContractRead({
     address: address,
     abi: abi,
@@ -88,7 +92,7 @@ const Home: NextPage = () => {
     <div className={styles.container}>
       <div className={styles.column}>
         <Head>
-          <title>Mercurials - Abstract on-chain generative art</title>
+          <title>Mercurials - 0n-chain generative art</title>
         </Head>
         <Navbar chainId={chain.id} address={address} />
         <main className={styles.main}>
