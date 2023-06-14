@@ -110,29 +110,11 @@ const Home: NextPage = () => {
                     // key={nextToken?.[0]?.toString() + blockNumber?.toString()}
                     key={nextToken?.[0]?.toString()}
                     dangerouslySetInnerHTML={{
-                      __html: "" && extractSVGFromTokenURI(nextToken[1]),
+                      __html: extractSVGFromTokenURI(nextToken[1]),
                     }}
                   />
                 )}
               </div>
-              <svg xmlns="http://www.w3.org/2000/svg" width="350" height="350" version="1.1" viewBox="0 0 350 350">
-                <filter id="a">
-                  <feTurbulence baseFrequency="0.0115" numOctaves="2" seed="9772"/>
-                  <feDisplacementMap>
-                    <animate attributeName="scale" values="-74;-170;-74;" keyTimes="0; 0.6; 1" dur="40s" repeatCount="indefinite" calcMode="spline" keySplines="0.3 0 0.7 1; 0.3 0 0.7 1"/>
-                  </feDisplacementMap>
-                  <feColorMatrix type="hueRotate" result="b">
-                    <animate attributeName="values" from="0" to="360" dur="20s" repeatCount="indefinite"/>
-                  </feColorMatrix>
-                  <feColorMatrix type="matrix" result="c" values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 1 0 0 0 0"/>
-                  <feComposite in="b" in2="c" operator="out" result="d"/>
-                  <feComposite in="d" in2="d" operator="arithmetic" k1="1" k2="1" k3="1" k4="0.10"/>
-                  <feDiffuseLighting lighting-color="#fff" diffuseConstant="1" surfaceScale="5">
-                    <feDistantLight elevation="6"/>
-                  </feDiffuseLighting>
-                </filter>
-                <rect width="350" height="350" filter="url(#a)" transform="rotate(180 175 175)"/>
-              </svg>
               <div className={styles.buttonContainer}>
                 <MintButton
                   isConnected={isConnected}
