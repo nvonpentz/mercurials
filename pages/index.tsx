@@ -25,15 +25,19 @@ const Home: NextPage = () => {
   const { chain = { id: 5 } } = useNetwork();
 
   // State
-  const [address, setAddress] = useState(deployments[1].address);
-  const [abi, setAbi] = useState(deployments[1].abi);
+  const [address, setAddress] = useState(deployments[chain.id].address);
+  const [abi, setAbi] = useState(deployments[chain.id].abi);
+  // const [address, setAddress] = useState(deployments[1].address);
+  // const [abi, setAbi] = useState(deployments[1].abi);
   const [mintAttempt, setMintAttempt] = useState<MintAttempt>();
 
   // Hooks
   const { isConnected } = useAccount();
   useEffect(() => {
-    setAddress(deployments[1].address);
-    setAbi(deployments[1].abi);
+    setAddress(deployments[chain.id].address);
+    setAbi(deployments[chain.id].abi);
+    // setAddress(deployments[1].address);
+    // setAbi(deployments[1].abi);
   }, [chain]);
 
   const { data: blockNumber } = useBlockNumber();
@@ -73,7 +77,9 @@ const Home: NextPage = () => {
 
   // Log traits when nextToken changes
   useEffect(() => {
-    console.log("Traits:", extractTraitsFromTokenURI(encodedMetadata));
+
+    console.log("Traits:", JSON.stringify(extractTraitsFromTokenURI(encodedMetadata), null, 2));
+      // extractTraitsFromTokenURI(encodedMetadata));
   }, [encodedMetadata]);
 
   const {
@@ -88,7 +94,7 @@ const Home: NextPage = () => {
     <div className={styles.container}>
       <div className={styles.column}>
         <Head>
-          <title>Mercurials - 0n-chain generative art</title>
+          <title>Mercurials - On-chain generative art</title>
         </Head>
         <Navbar chainId={chain.id} address={address} />
         <main className={styles.main}>

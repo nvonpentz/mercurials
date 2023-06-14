@@ -26,7 +26,7 @@ const Navbar: React.FC<NavbarProps> = ({ chainId, address }) => {
           <a href={openseaLink} target="_blank" rel="noopener noreferrer">OpenSea</a>
         </li>
         <li>
-          Ξ {parseFloat(contractBalance?.formatted)?.toFixed(3)} 🔥
+          🔥 Ξ {parseFloat(contractBalance?.formatted)?.toFixed(3)}
         </li>
         <li className={styles.connectButtonLi}>
           <ConnectButton />

@@ -36,23 +36,23 @@ contract Mercurials is ERC721, LinearVRGDA, ReentrancyGuard {
     // the feTurbulence SVG element.
     uint256 private constant SVG_SEED_MAX = 65536;
     uint256 private constant K4_MIN = 0;
-    uint256 private constant K4_MAX = 51;
+    uint256 private constant K4_MAX = 100;
     uint256 private constant DIFFUSE_CONSTANT_MIN = 1;
-    uint256 private constant DIFFUSE_CONSTANT_MAX = 4;
-    uint256 private constant SURFACE_SCALE_MIN = 5;
-    uint256 private constant SURFACE_SCALE_MAX = 11;
-    uint256 private constant ELEVATION_MIN = 3;
-    uint256 private constant ELEVATION_MAX = 21;
+    uint256 private constant DIFFUSE_CONSTANT_MAX = 2;
+    uint256 private constant SURFACE_SCALE_MIN = 1;
+    uint256 private constant SURFACE_SCALE_MAX = 31;
+    uint256 private constant ELEVATION_MIN = 1;
+    uint256 private constant ELEVATION_MAX = 61;
     uint256 private constant SCALE_MIN = 0;
-    uint256 private constant SCALE_MAX = 201;
-    uint256 private constant SCALE_DELTA_MIN = 50;
-    uint256 private constant SCALE_DELTA_MAX = 251;
-    uint256 private constant SCALE_ANIMATION_MIN = 1;
-    uint256 private constant SCALE_ANIMATION_MAX = 81;
-    uint256 private constant KEY_TIME_MIN = 3;
-    uint256 private constant KEY_TIME_MAX = 8;
+    uint256 private constant SCALE_MAX = 76;
+    uint256 private constant SCALE_DELTA_MIN = 0;
+    uint256 private constant SCALE_DELTA_MAX = 226;
+    uint256 private constant SCALE_ANIMATION_MIN = 15;
+    uint256 private constant SCALE_ANIMATION_MAX = 61;
+    uint256 private constant KEY_TIME_MIN = 4;
+    uint256 private constant KEY_TIME_MAX = 7;
     uint256 private constant HUE_ROTATE_ANIMATION_MIN = 1;
-    uint256 private constant HUE_ROTATE_ANIMATION_MAX = 21;
+    uint256 private constant HUE_ROTATE_ANIMATION_MAX = 31;
     uint256 private constant ROTATION_MIN = 0;
     uint256 private constant ROTATION_MAX = 4;
 
@@ -520,20 +520,21 @@ contract Mercurials is ERC721, LinearVRGDA, ReentrancyGuard {
     )
         internal
         pure
-        returns (string memory element, string memory attributes, uint256)
+        returns (string memory element, string memory attributes, uint256 elevationInt, uint256)
     {
         // Generate a random value for the diffuse constant.
-        uint256 random;
+        uint diffuseConstantInt;
         string memory diffuseConstant;
-        (random, nonce) = generateRandom(
+        (diffuseConstantInt, nonce) = generateRandom(
             DIFFUSE_CONSTANT_MIN,
             DIFFUSE_CONSTANT_MAX,
             seed,
             nonce
         );
-        diffuseConstant = random.toString();
+        diffuseConstant = diffuseConstantInt.toString();
 
         // Generate a random value for the surfaceScale.
+        uint256 random;
         string memory surfaceScale;
         // Note: 10 is the largest surface scale rendered on mobile devices.
         (random, nonce) = generateRandom(
@@ -546,13 +547,15 @@ contract Mercurials is ERC721, LinearVRGDA, ReentrancyGuard {
 
         // Generate a random value for the elevation.
         string memory elevation;
-        (random, nonce) = generateRandom(
+        (elevationInt, nonce) = generateRandom(
             ELEVATION_MIN,
             ELEVATION_MAX,
             seed,
             nonce
         );
-        elevation = random.toString();
+        // elevation = (random / diffuseConstantInt).toString();
+        // elevation = random.toString();
+        elevation = elevationInt.toString();
 
         // Create the feDiffuseLighting element.
         element = string.concat(
@@ -576,11 +579,12 @@ contract Mercurials is ERC721, LinearVRGDA, ReentrancyGuard {
             '" },'
         );
 
-        return (element, attributes, nonce);
+        return (element, attributes, elevationInt, nonce);
     }
 
     /// @notice Generates the feColorMatrix SVG element for (maybe) inverting the colors
     function generateFeColorMatrixForInversionElement(
+        uint256 elevation,
         uint256 seed,
         uint256 nonce
     )
@@ -588,9 +592,15 @@ contract Mercurials is ERC721, LinearVRGDA, ReentrancyGuard {
         pure
         returns (string memory element, string memory attributes, uint256)
     {
-        // Apply the inversion half the time.
+        // Apply the inversion half the time. FIXME
         bool invert;
-        (invert, nonce) = generateRandomBool(seed, nonce);
+        if (elevation >= 45) {
+            invert = true;
+        } else if (elevation <= 15) {
+            invert = false;
+        } else {
+            (invert, nonce) = generateRandomBool(seed, nonce);
+        }
         if (invert) {
             element = '<feColorMatrix type="matrix" values="-1 0 0 0 1 0 -1 0 0 1 0 0 -1 0 1 0 0 0 1 0"/>';
         }
@@ -699,9 +709,11 @@ contract Mercurials is ERC721, LinearVRGDA, ReentrancyGuard {
         // Generate the feDiffuseLighting element.
         string memory feDiffuseLightingElement;
         string memory feDiffuseLightingAttributes;
+        uint256 elevation;
         (
             feDiffuseLightingElement,
             feDiffuseLightingAttributes,
+            elevation,
             nonce
         ) = generateFeDiffuseLightingElement(seed, nonce);
 
@@ -712,7 +724,7 @@ contract Mercurials is ERC721, LinearVRGDA, ReentrancyGuard {
             feColorMatrixForInversionElement,
             feColorMatrixForInversionAttributes,
             nonce
-        ) = generateFeColorMatrixForInversionElement(seed, nonce);
+        ) = generateFeColorMatrixForInversionElement(elevation, seed, nonce);
 
         string memory rectAndSvgClose;
         string memory rectAttributes;
