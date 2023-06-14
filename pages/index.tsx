@@ -25,19 +25,20 @@ const Home: NextPage = () => {
   const { chain = { id: 5 } } = useNetwork();
 
   // State
-  const [address, setAddress] = useState(deployments[chain.id].address);
-  const [abi, setAbi] = useState(deployments[chain.id].abi);
-  // const [address, setAddress] = useState(deployments[1].address);
-  // const [abi, setAbi] = useState(deployments[1].abi);
+  // const [address, setAddress] = useState(deployments[chain.id].address);
+  // const [abi, setAbi] = useState(deployments[chain.id].abi);
+  const [address, setAddress] = useState(deployments[5].address);
+  console.log('address', address)
+  const [abi, setAbi] = useState(deployments[5].abi);
   const [mintAttempt, setMintAttempt] = useState<MintAttempt>();
 
   // Hooks
   const { isConnected } = useAccount();
   useEffect(() => {
-    setAddress(deployments[chain.id].address);
-    setAbi(deployments[chain.id].abi);
-    // setAddress(deployments[1].address);
-    // setAbi(deployments[1].abi);
+    // setAddress(deployments[chain.id].address);
+    // setAbi(deployments[chain.id].abi);
+    setAddress(deployments[5].address);
+    setAbi(deployments[5].abi);
   }, [chain]);
 
   const { data: blockNumber } = useBlockNumber();
