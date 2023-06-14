@@ -40,7 +40,7 @@ contract Mercurials is ERC721, LinearVRGDA, ReentrancyGuard {
     uint256 private constant DIFFUSE_CONSTANT_MIN = 1;
     uint256 private constant DIFFUSE_CONSTANT_MAX = 2;
     uint256 private constant SURFACE_SCALE_MIN = 1;
-    uint256 private constant SURFACE_SCALE_MAX = 31;
+    uint256 private constant SURFACE_SCALE_MAX = 21;
     uint256 private constant ELEVATION_MIN = 1;
     uint256 private constant ELEVATION_MAX = 91;
     uint256 private constant SCALE_MIN = 0;
