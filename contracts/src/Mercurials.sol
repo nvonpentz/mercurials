@@ -42,7 +42,7 @@ contract Mercurials is ERC721, LinearVRGDA, ReentrancyGuard {
     uint256 private constant SURFACE_SCALE_MIN = 1;
     uint256 private constant SURFACE_SCALE_MAX = 31;
     uint256 private constant ELEVATION_MIN = 1;
-    uint256 private constant ELEVATION_MAX = 61;
+    uint256 private constant ELEVATION_MAX = 91;
     uint256 private constant SCALE_MIN = 0;
     uint256 private constant SCALE_MAX = 76;
     uint256 private constant SCALE_DELTA_MIN = 0;
@@ -594,9 +594,9 @@ contract Mercurials is ERC721, LinearVRGDA, ReentrancyGuard {
     {
         // Apply the inversion half the time. FIXME
         bool invert;
-        if (elevation >= 45) {
+        if (elevation >= 70) {
             invert = true;
-        } else if (elevation <= 15) {
+        } else if (elevation <= 20) {
             invert = false;
         } else {
             (invert, nonce) = generateRandomBool(seed, nonce);
