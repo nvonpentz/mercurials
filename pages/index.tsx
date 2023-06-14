@@ -115,7 +115,7 @@ const Home: NextPage = () => {
                   />
                 )}
               </div>
-              <svg xmlns="http://www.w3.org/2000/svg" width="350" height="350" version="1.1" viewBox="25 25 300 300">
+              <svg xmlns="http://www.w3.org/2000/svg" width="350" height="350" version="1.1" viewBox="0 0 350 350">
                 <filter id="a">
                   <feTurbulence baseFrequency="0.0115" numOctaves="2" seed="9772"/>
                   <feDisplacementMap>
@@ -127,7 +127,7 @@ const Home: NextPage = () => {
                   <feColorMatrix type="matrix" result="c" values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 1 0 0 0 0"/>
                   <feComposite in="b" in2="c" operator="out" result="d"/>
                   <feComposite in="d" in2="d" operator="arithmetic" k1="1" k2="1" k3="1" k4="0.10"/>
-                  <feDiffuseLighting lighting-color="#fff" diffuseConstant="1" surfaceScale="17">
+                  <feDiffuseLighting lighting-color="#fff" diffuseConstant="1" surfaceScale="5">
                     <feDistantLight elevation="6"/>
                   </feDiffuseLighting>
                 </filter>
