@@ -36,7 +36,7 @@ contract Mercurials is ERC721, LinearVRGDA, ReentrancyGuard {
     // the feTurbulence SVG element.
     uint256 private constant SVG_SEED_MAX = 65536;
     uint256 private constant K4_MIN = 0;
-    uint256 private constant K4_MAX = 51;
+    uint256 private constant K4_MAX = 81;
     uint256 private constant DIFFUSE_CONSTANT_MIN = 1;
     uint256 private constant DIFFUSE_CONSTANT_MAX = 2;
     uint256 private constant SURFACE_SCALE_MIN = 1;
@@ -44,7 +44,7 @@ contract Mercurials is ERC721, LinearVRGDA, ReentrancyGuard {
     uint256 private constant ELEVATION_MIN = 1;
     uint256 private constant ELEVATION_MAX = 91;
     uint256 private constant SCALE_MIN = 0;
-    uint256 private constant SCALE_MAX = 101;
+    uint256 private constant SCALE_MAX = 51;
     uint256 private constant SCALE_DELTA_MIN = 0;
     uint256 private constant SCALE_DELTA_MAX = 251;
     uint256 private constant SCALE_ANIMATION_MIN = 15;
@@ -285,7 +285,7 @@ contract Mercurials is ERC721, LinearVRGDA, ReentrancyGuard {
 
         // Create the SVG element
         element = string.concat(
-            '<svg width="350" height="350" version="1.1" viewBox="25 25 300 300" xmlns="http://www.w3.org/2000/svg"><filter id="a"><feTurbulence baseFrequency="',
+            '<svg width="350" height="350" version="1.1" viewBox="0 0 350 350" xmlns="http://www.w3.org/2000/svg"><filter id="a"><feTurbulence baseFrequency="',
             baseFrequency,
             '" numOctaves="',
             numOctaves,
