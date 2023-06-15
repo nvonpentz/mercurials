@@ -17,7 +17,7 @@ import { Analytics } from "@vercel/analytics/react";
 const { chains, provider, webSocketProvider } = configureChains(
   process.env.NEXT_PUBLIC_ENV === "production"
     ? [goerli]
-  : [goerli, polygon, foundry],
+  : [goerli, foundry],
 
     // : [mainnet],
   [

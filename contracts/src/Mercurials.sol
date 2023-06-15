@@ -36,17 +36,17 @@ contract Mercurials is ERC721, LinearVRGDA, ReentrancyGuard {
     // the feTurbulence SVG element.
     uint256 private constant SVG_SEED_MAX = 65536;
     uint256 private constant K4_MIN = 0;
-    uint256 private constant K4_MAX = 100;
+    uint256 private constant K4_MAX = 51;
     uint256 private constant DIFFUSE_CONSTANT_MIN = 1;
     uint256 private constant DIFFUSE_CONSTANT_MAX = 2;
     uint256 private constant SURFACE_SCALE_MIN = 1;
-    uint256 private constant SURFACE_SCALE_MAX = 21;
+    uint256 private constant SURFACE_SCALE_MAX = 16;
     uint256 private constant ELEVATION_MIN = 1;
     uint256 private constant ELEVATION_MAX = 91;
     uint256 private constant SCALE_MIN = 0;
-    uint256 private constant SCALE_MAX = 76;
+    uint256 private constant SCALE_MAX = 101;
     uint256 private constant SCALE_DELTA_MIN = 0;
-    uint256 private constant SCALE_DELTA_MAX = 226;
+    uint256 private constant SCALE_DELTA_MAX = 251;
     uint256 private constant SCALE_ANIMATION_MIN = 15;
     uint256 private constant SCALE_ANIMATION_MAX = 61;
     uint256 private constant KEY_TIME_MIN = 4;
@@ -468,6 +468,7 @@ contract Mercurials is ERC721, LinearVRGDA, ReentrancyGuard {
         // Generate a random value for the k4 attribute.
         string memory k4;
         (random, nonce) = generateRandom(K4_MIN, K4_MAX, seed, nonce);
+        // random = 85;
         if (random < 10) {
             k4 = string.concat("0.0", random.toString());
         } else {
@@ -535,15 +536,6 @@ contract Mercurials is ERC721, LinearVRGDA, ReentrancyGuard {
 
         // Generate a random value for the surfaceScale.
         uint256 random;
-        string memory surfaceScale;
-        // Note: 10 is the largest surface scale rendered on mobile devices.
-        (random, nonce) = generateRandom(
-            SURFACE_SCALE_MIN,
-            SURFACE_SCALE_MAX,
-            seed,
-            nonce
-        );
-        surfaceScale = random.toString();
 
         // Generate a random value for the elevation.
         string memory elevation;
@@ -556,6 +548,16 @@ contract Mercurials is ERC721, LinearVRGDA, ReentrancyGuard {
         // elevation = (random / diffuseConstantInt).toString();
         // elevation = random.toString();
         elevation = elevationInt.toString();
+
+        string memory surfaceScale;
+        // Note: 10 is the largest surface scale rendered on mobile devices.
+        (random, nonce) = generateRandom(
+            SURFACE_SCALE_MIN,
+            SURFACE_SCALE_MAX,
+            seed,
+            nonce
+        );
+        surfaceScale = (random + ((1+elevationInt)/10)).toString();
 
         // Create the feDiffuseLighting element.
         element = string.concat(
@@ -635,10 +637,14 @@ contract Mercurials is ERC721, LinearVRGDA, ReentrancyGuard {
         rotation = rotation * 90;
 
         element = string.concat(
-            '</filter><rect width="350" height="350" filter="url(#a)" transform="rotate(',
-            rotation.toString(),
-            ' 175 175)"/></svg>'
+            '</filter><rect width="350" height="350" filter="url(#a)"/></svg>'
         );
+        
+        // element = string.concat(
+        //     '</filter><rect width="350" height="350" filter="url(#a)" transform="rotate(',
+       //     rotation.toString(),
+        //     ' 175 175)"/></svg>'
+        // );
 
         attributes = string.concat(
             '{ "trait_type": "Rotation", "value": "',
