@@ -27,7 +27,7 @@ contract Mercurials is ERC721, LinearVRGDA, ReentrancyGuard {
     mapping(uint256 => uint256) public seeds;
 
     // ==================== CONSTANTS ====================
-    uint256 private constant BASE_FREQUENCY_MIN = 50;
+    uint256 private constant BASE_FREQUENCY_MIN = 1;
     uint256 private constant BASE_FREQUENCY_MAX = 301;
     uint256 private constant NUM_OCTAVES_MIN = 1;
     uint256 private constant NUM_OCTAVES_MAX = 6;
@@ -40,19 +40,19 @@ contract Mercurials is ERC721, LinearVRGDA, ReentrancyGuard {
     uint256 private constant DIFFUSE_CONSTANT_MIN = 1;
     uint256 private constant DIFFUSE_CONSTANT_MAX = 2;
     uint256 private constant SURFACE_SCALE_MIN = 1;
-    uint256 private constant SURFACE_SCALE_MAX = 16;
+    uint256 private constant SURFACE_SCALE_MAX = 101;
     uint256 private constant ELEVATION_MIN = 1;
     uint256 private constant ELEVATION_MAX = 91;
     uint256 private constant SCALE_MIN = 0;
     uint256 private constant SCALE_MAX = 51;
     uint256 private constant SCALE_DELTA_MIN = 0;
     uint256 private constant SCALE_DELTA_MAX = 251;
-    uint256 private constant SCALE_ANIMATION_MIN = 15;
+    uint256 private constant SCALE_ANIMATION_MIN = 10;
     uint256 private constant SCALE_ANIMATION_MAX = 61;
     uint256 private constant KEY_TIME_MIN = 4;
     uint256 private constant KEY_TIME_MAX = 7;
     uint256 private constant HUE_ROTATE_ANIMATION_MIN = 1;
-    uint256 private constant HUE_ROTATE_ANIMATION_MAX = 31;
+    uint256 private constant HUE_ROTATE_ANIMATION_MAX = 21;
     uint256 private constant ROTATION_MIN = 0;
     uint256 private constant ROTATION_MAX = 4;
 
@@ -557,7 +557,8 @@ contract Mercurials is ERC721, LinearVRGDA, ReentrancyGuard {
             seed,
             nonce
         );
-        surfaceScale = (random + ((1+elevationInt)/10)).toString();
+        // surfaceScale = (random + ((1+elevationInt)/10)).toString();
+        surfaceScale = random.toString();
 
         // Create the feDiffuseLighting element.
         element = string.concat(
