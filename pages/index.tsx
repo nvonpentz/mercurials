@@ -105,17 +105,24 @@ const Home: NextPage = () => {
           <PriceInfo blockNumber={blockNumber} nextToken={nextToken} />
           <div className={styles.traitsAndImageContainer}>
             <div className={styles.imageContainer}>
-              <div className={styles.tokenImage}>
-                {nextToken && (
-                  <div
-                    // key={nextToken?.[0]?.toString() + blockNumber?.toString()}
-                    key={nextToken?.[0]?.toString()}
-                    dangerouslySetInnerHTML={{
-                      __html: extractSVGFromTokenURI(nextToken[1]),
-                    }}
-                  />
-                )}
-              </div>
+            <svg xmlns="http://www.w3.org/2000/svg" width="350" height="350" version="1.1" viewBox="25 25 300 300">
+              <filter id="a">
+                <feTurbulence baseFrequency="0.0161" numOctaves="5" seed="29456"/>
+                <feDisplacementMap>
+                  <animate attributeName="scale" values="-66;-84;-66;" keyTimes="0; 0.5; 1" dur="60s" repeatCount="indefinite" calcMode="spline" keySplines="0.3 0 0.7 1; 0.3 0 0.7 1"/>
+                </feDisplacementMap>
+                <feColorMatrix type="hueRotate" result="b">
+                  <animate attributeName="values" from="0" to="360" dur="18s" repeatCount="indefinite"/>
+                </feColorMatrix>
+                <feColorMatrix type="matrix" result="c" values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 1 0 0 0 0"/>
+                <feComposite in="b" in2="c" operator="out" result="d"/>
+                <feComposite in="d" in2="d" operator="arithmetic" k1="1" k2="1" k3="1" k4="0.16"/>
+                <feDiffuseLighting lighting-color="#fff" diffuseConstant="1" surfaceScale="18">
+                  <feDistantLight elevation="15"/>
+                </feDiffuseLighting>
+              </filter>
+              <rect width="350" height="350" filter="url(#a)"/>
+            </svg>
               <div className={styles.buttonContainer}>
                 <MintButton
                   isConnected={isConnected}
