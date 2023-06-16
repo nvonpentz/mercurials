@@ -521,7 +521,12 @@ contract Mercurials is ERC721, LinearVRGDA, ReentrancyGuard {
     )
         internal
         pure
-        returns (string memory element, string memory attributes, uint256 elevationInt, uint256)
+        returns (
+            string memory element,
+            string memory attributes,
+            uint256 elevationInt,
+            uint256
+        )
     {
         // Generate a random value for the diffuse constant.
         uint diffuseConstantInt;
@@ -640,10 +645,10 @@ contract Mercurials is ERC721, LinearVRGDA, ReentrancyGuard {
         element = string.concat(
             '</filter><rect width="350" height="350" filter="url(#a)"/></svg>'
         );
-        
+
         // element = string.concat(
         //     '</filter><rect width="350" height="350" filter="url(#a)" transform="rotate(',
-       //     rotation.toString(),
+        //     rotation.toString(),
         //     ' 175 175)"/></svg>'
         // );
 
