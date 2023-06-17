@@ -544,50 +544,119 @@ contract Mercurials is ERC721, LinearVRGDA, ReentrancyGuard {
         returns (
             string memory element,
             string memory attributes,
-            uint256 elevationInt,
             uint256
         )
     {
-        // Generate a random value for the diffuse constant.
-        uint diffuseConstantInt;
-        string memory diffuseConstant;
-        (diffuseConstantInt, nonce) = generateRandom(
-            DIFFUSE_CONSTANT_MIN,
-            DIFFUSE_CONSTANT_MAX,
+
+        // Generate a random number for the palette.
+        uint256 palette;
+        (palette, nonce) = generateRandom(
+            0,
+            9,
             seed,
             nonce
         );
-        diffuseConstant = diffuseConstantInt.toString();
-        uint256 random;
-        (random, nonce) = generateRandom(
-            0, 100, seed, nonce
-        );
-        diffuseConstant = string.concat(diffuseConstant, ".", random.toString());
 
-        // Generate a random value for the surfaceScale.
-
-        // Generate a random value for the elevation.
+        // Generate elevation, surface scale, diffuse constant, and inversion based on the palette.
         string memory elevation;
-        (elevationInt, nonce) = generateRandom(
-            ELEVATION_MIN,
-            ELEVATION_MAX,
-            seed,
-            nonce
-        );
-        // elevation = (random / diffuseConstantInt).toString();
-        // elevation = random.toString();
-        elevation = elevationInt.toString();
-
         string memory surfaceScale;
-        // Note: 10 is the largest surface scale rendered on mobile devices.
-        (random, nonce) = generateRandom(
-            SURFACE_SCALE_MIN,
-            SURFACE_SCALE_MAX,
-            seed,
-            nonce
-        );
-        // surfaceScale = (random + ((1+elevationInt)/10)).toString();
-        surfaceScale = random.toString();
+        string memory diffuseConstant;
+        bool invert;
+
+        if (palette == 0) {
+            // classic
+            elevation = "21";
+            surfaceScale = "7";
+            diffuseConstant = "2";
+            invert = true;
+        } else if (palette == 1) {
+            // classic inverted
+            elevation = "60";
+            surfaceScale = "64";
+            diffuseConstant = "1";
+            invert = true;
+        } else if (palette == 2) {
+            // black
+            // * 70,40,true,1.97
+            elevation = "70";
+            surfaceScale = "40";
+            diffuseConstant = "1.97";
+            invert = true;
+        } else if (palette == 3) {
+            // muted dark gray 
+            // 73,3,true,1
+            elevation = "73";
+            surfaceScale = "3";
+            diffuseConstant = "1";
+            invert = true;
+        } else if (palette == 4) {
+            // black
+            // * 88,10,true,1
+            elevation = "88";
+            surfaceScale = "10";
+            diffuseConstant = "1";
+            invert = true;
+        } else if (palette == 5) {
+            // muted dark gray
+            // * 2,2,false,1,     
+            elevation = "2";
+            surfaceScale = "2";
+            diffuseConstant = "1";
+            invert = false;
+        } else if (palette == 6) {
+            // darker classic
+            elevation = "5";
+            surfaceScale = "10";
+            diffuseConstant = "0.91";
+            invert = false;
+        } else if (palette == 7) {
+            // bright classic
+            // * 9,10,false,3,14,
+            elevation = "9";
+            surfaceScale = "10";
+            diffuseConstant = "3";
+            invert = false;
+        } else if (palette == 8) {
+            // funky
+            // 67,91,false,1
+            elevation = "67";
+            surfaceScale = "91";
+            diffuseConstant = "1";
+            invert = false;
+        }
+
+        // Generate a random value for the diffuse constant.
+        // uint random;
+        // (random, nonce) = generateRandom(
+        //     DIFFUSE_CONSTANT_MIN,
+        //     DIFFUSE_CONSTANT_MAX,
+        //     seed,
+        //     nonce
+        // );
+        // (random, nonce) = generateRandom(
+        //     0, 100, seed, nonce
+        // );
+        // string memory diffuseConstant = string.concat(random.toString(), ".", random.toString());
+
+        // // Generate a random value for the elevation.
+        // string memory elevation;
+        // (random, nonce) = generateRandom(
+        //     ELEVATION_MIN,
+        //     ELEVATION_MAX,
+        //     seed,
+        //     nonce
+        // );
+        // elevation = random.toString();
+
+        // // Generate a random value for the surfaceScale.
+        // string memory surfaceScale;
+        // (random, nonce) = generateRandom(
+        //     SURFACE_SCALE_MIN,
+        //     SURFACE_SCALE_MAX,
+        //     seed,
+        //     nonce
+        // );
+        // surfaceScale = random.toString();
 
         // Create the feDiffuseLighting element.
         element = string.concat(
@@ -597,7 +666,8 @@ contract Mercurials is ERC721, LinearVRGDA, ReentrancyGuard {
             surfaceScale,
             '"><feDistantLight elevation="',
             elevation,
-            '"/></feDiffuseLighting>'
+            '"/></feDiffuseLighting>',
+            invert ? '<feColorMatrix type="matrix" values="-1 0 0 0 1 0 -1 0 0 1 0 0 -1 0 1 0 0 0 1 0"/>' : ""
         );
 
         // Create the attributes.
@@ -608,50 +678,37 @@ contract Mercurials is ERC721, LinearVRGDA, ReentrancyGuard {
             surfaceScale,
             '" }, { "trait_type": "Elevation", "value": "',
             elevation,
-            '" },'
-        );
-
-        return (element, attributes, elevationInt, nonce);
-    }
-
-    /// @notice Generates the feColorMatrix SVG element for (maybe) inverting the colors
-    function generateFeColorMatrixForInversionElement(
-        uint256 elevation,
-        uint256 seed,
-        uint256 nonce
-    )
-        internal
-        pure
-        returns (string memory element, string memory attributes, uint256)
-    {
-        // Apply the inversion half the time. FIXME
-        bool invert;
-        // if (elevation >= 70) {
-        //     invert = true;
-        // } else if (elevation <= 20) {
-        //     invert = false;
-        // } else {
-        //     (invert, nonce) = generateRandomBool(seed, nonce);
-        // }
-        // if (elevation < 45) {
-        //     invert = false;
-        // } else {
-        //     invert = true;
-        // }
-
-        (invert, nonce) = generateRandomBool(seed, nonce);
-        if (invert) {
-            element = '<feColorMatrix type="matrix" values="-1 0 0 0 1 0 -1 0 0 1 0 0 -1 0 1 0 0 0 1 0"/>';
-        }
-
-        attributes = string.concat(
+            '" }, ',
             '{ "trait_type": "Inverted", "value": ',
             invert ? "true" : "false",
-            " } " // No comma here because this is the last attribute.
+            " }, " // No comma here because this is the last attribute.
         );
 
         return (element, attributes, nonce);
     }
+
+    /// @notice Generates the feColorMatrix SVG element for (maybe) inverting the colors
+    // function generateFeColorMatrixForInversionElement(
+    //     uint256 palette
+    // )
+    //     internal
+    //     pure
+    //     returns (string memory element, string memory attributes)
+    // {
+    //     bool invert = palette == 0;
+    //     if (invert) {
+    //         element = '<feColorMatrix type="matrix" values="-1 0 0 0 1 0 -1 0 0 1 0 0 -1 0 1 0 0 0 1 0"/>';
+    //     }
+
+    //     attributes = string.concat(
+    //         '{ "trait_type": "Inverted", "value": ',
+    //         invert ? "true" : "false",
+    //         " } " // No comma here because this is the last attribute.
+    //     );
+
+    //     return (element, attributes);
+    //     // return (element, attributes, nonce);
+    // }
 
     /// @notice Generates the main rect element but also includes the closing filter
     /// and closing svg tags
@@ -686,7 +743,7 @@ contract Mercurials is ERC721, LinearVRGDA, ReentrancyGuard {
         attributes = string.concat(
             '{ "trait_type": "Rotation", "value": "',
             rotation.toString(),
-            '" }, '
+            '" } '
         );
         return (element, attributes, nonce);
     }
@@ -752,22 +809,21 @@ contract Mercurials is ERC721, LinearVRGDA, ReentrancyGuard {
         // Generate the feDiffuseLighting element.
         string memory feDiffuseLightingElement;
         string memory feDiffuseLightingAttributes;
-        uint256 elevation;
+        // uint256 palette;
         (
             feDiffuseLightingElement,
             feDiffuseLightingAttributes,
-            elevation,
+            // palette,
             nonce
         ) = generateFeDiffuseLightingElement(seed, nonce);
 
         // Generate the feColorMatrix element used for inverting colors.
-        string memory feColorMatrixForInversionElement;
-        string memory feColorMatrixForInversionAttributes;
-        (
-            feColorMatrixForInversionElement,
-            feColorMatrixForInversionAttributes,
-            nonce
-        ) = generateFeColorMatrixForInversionElement(elevation, seed, nonce);
+        // string memory feColorMatrixForInversionElement;
+        // string memory feColorMatrixForInversionAttributes;
+        // (
+        //     feColorMatrixForInversionElement,
+        //     feColorMatrixForInversionAttributes
+        // ) = generateFeColorMatrixForInversionElement(palette);
 
         string memory rectAndSvgClose;
         string memory rectAttributes;
@@ -782,7 +838,7 @@ contract Mercurials is ERC721, LinearVRGDA, ReentrancyGuard {
             feColorMatrixElements,
             feCompositeElements,
             feDiffuseLightingElement,
-            feColorMatrixForInversionElement,
+            // feColorMatrixForInversionElement,
             rectAndSvgClose
         );
 
@@ -792,8 +848,8 @@ contract Mercurials is ERC721, LinearVRGDA, ReentrancyGuard {
             feColorMatrixAttributes,
             feCompositeAttributes,
             feDiffuseLightingAttributes,
-            rectAttributes,
-            feColorMatrixForInversionAttributes
+            rectAttributes
+            // feColorMatrixForInversionAttributes
         );
 
         return (svg, attributes);
