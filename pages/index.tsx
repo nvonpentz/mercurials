@@ -27,8 +27,8 @@ const Home: NextPage = () => {
   // State
   // const [address, setAddress] = useState(deployments[chain.id].address);
   // const [abi, setAbi] = useState(deployments[chain.id].abi);
-  const [address, setAddress] = useState(deployments[5].address);
-  const [abi, setAbi] = useState(deployments[5].abi);
+  const [address, setAddress] = useState(deployments[31337].address);
+  const [abi, setAbi] = useState(deployments[31337].abi);
   const [mintAttempt, setMintAttempt] = useState<MintAttempt>();
 
   // Hooks
@@ -36,8 +36,8 @@ const Home: NextPage = () => {
   useEffect(() => {
     // setAddress(deployments[chain.id].address);
     // setAbi(deployments[chain.id].abi);
-    setAddress(deployments[5].address);
-    setAbi(deployments[5].abi);
+    setAddress(deployments[31337].address);
+    setAbi(deployments[31337].abi);
   }, [chain]);
 
   const { data: blockNumber } = useBlockNumber();

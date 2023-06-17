@@ -27,7 +27,7 @@ contract Mercurials is ERC721, LinearVRGDA, ReentrancyGuard {
     mapping(uint256 => uint256) public seeds;
 
     // ==================== CONSTANTS ====================
-    uint256 private constant BASE_FREQUENCY_MIN = 1;
+    uint256 private constant BASE_FREQUENCY_MIN = 30;
     uint256 private constant BASE_FREQUENCY_MAX = 301;
     uint256 private constant NUM_OCTAVES_MIN = 1;
     uint256 private constant NUM_OCTAVES_MAX = 6;
@@ -37,17 +37,17 @@ contract Mercurials is ERC721, LinearVRGDA, ReentrancyGuard {
     uint256 private constant SVG_SEED_MAX = 65536;
     uint256 private constant K4_MIN = 0;
     uint256 private constant K4_MAX = 81;
-    uint256 private constant DIFFUSE_CONSTANT_MIN = 1;
+    uint256 private constant DIFFUSE_CONSTANT_MIN = 0;
     uint256 private constant DIFFUSE_CONSTANT_MAX = 2;
-    uint256 private constant SURFACE_SCALE_MIN = 1;
-    uint256 private constant SURFACE_SCALE_MAX = 101;
-    uint256 private constant ELEVATION_MIN = 1;
+    uint256 private constant SURFACE_SCALE_MIN =  1;
+    uint256 private constant SURFACE_SCALE_MAX =  101;
+    uint256 private constant ELEVATION_MIN = 0;
     uint256 private constant ELEVATION_MAX = 91;
     uint256 private constant SCALE_MIN = 0;
-    uint256 private constant SCALE_MAX = 176;
+    uint256 private constant SCALE_MAX = 151;
     uint256 private constant SCALE_DELTA_MIN = 0;
-    uint256 private constant SCALE_DELTA_MAX = 176;
-    uint256 private constant SCALE_ANIMATION_MIN = 10;
+    uint256 private constant SCALE_DELTA_MAX = 151;
+    uint256 private constant SCALE_ANIMATION_MIN = 1;
     uint256 private constant SCALE_ANIMATION_MAX = 61;
     uint256 private constant KEY_TIME_MIN = 4;
     uint256 private constant KEY_TIME_MAX = 7;
@@ -478,20 +478,40 @@ contract Mercurials is ERC721, LinearVRGDA, ReentrancyGuard {
         // Make k4 negative half the time.
         string memory operator;
         bool randomBool;
+        // (randomBool, nonce) = generateRandomBool(seed, nonce);
+        // if (randomBool) {
+        //     k4 = string.concat("-", k4);
+        //     // If k4 is negative, always use the "out" operator.
+        //     operator = "out";
+        // } else {
+        //     // Otherwise use the "over" operator half the time.
+        //     (randomBool, nonce) = generateRandomBool(seed, nonce);
+        //     if (randomBool) {
+        //         operator = "out";
+        //     } else {
+        //         operator = "in";
+        //     }
+        // }
+        // Otherwise use the "over" operator half the time.
         (randomBool, nonce) = generateRandomBool(seed, nonce);
         if (randomBool) {
-            k4 = string.concat("-", k4);
-            // If k4 is negative, always use the "out" operator.
             operator = "out";
         } else {
-            // Otherwise use the "over" operator half the time.
-            (randomBool, nonce) = generateRandomBool(seed, nonce);
-            if (randomBool) {
-                operator = "out";
-            } else {
-                operator = "in";
-            }
+            operator = "in";
         }
+
+        // (random, nonce) = generateRandom(0, 5, seed, nonce);
+        // if (random == 0 ) {
+        //     operator = "over";
+        // } else if (random == 1) {
+        //     operator = "in";
+        // } else if (random == 2) {
+        //     operator = "out";
+        // } else if (random == 3) {
+        //     operator = "atop";
+        // } else {
+        //     operator = "xor";
+        // }
 
         // Create the feComposite elements.
         elements = string.concat(
@@ -538,9 +558,13 @@ contract Mercurials is ERC721, LinearVRGDA, ReentrancyGuard {
             nonce
         );
         diffuseConstant = diffuseConstantInt.toString();
+        uint256 random;
+        (random, nonce) = generateRandom(
+            0, 100, seed, nonce
+        );
+        diffuseConstant = string.concat(diffuseConstant, ".", random.toString());
 
         // Generate a random value for the surfaceScale.
-        uint256 random;
 
         // Generate a random value for the elevation.
         string memory elevation;
@@ -602,13 +626,20 @@ contract Mercurials is ERC721, LinearVRGDA, ReentrancyGuard {
     {
         // Apply the inversion half the time. FIXME
         bool invert;
-        if (elevation >= 70) {
-            invert = true;
-        } else if (elevation <= 20) {
-            invert = false;
-        } else {
-            (invert, nonce) = generateRandomBool(seed, nonce);
-        }
+        // if (elevation >= 70) {
+        //     invert = true;
+        // } else if (elevation <= 20) {
+        //     invert = false;
+        // } else {
+        //     (invert, nonce) = generateRandomBool(seed, nonce);
+        // }
+        // if (elevation < 45) {
+        //     invert = false;
+        // } else {
+        //     invert = true;
+        // }
+
+        (invert, nonce) = generateRandomBool(seed, nonce);
         if (invert) {
             element = '<feColorMatrix type="matrix" values="-1 0 0 0 1 0 -1 0 0 1 0 0 -1 0 1 0 0 0 1 0"/>';
         }
