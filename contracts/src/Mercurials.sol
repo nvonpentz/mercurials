@@ -476,8 +476,13 @@ contract Mercurials is ERC721, LinearVRGDA, ReentrancyGuard {
         }
 
         // Make k4 negative half the time.
-        string memory operator;
         bool randomBool;
+        (randomBool, nonce) = generateRandomBool(seed, nonce);
+        if (randomBool) {
+            k4 = string.concat("-", k4);
+        }
+
+        string memory operator;
         // (randomBool, nonce) = generateRandomBool(seed, nonce);
         // if (randomBool) {
         //     k4 = string.concat("-", k4);
@@ -557,106 +562,109 @@ contract Mercurials is ERC721, LinearVRGDA, ReentrancyGuard {
             nonce
         );
 
-        // Generate elevation, surface scale, diffuse constant, and inversion based on the palette.
-        string memory elevation;
-        string memory surfaceScale;
-        string memory diffuseConstant;
-        bool invert;
-
-        if (palette == 0) {
-            // classic
-            elevation = "21";
-            surfaceScale = "7";
-            diffuseConstant = "2";
-            invert = true;
-        } else if (palette == 1) {
-            // classic inverted
-            elevation = "60";
-            surfaceScale = "64";
-            diffuseConstant = "1";
-            invert = true;
-        } else if (palette == 2) {
-            // black
-            // * 70,40,true,1.97
-            elevation = "70";
-            surfaceScale = "40";
-            diffuseConstant = "1.97";
-            invert = true;
-        } else if (palette == 3) {
-            // muted dark gray 
-            // 73,3,true,1
-            elevation = "73";
-            surfaceScale = "3";
-            diffuseConstant = "1";
-            invert = true;
-        } else if (palette == 4) {
-            // black
-            // * 88,10,true,1
-            elevation = "88";
-            surfaceScale = "10";
-            diffuseConstant = "1";
-            invert = true;
-        } else if (palette == 5) {
-            // muted dark gray
-            // * 2,2,false,1,     
-            elevation = "2";
-            surfaceScale = "2";
-            diffuseConstant = "1";
-            invert = false;
-        } else if (palette == 6) {
-            // darker classic
-            elevation = "5";
-            surfaceScale = "10";
-            diffuseConstant = "0.91";
-            invert = false;
-        } else if (palette == 7) {
-            // bright classic
-            // * 9,10,false,3,14,
-            elevation = "9";
-            surfaceScale = "10";
-            diffuseConstant = "3";
-            invert = false;
-        } else if (palette == 8) {
-            // funky
-            // 67,91,false,1
-            elevation = "67";
-            surfaceScale = "91";
-            diffuseConstant = "1";
-            invert = false;
-        }
+        // // Generate elevation, surface scale, diffuse constant, and inversion based on the palette.
+        // string memory elevation;
+        // string memory surfaceScale;
+        // string memory diffuseConstant;
+        // bool invert;
+        // if (palette == 0) {
+        //     // classic
+        //     elevation = "21";
+        //     surfaceScale = "7";
+        //     diffuseConstant = "2";
+        //     invert = true;
+        // } else if (palette == 1) {
+        //     // classic inverted
+        //     elevation = "60";
+        //     surfaceScale = "64";
+        //     diffuseConstant = "1";
+        //     invert = true;
+        // } else if (palette == 2) {
+        //     // black
+        //     // * 70,40,true,1.97
+        //     elevation = "70";
+        //     surfaceScale = "40";
+        //     diffuseConstant = "1.97";
+        //     invert = true;
+        // } else if (palette == 3) {
+        //     // muted dark gray w highlights + 
+        //     // 73,3,true,1
+        //     elevation = "73";
+        //     surfaceScale = "3";
+        //     diffuseConstant = "1";
+        //     invert = true;
+        // } else if (palette == 4) {
+        //     // black -
+        //     // * 88,10,true,1
+        //     elevation = "88";
+        //     surfaceScale = "10";
+        //     diffuseConstant = "1";
+        //     invert = true;
+        // } else if (palette == 5) {
+        //     // muted dark gray
+        //     // * 2,2,false,1,     
+        //     elevation = "2";
+        //     surfaceScale = "2";
+        //     diffuseConstant = "1";
+        //     invert = false;
+        // } else if (palette == 6) {
+        //     // darker classic
+        //     elevation = "5";
+        //     surfaceScale = "10";
+        //     diffuseConstant = "0.91";
+        //     invert = false;
+        // } else if (palette == 7) {
+        //     // bright classic
+        //     // * 9,10,false,3,14,
+        //     elevation = "9";
+        //     surfaceScale = "10";
+        //     diffuseConstant = "3";
+        //     invert = false;
+        // } else if (palette == 8) {
+        //     // funky
+        //     // 67,91,false,1
+        //     elevation = "67";
+        //     surfaceScale = "91";
+        //     diffuseConstant = "1";
+        //     invert = false;
+        // } else if (palette == 9) {
+        // }
 
         // Generate a random value for the diffuse constant.
-        // uint random;
-        // (random, nonce) = generateRandom(
-        //     DIFFUSE_CONSTANT_MIN,
-        //     DIFFUSE_CONSTANT_MAX,
-        //     seed,
-        //     nonce
-        // );
-        // (random, nonce) = generateRandom(
-        //     0, 100, seed, nonce
-        // );
-        // string memory diffuseConstant = string.concat(random.toString(), ".", random.toString());
+        uint random;
+        (random, nonce) = generateRandom(
+            DIFFUSE_CONSTANT_MIN,
+            DIFFUSE_CONSTANT_MAX,
+            seed,
+            nonce
+        );
+        (random, nonce) = generateRandom(
+            0, 100, seed, nonce
+        );
+        string memory diffuseConstant = string.concat(random.toString(), ".", random.toString());
 
-        // // Generate a random value for the elevation.
-        // string memory elevation;
-        // (random, nonce) = generateRandom(
-        //     ELEVATION_MIN,
-        //     ELEVATION_MAX,
-        //     seed,
-        //     nonce
-        // );
-        // elevation = random.toString();
+        // Generate a random value for the elevation.
+        string memory elevation;
+        (random, nonce) = generateRandom(
+            ELEVATION_MIN,
+            ELEVATION_MAX,
+            seed,
+            nonce
+        );
+        elevation = random.toString();
 
-        // // Generate a random value for the surfaceScale.
-        // string memory surfaceScale;
-        // (random, nonce) = generateRandom(
-        //     SURFACE_SCALE_MIN,
-        //     SURFACE_SCALE_MAX,
-        //     seed,
-        //     nonce
-        // );
-        // surfaceScale = random.toString();
+        // Generate a random value for the surfaceScale.
+        string memory surfaceScale;
+        (random, nonce) = generateRandom(
+            SURFACE_SCALE_MIN,
+            SURFACE_SCALE_MAX,
+            seed,
+            nonce
+        );
+        surfaceScale = random.toString();
+
+        bool invert;
+        (invert, nonce) = generateRandomBool(seed, nonce);
 
         // Create the feDiffuseLighting element.
         element = string.concat(
@@ -681,7 +689,11 @@ contract Mercurials is ERC721, LinearVRGDA, ReentrancyGuard {
             '" }, ',
             '{ "trait_type": "Inverted", "value": ',
             invert ? "true" : "false",
-            " }, " // No comma here because this is the last attribute.
+            " }, ",
+            // palette
+            '{ "trait_type": "Palette", "value": "',
+            palette.toString(),
+            '" }, '
         );
 
         return (element, attributes, nonce);
