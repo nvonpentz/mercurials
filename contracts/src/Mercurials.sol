@@ -27,7 +27,7 @@ contract Mercurials is ERC721, LinearVRGDA, ReentrancyGuard {
     mapping(uint256 => uint256) public seeds;
 
     // ==================== CONSTANTS ====================
-    uint256 private constant BASE_FREQUENCY_MIN = 30;
+    uint256 private constant BASE_FREQUENCY_MIN = 50;
     uint256 private constant BASE_FREQUENCY_MAX = 301;
     uint256 private constant NUM_OCTAVES_MIN = 1;
     uint256 private constant NUM_OCTAVES_MAX = 6;
@@ -36,7 +36,7 @@ contract Mercurials is ERC721, LinearVRGDA, ReentrancyGuard {
     // the feTurbulence SVG element.
     uint256 private constant SVG_SEED_MAX = 65536;
     uint256 private constant K4_MIN = 0;
-    uint256 private constant K4_MAX = 81;
+    uint256 private constant K4_MAX = 76;
     uint256 private constant DIFFUSE_CONSTANT_MIN = 0;
     uint256 private constant DIFFUSE_CONSTANT_MAX = 2;
     uint256 private constant SURFACE_SCALE_MIN =  1;
@@ -560,7 +560,7 @@ contract Mercurials is ERC721, LinearVRGDA, ReentrancyGuard {
         (invert, nonce) = generateRandomBool(seed, nonce);
         if (invert) {
             // Generate elevation.
-            (random, nonce) = generateRandom(15, 91, seed, nonce);
+            (random, nonce) = generateRandom(30, 91, seed, nonce);
             elevation = random.toString();
 
             // Generate surface scale.
@@ -569,17 +569,31 @@ contract Mercurials is ERC721, LinearVRGDA, ReentrancyGuard {
             // Generate diffuse constant.
             diffuseConstant = "1";
         } else {
+            bool randomBool;
+            (randomBool, nonce) = generateRandomBool(seed, nonce);
 
-            // Generate elevation
-            elevation = "1";
-            // Generate surface scale.
-            surfaceScale = "1";
-            // Generate diffuse constant before decimal
-            (random, nonce) = generateRandom(1, 31, seed, nonce);
-            diffuseConstant = random.toString();
-            // Generate diffuse constant after decimal
-            (random, nonce) = generateRandom(0, 100, seed, nonce);
-            diffuseConstant = string.concat(diffuseConstant, ".", random.toString());
+            if (randomBool) {
+                // Strategy 1
+                elevation = "1";
+                surfaceScale = "1";
+                // Generate diffuse constant before decimal
+                (random, nonce) = generateRandom(1, 30, seed, nonce);
+                diffuseConstant = random.toString();
+                // Generate diffuse constant after decimal
+                (random, nonce) = generateRandom(0, 100, seed, nonce);
+                diffuseConstant = string.concat(diffuseConstant, ".", random.toString());
+            } else {
+                // Strategy 2
+                (random, nonce) = generateRandom(0, 31, seed, nonce);
+                elevation = random.toString();
+
+                // Generate surface scale, 1-30
+                (random, nonce) = generateRandom(1, 31, seed, nonce);
+                surfaceScale = random.toString();
+
+                diffuseConstant = "1";
+            }
+
         }
 
         // Create the feDiffuseLighting element.
