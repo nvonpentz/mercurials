@@ -50,7 +50,7 @@ contract Mercurials is ERC721, LinearVRGDA, ReentrancyGuard {
     uint256 private constant HUE_ROTATE_ANIMATION_MIN = 1;
     uint256 private constant HUE_ROTATE_ANIMATION_MAX = 21;
     uint256 private constant ROTATION_MIN = 0;
-    uint256 private constant ROTATION_MAX = 4;
+    uint256 private constant ROTATION_MAX = 2;
 
     // ===================== EVENTS =====================
     event TokenMinted(
