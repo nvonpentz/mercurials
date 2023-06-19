@@ -107,7 +107,7 @@ const Home: NextPage = () => {
           <div className={styles.traitsAndImageContainer}>
             <div className={styles.imageContainer}>
               <svg xmlns="http://www.w3.org/2000/svg" width="350" height="350" version="1.1" viewBox="0 0 350 350">
-                <g transform="rotate(180, 175, 175)">
+                <g transform="rotate(90, 175, 175)">
                   <filter id="a">
                     <feTurbulence baseFrequency="0.0079" numOctaves="2" seed="32927"/>
                     <feDisplacementMap>
