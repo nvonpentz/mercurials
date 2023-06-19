@@ -27,7 +27,7 @@ contract Mercurials is ERC721, LinearVRGDA, ReentrancyGuard {
     mapping(uint256 => uint256) public seeds;
 
     // ==================== CONSTANTS ====================
-    uint256 private constant BASE_FREQUENCY_MIN = 50;
+    uint256 private constant BASE_FREQUENCY_MIN = 30;
     uint256 private constant BASE_FREQUENCY_MAX = 301;
     uint256 private constant NUM_OCTAVES_MIN = 1;
     uint256 private constant NUM_OCTAVES_MAX = 6;
@@ -37,8 +37,6 @@ contract Mercurials is ERC721, LinearVRGDA, ReentrancyGuard {
     uint256 private constant SVG_SEED_MAX = 65536;
     uint256 private constant K4_MIN = 0;
     uint256 private constant K4_MAX = 76;
-    uint256 private constant SURFACE_SCALE_MIN = 1;
-    uint256 private constant SURFACE_SCALE_MAX = 101;
     uint256 private constant SCALE_MIN = 0;
     uint256 private constant SCALE_MAX = 151;
     uint256 private constant SCALE_DELTA_MIN = 0;
@@ -51,6 +49,16 @@ contract Mercurials is ERC721, LinearVRGDA, ReentrancyGuard {
     uint256 private constant HUE_ROTATE_ANIMATION_MAX = 21;
     uint256 private constant ROTATION_MIN = 0;
     uint256 private constant ROTATION_MAX = 2;
+    uint256 private constant INVERT_ELEVATION_MIN = 30;
+    uint256 private constant INVERT_ELEVATION_MAX = 91;
+    uint256 private constant INVERT_SURFACE_SCALE_MIN = 1;
+    uint256 private constant INVERT_SURFACE_SCALE_MAX = 51;
+    uint256 private constant STANDARD_ONE_DIFFUSE_CONSTANT_MIN = 1;
+    uint256 private constant STANDARD_ONE_DIFFUSE_CONSTANT_MAX = 31;
+    uint256 private constant STANDARD_TWO_ELEVATION_MIN = 0;
+    uint256 private constant STANDARD_TWO_ELEVATION_MAX = 31;
+    uint256 private constant STANDARD_TWO_SURFACE_SCALE_MIN = 1;
+    uint256 private constant STANDARD_TWO_SURFACE_SCALE_MAX = 31;
 
     // ===================== EVENTS =====================
     event TokenMinted(
@@ -507,7 +515,7 @@ contract Mercurials is ERC721, LinearVRGDA, ReentrancyGuard {
     }
 
     /// @notice Generates the feDiffuseLighting SVG element.
-    function generateFeDiffuseLightingAndfeColorMatrixElements(
+    function generateLightingAndColorElements(
         uint256 seed,
         uint256 nonce
     )
@@ -523,20 +531,31 @@ contract Mercurials is ERC721, LinearVRGDA, ReentrancyGuard {
         (invert, nonce) = generateRandomBool(seed, nonce);
         if (invert) {
             // Generate elevation.
-            (random, nonce) = generateRandom(30, 91, seed, nonce);
+            (random, nonce) = generateRandom(
+                INVERT_ELEVATION_MIN,
+                INVERT_ELEVATION_MAX,
+                seed,
+                nonce
+            );
             elevation = random.toString();
 
             // Generate surface scale.
-            (random, nonce) = generateRandom(1, 51, seed, nonce);
+            (random, nonce) = generateRandom(
+                INVERT_SURFACE_SCALE_MIN,
+                INVERT_SURFACE_SCALE_MAX,
+                seed,
+                nonce
+            );
             surfaceScale = random.toString();
 
-            // Diffuse constant is always 1.
+            // Set diffuse constant.
             diffuseConstant = "1";
         } else {
             // Use two strategies for non-inverted case, randomly choose one.
             bool randomBool;
             (randomBool, nonce) = generateRandomBool(seed, nonce);
             if (randomBool) {
+                // Strategy 1
                 // Elevation is always 1.
                 elevation = "1";
 
@@ -544,7 +563,12 @@ contract Mercurials is ERC721, LinearVRGDA, ReentrancyGuard {
                 surfaceScale = "1";
 
                 // Generate diffuse constant before and after the decimal.
-                (random, nonce) = generateRandom(1, 30, seed, nonce);
+                (random, nonce) = generateRandom(
+                    STANDARD_ONE_DIFFUSE_CONSTANT_MIN,
+                    STANDARD_ONE_DIFFUSE_CONSTANT_MAX,
+                    seed,
+                    nonce
+                );
                 diffuseConstant = random.toString();
                 (random, nonce) = generateRandom(0, 100, seed, nonce);
                 diffuseConstant = string.concat(
@@ -553,12 +577,23 @@ contract Mercurials is ERC721, LinearVRGDA, ReentrancyGuard {
                     random.toString()
                 );
             } else {
+                // Strategy 2
                 // Generate elevation.
-                (random, nonce) = generateRandom(0, 31, seed, nonce);
+                (random, nonce) = generateRandom(
+                    STANDARD_TWO_ELEVATION_MIN,
+                    STANDARD_TWO_ELEVATION_MAX,
+                    seed,
+                    nonce
+                );
                 elevation = random.toString();
 
                 // Generate surface scale.
-                (random, nonce) = generateRandom(1, 31, seed, nonce);
+                (random, nonce) = generateRandom(
+                    STANDARD_TWO_SURFACE_SCALE_MIN,
+                    STANDARD_TWO_SURFACE_SCALE_MAX,
+                    seed,
+                    nonce
+                );
                 surfaceScale = random.toString();
 
                 // Diffuse constant is always 1.
@@ -688,14 +723,14 @@ contract Mercurials is ERC721, LinearVRGDA, ReentrancyGuard {
             nonce
         ) = generateFeCompositeElements(seed, nonce);
 
-        // Generate the feDiffuseLighting element.
-        string memory feDiffuseLightingElement;
-        string memory feDiffuseLightingAttributes;
+        // Generate the lighting and color elements.
+        string memory lightingAndColorElements;
+        string memory lightingAndColorAttributes;
         (
-            feDiffuseLightingElement,
-            feDiffuseLightingAttributes,
+            lightingAndColorElements,
+            lightingAndColorAttributes,
             nonce
-        ) = generateFeDiffuseLightingAndfeColorMatrixElements(seed, nonce);
+        ) = generateLightingAndColorElements(seed, nonce);
 
         string memory rectAndSvgClose;
         string memory rectAttributes;
@@ -709,7 +744,7 @@ contract Mercurials is ERC721, LinearVRGDA, ReentrancyGuard {
             svg,
             feColorMatrixElements,
             feCompositeElements,
-            feDiffuseLightingElement,
+            lightingAndColorElements,
             rectAndSvgClose
         );
 
@@ -718,7 +753,7 @@ contract Mercurials is ERC721, LinearVRGDA, ReentrancyGuard {
             attributes,
             feColorMatrixAttributes,
             feCompositeAttributes,
-            feDiffuseLightingAttributes,
+            lightingAndColorAttributes,
             rectAttributes
         );
 
