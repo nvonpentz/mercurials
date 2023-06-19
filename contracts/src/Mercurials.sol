@@ -514,7 +514,7 @@ contract Mercurials is ERC721, LinearVRGDA, ReentrancyGuard {
         return (elements, attributes, nonce);
     }
 
-    /// @notice Generates the feDiffuseLighting SVG element.
+    /// @notice Generates the feDiffuseLighting and feColorMatrix SVG elements.
     function generateLightingAndColorElements(
         uint256 seed,
         uint256 nonce
