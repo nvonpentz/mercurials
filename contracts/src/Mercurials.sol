@@ -35,8 +35,6 @@ contract Mercurials is ERC721, LinearVRGDA, ReentrancyGuard {
     // Note: 65535 is the max value for the seed attribute of
     // the feTurbulence SVG element.
     uint256 private constant SVG_SEED_MAX = 65536;
-    uint256 private constant K4_MIN = 0;
-    uint256 private constant K4_MAX = 76;
     uint256 private constant SCALE_MIN = 0;
     uint256 private constant SCALE_MAX = 151;
     uint256 private constant SCALE_DELTA_MIN = 0;
@@ -47,8 +45,8 @@ contract Mercurials is ERC721, LinearVRGDA, ReentrancyGuard {
     uint256 private constant KEY_TIME_MAX = 7;
     uint256 private constant HUE_ROTATE_ANIMATION_MIN = 1;
     uint256 private constant HUE_ROTATE_ANIMATION_MAX = 21;
-    uint256 private constant ROTATION_MIN = 0;
-    uint256 private constant ROTATION_MAX = 2;
+    uint256 private constant K4_MIN = 0;
+    uint256 private constant K4_MAX = 76;
     uint256 private constant INVERT_ELEVATION_MIN = 30;
     uint256 private constant INVERT_ELEVATION_MAX = 91;
     uint256 private constant INVERT_SURFACE_SCALE_MIN = 1;
@@ -59,6 +57,8 @@ contract Mercurials is ERC721, LinearVRGDA, ReentrancyGuard {
     uint256 private constant STANDARD_TWO_ELEVATION_MAX = 31;
     uint256 private constant STANDARD_TWO_SURFACE_SCALE_MIN = 1;
     uint256 private constant STANDARD_TWO_SURFACE_SCALE_MAX = 31;
+    uint256 private constant ROTATION_MIN = 0;
+    uint256 private constant ROTATION_MAX = 2;
 
     // ===================== EVENTS =====================
     event TokenMinted(
