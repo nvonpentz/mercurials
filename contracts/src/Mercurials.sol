@@ -527,7 +527,7 @@ contract Mercurials is ERC721, LinearVRGDA, ReentrancyGuard {
             elevation = random.toString();
 
             // Generate surface scale.
-            (random, nonce) = generateRandom(0, 51, seed, nonce);
+            (random, nonce) = generateRandom(1, 51, seed, nonce);
             surfaceScale = random.toString();
 
             // Diffuse constant is always 1.
