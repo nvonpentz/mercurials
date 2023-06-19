@@ -616,16 +616,11 @@ contract Mercurials is ERC721, LinearVRGDA, ReentrancyGuard {
             nonce
         );
         rotation = rotation * 90;
-
         element = string.concat(
-            '</filter><rect width="350" height="350" filter="url(#a)"/></svg>'
+            '</filter><rect width="350" height="350" filter="url(#a)" transform="rotate(',
+            rotation.toString(),
+            ' 175 175)"/></svg>'
         );
-
-        // element = string.concat(
-        //     '</filter><rect width="350" height="350" filter="url(#a)" transform="rotate(',
-        //     rotation.toString(),
-        //     ' 175 175)"/></svg>'
-        // );
 
         attributes = string.concat(
             '{ "trait_type": "Rotation", "value": "',
