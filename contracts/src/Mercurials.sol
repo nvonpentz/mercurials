@@ -40,7 +40,7 @@ contract Mercurials is ERC721, LinearVRGDA, ReentrancyGuard {
     uint256 private constant SCALE_MIN = 0;
     uint256 private constant SCALE_MAX = 151;
     uint256 private constant SCALE_DELTA_MIN = 0;
-    uint256 private constant SCALE_DELTA_MAX = 151;
+    uint256 private constant SCALE_DELTA_MAX = 201;
     uint256 private constant SCALE_ANIMATION_MIN = 1;
     uint256 private constant SCALE_ANIMATION_MAX = 61;
     uint256 private constant KEY_TIME_MIN = 4;
@@ -527,6 +527,8 @@ contract Mercurials is ERC721, LinearVRGDA, ReentrancyGuard {
         string memory elevation;
         string memory surfaceScale;
         string memory diffuseConstant;
+
+        // Determine whether the colors should be inverted.
         bool invert;
         (invert, nonce) = generateRandomBool(seed, nonce);
         if (invert) {
