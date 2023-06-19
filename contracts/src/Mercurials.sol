@@ -37,8 +37,8 @@ contract Mercurials is ERC721, LinearVRGDA, ReentrancyGuard {
     uint256 private constant SVG_SEED_MAX = 65536;
     uint256 private constant K4_MIN = 0;
     uint256 private constant K4_MAX = 76;
-    uint256 private constant SURFACE_SCALE_MIN =  1;
-    uint256 private constant SURFACE_SCALE_MAX =  101;
+    uint256 private constant SURFACE_SCALE_MIN = 1;
+    uint256 private constant SURFACE_SCALE_MAX = 101;
     uint256 private constant SCALE_MIN = 0;
     uint256 private constant SCALE_MAX = 151;
     uint256 private constant SCALE_DELTA_MIN = 0;
@@ -513,11 +513,7 @@ contract Mercurials is ERC721, LinearVRGDA, ReentrancyGuard {
     )
         internal
         pure
-        returns (
-            string memory element,
-            string memory attributes,
-            uint256
-        )
+        returns (string memory element, string memory attributes, uint256)
     {
         uint256 random;
         string memory elevation;
@@ -527,7 +523,7 @@ contract Mercurials is ERC721, LinearVRGDA, ReentrancyGuard {
         (invert, nonce) = generateRandomBool(seed, nonce);
         if (invert) {
             // Generate elevation.
-            (random, nonce) = generateRandom(30, 151, seed, nonce);
+            (random, nonce) = generateRandom(30, 91, seed, nonce);
             elevation = random.toString();
 
             // Generate surface scale.
@@ -540,7 +536,7 @@ contract Mercurials is ERC721, LinearVRGDA, ReentrancyGuard {
             // Use two strategies for non-inverted case, randomly choose one.
             bool randomBool;
             (randomBool, nonce) = generateRandomBool(seed, nonce);
-            if (randomBool) { 
+            if (randomBool) {
                 // Elevation is always 1.
                 elevation = "1";
 
@@ -551,7 +547,11 @@ contract Mercurials is ERC721, LinearVRGDA, ReentrancyGuard {
                 (random, nonce) = generateRandom(1, 30, seed, nonce);
                 diffuseConstant = random.toString();
                 (random, nonce) = generateRandom(0, 100, seed, nonce);
-                diffuseConstant = string.concat(diffuseConstant, ".", random.toString());
+                diffuseConstant = string.concat(
+                    diffuseConstant,
+                    ".",
+                    random.toString()
+                );
             } else {
                 // Generate elevation.
                 (random, nonce) = generateRandom(0, 31, seed, nonce);
@@ -575,7 +575,9 @@ contract Mercurials is ERC721, LinearVRGDA, ReentrancyGuard {
             '"><feDistantLight elevation="',
             elevation,
             '"/></feDiffuseLighting>',
-            invert ? '<feColorMatrix type="matrix" values="-1 0 0 0 1 0 -1 0 0 1 0 0 -1 0 1 0 0 0 1 0"/>' : ""
+            invert
+                ? '<feColorMatrix type="matrix" values="-1 0 0 0 1 0 -1 0 0 1 0 0 -1 0 1 0 0 0 1 0"/>'
+                : ""
         );
 
         // Create the attributes.
