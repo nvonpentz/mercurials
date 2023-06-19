@@ -37,12 +37,8 @@ contract Mercurials is ERC721, LinearVRGDA, ReentrancyGuard {
     uint256 private constant SVG_SEED_MAX = 65536;
     uint256 private constant K4_MIN = 0;
     uint256 private constant K4_MAX = 76;
-    uint256 private constant DIFFUSE_CONSTANT_MIN = 0;
-    uint256 private constant DIFFUSE_CONSTANT_MAX = 2;
     uint256 private constant SURFACE_SCALE_MIN =  1;
     uint256 private constant SURFACE_SCALE_MAX =  101;
-    uint256 private constant ELEVATION_MIN = 0;
-    uint256 private constant ELEVATION_MAX = 91;
     uint256 private constant SCALE_MIN = 0;
     uint256 private constant SCALE_MAX = 151;
     uint256 private constant SCALE_DELTA_MIN = 0;
@@ -463,12 +459,10 @@ contract Mercurials is ERC721, LinearVRGDA, ReentrancyGuard {
         pure
         returns (string memory elements, string memory attributes, uint256)
     {
-        uint256 random;
-
         // Generate a random value for the k4 attribute.
-        string memory k4;
+        uint256 random;
         (random, nonce) = generateRandom(K4_MIN, K4_MAX, seed, nonce);
-        // random = 85;
+        string memory k4;
         if (random < 10) {
             k4 = string.concat("0.0", random.toString());
         } else {
@@ -478,45 +472,18 @@ contract Mercurials is ERC721, LinearVRGDA, ReentrancyGuard {
         // Make k4 negative half the time.
         bool randomBool;
         (randomBool, nonce) = generateRandomBool(seed, nonce);
-        if (randomBool) {
+        if (randomBool && random != 0) {
             k4 = string.concat("-", k4);
         }
 
+        // Randomly choose either "out" or "in" for the operator attribute.
         string memory operator;
-        // (randomBool, nonce) = generateRandomBool(seed, nonce);
-        // if (randomBool) {
-        //     k4 = string.concat("-", k4);
-        //     // If k4 is negative, always use the "out" operator.
-        //     operator = "out";
-        // } else {
-        //     // Otherwise use the "over" operator half the time.
-        //     (randomBool, nonce) = generateRandomBool(seed, nonce);
-        //     if (randomBool) {
-        //         operator = "out";
-        //     } else {
-        //         operator = "in";
-        //     }
-        // }
-        // Otherwise use the "over" operator half the time.
         (randomBool, nonce) = generateRandomBool(seed, nonce);
         if (randomBool) {
             operator = "out";
         } else {
             operator = "in";
         }
-
-        // (random, nonce) = generateRandom(0, 5, seed, nonce);
-        // if (random == 0 ) {
-        //     operator = "over";
-        // } else if (random == 1) {
-        //     operator = "in";
-        // } else if (random == 2) {
-        //     operator = "out";
-        // } else if (random == 3) {
-        //     operator = "atop";
-        // } else {
-        //     operator = "xor";
-        // }
 
         // Create the feComposite elements.
         elements = string.concat(
@@ -540,7 +507,7 @@ contract Mercurials is ERC721, LinearVRGDA, ReentrancyGuard {
     }
 
     /// @notice Generates the feDiffuseLighting SVG element.
-    function generateFeDiffuseLightingElement(
+    function generateFeDiffuseLightingAndfeColorMatrixElements(
         uint256 seed,
         uint256 nonce
     )
@@ -560,40 +527,43 @@ contract Mercurials is ERC721, LinearVRGDA, ReentrancyGuard {
         (invert, nonce) = generateRandomBool(seed, nonce);
         if (invert) {
             // Generate elevation.
-            (random, nonce) = generateRandom(30, 91, seed, nonce);
+            (random, nonce) = generateRandom(30, 151, seed, nonce);
             elevation = random.toString();
 
             // Generate surface scale.
             (random, nonce) = generateRandom(0, 51, seed, nonce);
             surfaceScale = random.toString();
-            // Generate diffuse constant.
+
+            // Diffuse constant is always 1.
             diffuseConstant = "1";
         } else {
+            // Use two strategies for non-inverted case, randomly choose one.
             bool randomBool;
             (randomBool, nonce) = generateRandomBool(seed, nonce);
-
-            if (randomBool) {
-                // Strategy 1
+            if (randomBool) { 
+                // Elevation is always 1.
                 elevation = "1";
+
+                // Surface scale is always 1.
                 surfaceScale = "1";
-                // Generate diffuse constant before decimal
+
+                // Generate diffuse constant before and after the decimal.
                 (random, nonce) = generateRandom(1, 30, seed, nonce);
                 diffuseConstant = random.toString();
-                // Generate diffuse constant after decimal
                 (random, nonce) = generateRandom(0, 100, seed, nonce);
                 diffuseConstant = string.concat(diffuseConstant, ".", random.toString());
             } else {
-                // Strategy 2
+                // Generate elevation.
                 (random, nonce) = generateRandom(0, 31, seed, nonce);
                 elevation = random.toString();
 
-                // Generate surface scale, 1-30
+                // Generate surface scale.
                 (random, nonce) = generateRandom(1, 31, seed, nonce);
                 surfaceScale = random.toString();
 
+                // Diffuse constant is always 1.
                 diffuseConstant = "1";
             }
-
         }
 
         // Create the feDiffuseLighting element.
@@ -620,37 +590,10 @@ contract Mercurials is ERC721, LinearVRGDA, ReentrancyGuard {
             '{ "trait_type": "Inverted", "value": ',
             invert ? "true" : "false",
             " }, "
-            // // palette
-            // '{ "trait_type": "Palette", "value": "',
-            // palette.toString(),
-            // '" }, '
         );
 
         return (element, attributes, nonce);
     }
-
-    /// @notice Generates the feColorMatrix SVG element for (maybe) inverting the colors
-    // function generateFeColorMatrixForInversionElement(
-    //     uint256 palette
-    // )
-    //     internal
-    //     pure
-    //     returns (string memory element, string memory attributes)
-    // {
-    //     bool invert = palette == 0;
-    //     if (invert) {
-    //         element = '<feColorMatrix type="matrix" values="-1 0 0 0 1 0 -1 0 0 1 0 0 -1 0 1 0 0 0 1 0"/>';
-    //     }
-
-    //     attributes = string.concat(
-    //         '{ "trait_type": "Inverted", "value": ',
-    //         invert ? "true" : "false",
-    //         " } " // No comma here because this is the last attribute.
-    //     );
-
-    //     return (element, attributes);
-    //     // return (element, attributes, nonce);
-    // }
 
     /// @notice Generates the main rect element but also includes the closing filter
     /// and closing svg tags
@@ -751,21 +694,11 @@ contract Mercurials is ERC721, LinearVRGDA, ReentrancyGuard {
         // Generate the feDiffuseLighting element.
         string memory feDiffuseLightingElement;
         string memory feDiffuseLightingAttributes;
-        // uint256 palette;
         (
             feDiffuseLightingElement,
             feDiffuseLightingAttributes,
-            // palette,
             nonce
-        ) = generateFeDiffuseLightingElement(seed, nonce);
-
-        // Generate the feColorMatrix element used for inverting colors.
-        // string memory feColorMatrixForInversionElement;
-        // string memory feColorMatrixForInversionAttributes;
-        // (
-        //     feColorMatrixForInversionElement,
-        //     feColorMatrixForInversionAttributes
-        // ) = generateFeColorMatrixForInversionElement(palette);
+        ) = generateFeDiffuseLightingAndfeColorMatrixElements(seed, nonce);
 
         string memory rectAndSvgClose;
         string memory rectAttributes;
@@ -780,7 +713,6 @@ contract Mercurials is ERC721, LinearVRGDA, ReentrancyGuard {
             feColorMatrixElements,
             feCompositeElements,
             feDiffuseLightingElement,
-            // feColorMatrixForInversionElement,
             rectAndSvgClose
         );
 
@@ -791,7 +723,6 @@ contract Mercurials is ERC721, LinearVRGDA, ReentrancyGuard {
             feCompositeAttributes,
             feDiffuseLightingAttributes,
             rectAttributes
-            // feColorMatrixForInversionAttributes
         );
 
         return (svg, attributes);
