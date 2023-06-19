@@ -106,27 +106,17 @@ const Home: NextPage = () => {
           <PriceInfo blockNumber={blockNumber} nextToken={nextToken} />
           <div className={styles.traitsAndImageContainer}>
             <div className={styles.imageContainer}>
-              <svg xmlns="http://www.w3.org/2000/svg" width="350" height="350" version="1.1" viewBox="0 0 350 350">
-                <g transform="rotate(90, 175, 175)">
-                  <filter id="a">
-                    <feTurbulence baseFrequency="0.0079" numOctaves="2" seed="32927"/>
-                    <feDisplacementMap>
-                      <animate attributeName="scale" values="-79;-36;-79;" keyTimes="0; 0.6; 1" dur="33s" repeatCount="indefinite" calcMode="spline" keySplines="0.3 0 0.7 1; 0.3 0 0.7 1"/>
-                    </feDisplacementMap>
-                    <feColorMatrix type="hueRotate" result="b">
-                      <animate attributeName="values" from="0" to="360" dur="8s" repeatCount="indefinite"/>
-                    </feColorMatrix>
-                    <feColorMatrix type="matrix" result="c" values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 1 0 0 0 0"/>
-                    <feComposite in="b" in2="c" operator="out" result="d"/>
-                    <feComposite in="d" in2="d" operator="arithmetic" k1="1" k2="1" k3="1" k4="-0.20"/>
-                    <feDiffuseLighting lighting-color="#fff" diffuseConstant="1" surfaceScale="17">
-                      <feDistantLight elevation="82"/>
-                    </feDiffuseLighting>
-                    <feColorMatrix type="matrix" values="-1 0 0 0 1 0 -1 0 0 1 0 0 -1 0 1 0 0 0 1 0"/>
-                  </filter>
-                  <rect width="350" height="350" filter="url(#a)"/>
-                </g>
-              </svg>
+              <div className={styles.tokenImage}>
+                {nextToken && (
+                  <div
+                    // key={nextToken?.[0]?.toString() + blockNumber?.toString()}
+                    key={nextToken?.[0]?.toString()}
+                    dangerouslySetInnerHTML={{
+                      __html: extractSVGFromTokenURI(nextToken[1]),
+                    }}
+                  />
+                )}
+              </div>
               <div className={styles.buttonContainer}>
                 <MintButton
                   isConnected={isConnected}
