@@ -662,7 +662,7 @@ contract Mercurials is ERC721, LinearVRGDA, ReentrancyGuard {
         attributes = string.concat(
             '{ "trait_type": "Rotation", "value": "',
             rotation.toString(),
-            '" } '
+            '" } ' // No comma here because this is the last attribute.
         );
         return (element, attributes, nonce);
     }
