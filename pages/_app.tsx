@@ -15,7 +15,9 @@ import { useEffect, useState } from "react";
 import { Analytics } from "@vercel/analytics/react";
 
 const { chains, provider, webSocketProvider } = configureChains(
-  process.env.NEXT_PUBLIC_ENV === "production" ? [mainnet] : [mainnet, goerli, foundry],
+  process.env.NEXT_PUBLIC_ENV === "production"
+    ? [mainnet]
+    : [mainnet, goerli, foundry],
   [
     alchemyProvider({
       apiKey: process.env.NEXT_PUBLIC_ALCHEMY_API_KEY ?? "",

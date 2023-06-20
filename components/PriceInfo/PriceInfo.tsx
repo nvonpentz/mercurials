@@ -20,20 +20,20 @@ const PriceInfo: React.FC<PriceInfoProps> = ({
 
   // Fetches USD price of ETH
   const [ethPrice, setEthPrice] = useState();
-  // useEffect(() => {
-  //   const fetchData = async () => {
-  //     try {
-  //       const response = await fetch(
-  //         "https://api.coingecko.com/api/v3/simple/price?ids=ethereum&vs_currencies=usd"
-  //       );
-  //       const data = await response.json();
-  //       setEthPrice(data.ethereum.usd);
-  //     } catch (error) {
-  //       console.error(error);
-  //     }
-  //   };
-  //   fetchData();
-  // }, [blockNumber]);
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const response = await fetch(
+          "https://api.coingecko.com/api/v3/simple/price?ids=ethereum&vs_currencies=usd"
+        );
+        const data = await response.json();
+        setEthPrice(data.ethereum.usd);
+      } catch (error) {
+        console.error(error);
+      }
+    };
+    fetchData();
+  }, [blockNumber]);
 
   return (
     <div className={styles.tokenInfo}>
