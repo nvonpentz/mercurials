@@ -734,6 +734,7 @@ contract Mercurials is ERC721, LinearVRGDA, ReentrancyGuard {
             nonce
         ) = generateLightingAndColorElements(seed, nonce);
 
+        // Generate the rect and svg close elements.
         string memory rectAndSvgClose;
         string memory rectAttributes;
         (rectAndSvgClose, rectAttributes, nonce) = generateRectAndSvgClose(
