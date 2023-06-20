@@ -1,0 +1,9 @@
+[profile.default]
+src = 'src'
+out = 'out'
+libs = ['lib']
+fs_permissions = [
+  { access = "write", path = "deploys/"}, # Used in Deploy.sol
+  { access = "read", path = "out/"} # Used in Deploy.sol
+]
+# See more config options https://github.com/foundry-rs/foundry/tree/master/config
