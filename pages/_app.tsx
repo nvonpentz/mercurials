@@ -9,7 +9,6 @@ import {
 import { configureChains, createClient, WagmiConfig } from "wagmi";
 import { mainnet, goerli, polygon, foundry } from "wagmi/chains";
 import { alchemyProvider } from "wagmi/providers/alchemy";
-import { jsonRpcProvider } from "wagmi/providers/jsonRpc";
 import { publicProvider } from "wagmi/providers/public";
 import { useEffect, useState } from "react";
 import { Analytics } from "@vercel/analytics/react";
@@ -21,11 +20,6 @@ const { chains, provider, webSocketProvider } = configureChains(
   [
     alchemyProvider({
       apiKey: process.env.NEXT_PUBLIC_ALCHEMY_API_KEY ?? "",
-    }),
-    jsonRpcProvider({
-      rpc: (chain) => ({
-        http: `http://localhost:8545`,
-      }),
     }),
     publicProvider(),
   ]
