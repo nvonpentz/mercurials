@@ -1,18 +1,16 @@
-// @ts-nocheck
 import React from 'react';
-import Link from 'next/link';
 import { ConnectButton } from "@rainbow-me/rainbowkit";
 import styles from '../../styles/Navbar.module.css';
 import { useBalance } from "wagmi";
 
 interface NavbarProps {
   chainId: number;
-  address: string;
+  address: `0x${string}`;
 }
 
 const Navbar: React.FC<NavbarProps> = ({ chainId, address }) => {
   const openseaLink = `https://opensea.io/assets/ethereum/${address}`;
-  const { data: contractBalance, isError, isLoading } = useBalance({
+  const { data: contractBalance } = useBalance({
     address: address,
   })
 
@@ -26,7 +24,7 @@ const Navbar: React.FC<NavbarProps> = ({ chainId, address }) => {
           <a href={openseaLink} target="_blank" rel="noopener noreferrer">OpenSea</a>
         </li>
         <li>
-          🔥 Ξ {parseFloat(contractBalance?.formatted)?.toFixed(3)}
+          🔥 Ξ {contractBalance ? parseFloat(contractBalance.formatted).toFixed(3) : '0.000'}
         </li>
         <li className={styles.connectButtonLi}>
           <ConnectButton />

@@ -1,9 +1,8 @@
 import React, { useEffect } from 'react';
-import { ethers } from "ethers";
 import styles from "../../styles/MintButton.module.css";
 import {
-  usePrepareContractWrite,
-  useContractWrite,
+  useSimulateContract,
+  useWriteContract,
 } from "wagmi";
 import { MintAttempt } from "../../utils/types";
 
@@ -11,9 +10,9 @@ interface MintButtonProps {
   isConnected: boolean;
   readIsFetching: boolean;
   waitIsFetching: boolean;
-  address: string;
+  address: `0x${string}`;
   abi: any;
-  nextToken: any;
+  nextToken: readonly [bigint, string, bigint, `0x${string}`, bigint] | undefined;
   mintAttempt: MintAttempt | undefined;
   setMintAttempt: (mintAttempt: MintAttempt) => void;
 }
@@ -30,58 +29,53 @@ const MintButton: React.FC<MintButtonProps> = ({
 }) => {
   // UI logic
   const mintButtonText = (isConnected: boolean) => {
-    // if (!isConnected) {
-    //   return "Connect Wallet to Mint";
-    // }
     return "Burn Ether and Mint";
   };
 
   // Hooks
-  const { config, error: prepareWriteError } = usePrepareContractWrite({
+  const { data: simulateData, error: simulateError } = useSimulateContract({
     address: address,
     abi: abi,
-    args: [nextToken?.[0], nextToken?.[3]],
+    args: nextToken ? [nextToken[0], nextToken[3]] : undefined,
     functionName: "mint",
-    overrides: {
-      gasLimit: ethers.BigNumber.from(150000),
-      value: nextToken?.[2],
+    value: nextToken?.[2],
+    gas: BigInt(150000),
+    query: {
+      enabled: !!nextToken,
     },
   });
 
   const {
     data: writeData,
     error: writeError,
-    isError: isWriteError,
-    isLoading: isWriteLoading,
-    write,
-  } = useContractWrite(config);
+    isPending: isWritePending,
+    writeContract,
+  } = useWriteContract();
 
   const handleClick = async () => {
-    if (write) {
-      await write();
+    if (simulateData?.request && nextToken) {
+      writeContract(simulateData.request);
       setMintAttempt({
-        tokenId: nextToken?.[0].toString(),
+        tokenId: Number(nextToken[0]),
         svg: nextToken[1],
         transactionHash: undefined,
-      } as MintAttempt);
+      });
     }
   };
 
   useEffect(() => {
-    if (writeData?.hash) {
-      if (mintAttempt?.transactionHash === undefined) {
-        setMintAttempt({
-          tokenId: mintAttempt?.tokenId,
-          svg: mintAttempt?.svg,
-          transactionHash: writeData.hash,
-        } as MintAttempt);
-      }
+    if (writeData && mintAttempt && mintAttempt.transactionHash === undefined) {
+      setMintAttempt({
+        tokenId: mintAttempt.tokenId,
+        svg: mintAttempt.svg,
+        transactionHash: writeData,
+      });
     }
-  }, [writeData?.hash, setMintAttempt]);
+  }, [writeData, mintAttempt, setMintAttempt]);
 
   return (
     <button
-      disabled={readIsFetching || !write || waitIsFetching}
+      disabled={readIsFetching || !simulateData?.request || waitIsFetching || isWritePending}
       onClick={handleClick}
       className={styles.mintButton}
     >

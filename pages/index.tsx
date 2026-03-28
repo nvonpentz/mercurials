@@ -4,16 +4,12 @@ import styles from "../styles/Home.module.css";
 import {
   useAccount,
   useBlockNumber,
-  useContractRead,
-  usePrepareContractWrite,
-  useContractWrite,
-  useWaitForTransaction,
-  useNetwork,
+  useReadContract,
+  useWaitForTransactionReceipt,
+  useChainId,
 } from "wagmi";
 import Image from "next/image";
 import { useState, useEffect } from "react";
-import { ethers } from "ethers";
-import { Result } from "ethers/lib/utils";
 import { deployments } from "../utils/config";
 import Navbar from "../components/Navbar/Navbar";
 import MintButton from "../components/MintButton/MintButton";
@@ -22,39 +18,39 @@ import TransactionInfo from "../components/TransactionInfo/TransactionInfo";
 import { MintAttempt } from "../utils/types";
 
 const Home: NextPage = () => {
-  const { chain = { id: 1 } } = useNetwork();
-  
+  const chainId = useChainId();
+
   // Function to get the deployment based on the chain id
   const getDeployment = (id: number) => deployments[id || 1];
-  
+
   // Initial deployment
-  const initialDeployment = getDeployment(chain.id);
+  const initialDeployment = getDeployment(chainId);
 
   // State
-  const [address, setAddress] = useState(initialDeployment.address);
+  const [address, setAddress] = useState<`0x${string}`>(initialDeployment.address as `0x${string}`);
   const [abi, setAbi] = useState(initialDeployment.abi);
   const [mintAttempt, setMintAttempt] = useState<MintAttempt>();
 
   // Hooks
   const { isConnected } = useAccount();
   useEffect(() => {
-    const deployment = getDeployment(chain.id);
-    setAddress(deployment.address);
+    const deployment = getDeployment(chainId);
+    setAddress(deployment.address as `0x${string}`);
     setAbi(deployment.abi);
-  }, [chain]);
+  }, [chainId]);
 
-  const { data: blockNumber } = useBlockNumber();
+  const { data: blockNumber } = useBlockNumber({ watch: true });
 
-  const { data: nextToken, isFetching: readIsFetching } = useContractRead({
+  const { data: nextToken, isFetching: readIsFetching } = useReadContract({
     address: address,
     abi: abi,
     functionName: "nextToken",
     args: [],
-    overrides: {
-      blockTag: "pending",
+    blockTag: "pending",
+    query: {
+      refetchInterval: 4000,
     },
-    watch: true,
-  }) as { data: Result; isFetching: boolean };
+  }) as { data: readonly [bigint, string, bigint, `0x${string}`, bigint] | undefined; isFetching: boolean };
 
   const encodedMetadata = nextToken?.[1];
   const extractMetadataFromTokenURI = (tokenURI: string) => {
@@ -80,19 +76,20 @@ const Home: NextPage = () => {
 
   // Log traits when nextToken changes
   useEffect(() => {
-    console.log(
-      "Traits:",
-      JSON.stringify(extractTraitsFromTokenURI(encodedMetadata), null, 2)
-    );
-    // extractTraitsFromTokenURI(encodedMetadata));
+    if (encodedMetadata) {
+      console.log(
+        "Traits:",
+        JSON.stringify(extractTraitsFromTokenURI(encodedMetadata), null, 2)
+      );
+    }
   }, [encodedMetadata]);
 
   const {
     data: receipt,
     error: waitForTransactionError,
     isFetching: waitIsFetching,
-  } = useWaitForTransaction({
-    hash: mintAttempt?.transactionHash,
+  } = useWaitForTransactionReceipt({
+    hash: mintAttempt?.transactionHash as `0x${string}` | undefined,
   });
 
   return (
@@ -101,7 +98,7 @@ const Home: NextPage = () => {
         <Head>
           <title>Mercurials - On-chain generative art</title>
         </Head>
-        <Navbar chainId={chain.id} address={address} />
+        <Navbar chainId={chainId} address={address} />
         <main className={styles.main}>
           <h1 className={styles.header}>
             Mercurial #{nextToken?.[0].toString()}
